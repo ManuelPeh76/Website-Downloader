@@ -15,7 +15,7 @@
 <body>
   <h1>Website Downloader</h1>
   <label id="url-label">URL: <input type="text" id="url" size="50" placeholder="https://example.com"/></label>
-  <label id="depth-label">Depth: <input type="number" id="depth" min="0" value="2" /></label>
+  <label id="depth-label">Depth: <input type="number" id="depth" min="0" /></label>
   <label id="recursive-label"><input type="checkbox" id="recursive" checked /> Recursive</label>
   <label id="zip-label"><input type="checkbox" id="zip" /> Export ZIP</label>
   <label id="clean-label"><input type="checkbox" id="clean" /> Clean-Mode</label>
@@ -23,7 +23,7 @@
 
   <button id="start" data-is-started="0" data-is-init="0">Start</button><button id="abort">Cancel</button>
 
-  <div id="settings" style="border:#000 1px solid;border-radius:5px;font-family:monospace"></div>
+  <div id="settings" style="border:#000 1px solid;border-radius:5px;font-family:monospace;padding:8px;display:none"></div>
   <div id="progressContainer" style="margin-top: 20px;">
     <strong>Progress:</strong>
     <div id="progressText">No data...</div>

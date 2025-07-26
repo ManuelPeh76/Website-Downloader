@@ -48,11 +48,11 @@ node downloader.js <url> [options]
 #### Options
 | Option | Description |
 | --- | --- |
-| `-d`, `--depth` | The depth of links to consider (default: 0[=infinity]). |
+| `-d=<number>`, `--depth=<number>` | The depth of links to consider (default: infinity). |
 | `-r`, `--recursive` | Enables recursive downloading of linked pages (default: false). |
 | `-z`, `--zip` | Creates a ZIP archive after downloads are complete (default: false). |
 | `-c`, `--clean` | Empties the destination folder before saving downloads (default: false). |
-| `-o`, `--outdir` | The full path to the folder the website is saved in.
+| `-o=<path>`, `--outdir=<path>` | The full path to the folder the website is saved to.
 
 ## Example
 

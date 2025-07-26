@@ -51,6 +51,11 @@ async function downloadResource(url, baseUrl) {
   try {
     const loc = getLocalPath(url, baseUrl);
     if (await fs.access(loc).then(() => true).catch(() => false)) return;
+    const parsedUrl = new URL(url);
+    const filename = parsedUrl.href.split("/").pop();
+    if (!parsedUrl.href.includes(TARGET_URL)) return;
+    if (!filename.includes(".") || filename.includes("#")) return;
+
     console.log(`🌐 File: ${url}`);
     await fs.mkdir(path.dirname(loc), { recursive: true });
     await new Promise((res, rej) => {
@@ -116,9 +121,40 @@ async function crawl(url, depth, browser) {
   sitemap.push(url);
 
   const page = await browser.newPage();
+page.on('request', async (request) => {
+  try {
+    const url = request.url();
+    const type = request.resourceType();
+
+    if (url.startsWith("blob:") || url.startsWith("data:")) return;    
+    if (!['image', 'stylesheet', 'script', 'font', 'xhr', 'other'].includes(type)) return;
+    const parsedUrl = new URL(url);
+    const filename = parsedUrl.href.split("/").pop();
+    if (!parsedUrl.href.includes(TARGET_URL)) return;
+    if (!filename.includes(".") || filename.includes("#")) return;
+
+    let resourcePath = sanitize(parsedUrl.pathname);
+    const ext = path.extname(resourcePath) || '.bin';
+    if (!resourcePath.endsWith(ext)) resourcePath += ext;
+
+    const localPath = path.join(OUTPUT_DIR, resourcePath);
+    const relativePath = path.relative(OUTPUT_DIR, localPath).replace(/\\/g, '/');
+
+    if (!resourceMap.has(url)) {
+      resourceMap.set(url, relativePath);
+      await downloadResource(url, localPath);
+    }
+  } catch (err) {
+    console.error('Request Error:', err.message);
+  }
+});
+
   try {
     console.log(`🌐 Site (Depth ${depth}): ${url}`);
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+    await page.evaluate(() => window.scrollBy(0, window.innerHeight));
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
     let html = await fetch(url);
     html = await html.text();
 

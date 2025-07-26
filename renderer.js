@@ -12,7 +12,9 @@ document.getElementById('start').addEventListener('click', async () => {
   document.getElementById('start').disabled = true;
   document.getElementById('log').textContent = url ? 'Starting download...\n' : "";
   document.getElementById('progressText').innerHTML = "";
-  
+  document.getElementById('settings').innerHTML = "";
+  document.getElementById('settings').style.display = "block";
+
   window.api.startDownload({ url, zip, clean, depth, recursive, outdir });
 
   if (isStarted) return;
@@ -34,8 +36,10 @@ document.getElementById('start').addEventListener('click', async () => {
 
     if (msg.includes('Log created')) {
       document.getElementById('start').disabled = false;
-    } else if (msg.includes("Please enter a URL")) {
+    } else if (msg.includes("enter a URL")) {
       isStarted = 0;
+      document.getElementById('start').disabled = false;
+      document.getElementById('settings').style.display = "none";
     }
   });
   
@@ -48,6 +52,7 @@ document.getElementById('abort').addEventListener('click', () => {
   isStarted = 0;
   document.getElementById('log').textContent += '\nAborted by user.';
   document.getElementById('start').disabled = false;
+  document.getElementById('settings').style.display = "none";
   window.api.abortCrawling();
 });
 
