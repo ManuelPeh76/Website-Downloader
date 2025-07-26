@@ -2,7 +2,6 @@
 # <img src="electron.svg" width="50" height="50" style="transform: translate(0, 10px)"> Website-Downloader
 A universal downloader for dynamic websites, created with electron.
 
----
 ## Features
 
 - 🚀 Dynamic Loading: Also loads assets that are loaded during page loading.
@@ -16,7 +15,6 @@ A universal downloader for dynamic websites, created with electron.
 - 💻 GUI or CLI usage.
 - 🌐 Offline support: Adapts all links inside the HTML files, so the website can be used offline.
 
----
 ## Installation
 I assume you have node.js, npm and git already installed.
 1. Open a command window (`cmd` on windows machines).
@@ -32,7 +30,6 @@ git clone https://github.com/ManuelPeh76/website-downloader.git
 npm install
 ```
 
----
 ## Usage
 
 #### GUI
@@ -57,7 +54,6 @@ node downloader.js <url> [options]
 | `-c`, `--clean` | Empties the destination folder before saving downloads (default: false). |
 | `-o`, `--outdir` | The full path to the folder the website is saved in.
 
----
 ## Example
 
 To download a web page with a link depth of 1, recursion and ZIP export, use the following command:
