@@ -19,15 +19,17 @@ function createWindow() {
 let proc;
 
 app.whenReady().then(() => {
-  // Downloader-Prozess starten
   ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir }) => {
     return new Promise((resolve, reject) => {
+      
       const args = ['downloader.js', url];
+      
       if (zip) args.push('--zip');
       if (clean) args.push('--clean');
       if (recursive) args.push('--recursive');
       if (depth) args.push(`--depth=${depth}`);
       if (outdir) args.push(`--outdir=${outdir}`);
+      
       proc = spawn('node', args);
 
       proc.stdout.on('data', data => {
