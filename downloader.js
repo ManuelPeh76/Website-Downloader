@@ -51,7 +51,7 @@ async function downloadResource(url, baseUrl) {
   try {
     const loc = getLocalPath(url, baseUrl);
     if (await fs.access(loc).then(() => true).catch(() => false)) return;
-    console.log(`🌐 Datei: ${url}`);
+    console.log(`🌐 File: ${url}`);
     await fs.mkdir(path.dirname(loc), { recursive: true });
     await new Promise((res, rej) => {
       const proto = url.startsWith('https') ? https : http;
