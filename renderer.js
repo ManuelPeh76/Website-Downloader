@@ -2,19 +2,17 @@ let isStarted = 0;
 let isInit = 0;
 
 document.getElementById('start').addEventListener('click', async () => {
-  document.getElementById('start').disabled = true;
   const url = document.getElementById('url').value;
   const depth = document.getElementById('depth').value;
   const zip = document.getElementById('zip').checked;
   const clean = document.getElementById('clean').checked;
   const recursive = document.getElementById('recursive').checked;
-
-  //document.getElementById('progress').style.display = 'block';
-  //document.getElementById('progress').value = 0;
+  const outdir = document.getElementById('outdir').value.trim();
+  
+  document.getElementById('start').disabled = true;
   document.getElementById('log').textContent = url ? 'Starte Download...\n' : "";
   document.getElementById('progressText').innerHTML = "";
-
-  const outdir = document.getElementById('outdir').value.trim();
+  
   window.api.startDownload({ url, zip, clean, depth, recursive, outdir });
 
   if (isStarted) return;
@@ -41,6 +39,7 @@ document.getElementById('start').addEventListener('click', async () => {
       isStarted = 0;
     }
   });
+  
   isInit = 1;
 
 });
