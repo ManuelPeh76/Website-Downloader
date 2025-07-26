@@ -15,28 +15,28 @@
 <body>
   <h1>Website Downloader</h1>
   <label id="url-label">URL: <input type="text" id="url" size="50" placeholder="https://example.com"/></label>
-  <label id="depth-label">Tiefe: <input type="number" id="depth" min="0" value="2" /></label>
-  <label id="recursive-label"><input type="checkbox" id="recursive" checked /> Rekursiv</label>
-  <label id="zip-label"><input type="checkbox" id="zip" /> ZIP exportieren</label>
-  <label id="clean-label"><input type="checkbox" id="clean" /> Clean-Modus</label>
-  <label>Zielordner:<input type="text" id="outdir" size="50" readonly /><button id="select-folder">Wählen…</button></label>
+  <label id="depth-label">Depth: <input type="number" id="depth" min="0" value="2" /></label>
+  <label id="recursive-label"><input type="checkbox" id="recursive" checked /> Recursive</label>
+  <label id="zip-label"><input type="checkbox" id="zip" /> Export ZIP</label>
+  <label id="clean-label"><input type="checkbox" id="clean" /> Clean-Mode</label>
+  <label>Target Folder:<input type="text" id="outdir" size="50" readonly /><button id="select-folder">Choose…</button></label>
 
-  <button id="start" data-is-started="0" data-is-init="0">Start</button><button id="abort">Abbrechen</button>
+  <button id="start" data-is-started="0" data-is-init="0">Start</button><button id="abort">Cancel</button>
 
   <div id="settings" style="border:#000 1px solid;border-radius:5px;font-family:monospace"></div>
   <div id="progressContainer" style="margin-top: 20px;">
-    <strong>Fortschritt:</strong>
-    <div id="progressText">Noch keine Daten...</div>
+    <strong>Progress:</strong>
+    <div id="progressText">No data...</div>
   </div>
 
   <pre id="log"></pre>
   <script>
     const title = {
-      url: "Dir Web-Adresse der Site, die du herunterladen möchtest.",
-      depth: "Die Tiefe der Verlinkungen, die berücksichtigt werden sollen.\nZ.B. würde ein Wert von 0 nur die auf der Hauptseite gefundenen Links durchsuchen.",
-      recursive: "Ist diese Funktion aktiviert, werden die Links auf heruntergeladenen HTML-Seiten durchsucht und dort gefundene Dateien ebenfalls heruntergeladen.",
-      zip: "Wenn aktiviert, wird nach Abschluss der Downloads ein ZIP-Archiv erstellt, das die gesamte Website enthält.",
-      clean: "Wenn aktiviert, wird der Ordner, in dem die Dateien gespeichert werden, vor dem Herunterladen geleert."
+      url: "The web address of the site you want to download.",
+      depth: "The depth of links to consider.",
+      recursive: "If enabled, links on downloaded HTML pages will be searched and any files found there will also be downloaded.",
+      zip: "If enabled, a ZIP archive containing the entire website will be created after downloads are complete.",
+      clean: "If enabled, the folder where the files are saved will be emptied before downloading."
     }
     Object.entries(title).forEach(([id, content]) => document.getElementById(`${id}-label`).title = content);
   </script>
