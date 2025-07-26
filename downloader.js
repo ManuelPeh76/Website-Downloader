@@ -1,5 +1,3 @@
-// downloader.js
-
 const fs = require('fs/promises');
 const path = require('path');
 const { existsSync, createWriteStream } = require('fs');
@@ -8,13 +6,12 @@ const http = require('http');
 const puppeteer = require('puppeteer');
 const JSZip = require('jszip');
 const pLimit = require('p-limit');
-const limit = pLimit(8); // max. 8 gleichzeitige Tasks
 
+const limit = pLimit(8);
 const htmlLinks = [];
 const assetTasks = [];
-
-// CLI-Argumente
 const isElectron = !!process.send;
+
 const args = process.argv.slice(2);
 const TARGET_URL = args[0];
 const ZIP_EXPORT = args.includes('--zip') || args.includes('-z');
@@ -22,26 +19,22 @@ const CLEAN_MODE = args.includes('--clean') || args.includes('-c');
 const RECURSIVE = args.includes('--recursive') || args.includes('-r');
 const depthArg = args.find(arg => arg.startsWith('--depth=') || arg.startsWith('-d='));
 const MAX_DEPTH = depthArg ? parseInt(depthArg.split('=')[1], 10) : Infinity;
+const outArg = args.find(arg => arg.startsWith('--outdir=') || arg.startsWith('-o='));
 
 if (!TARGET_URL) {
-  console.log('❌ Bitte gib eine URL ein!');
+  console.log('❌ Please enter a URL!');
   process.exit(1);
 }
 
-// Speicherordner
-const outArg = args.find(arg => arg.startsWith('--outdir=') || arg.startsWith('-o='));
 const OUTPUT_DIR = outArg
   ? path.join(outArg.split('=')[1].replace(/^["']|["']$/g, ''), new URL(TARGET_URL).hostname)
   : path.join(process.cwd(), new URL(TARGET_URL).hostname);
 
-// Zustandskontrolle
 const visited = new Set();
 const resourceMap = new Map();
 const sitemap = [];
 const logs = [];
 
-
-// Hilfsfunktionen
 function sanitize(p) {
   return p.replace(/[^a-z0-9\-_.]/gi, '_').replace(/_+/g, '_');
 }
@@ -114,7 +107,7 @@ async function extractCssResources(cssContent, baseUrl) {
 function reportProgress() {
   const total = visited.size + logs.length;
   const percent = total > 0 ? (visited.size / total) * 100 : 0;
-  console.log(`progress:📊 ${visited.size} Seiten, ${resourceMap.size} Dateien, ${logs.length} Fehler (${percent.toFixed(1)}%)`);
+  console.log(`progress:📊 ${visited.size} Sites, ${resourceMap.size} Files, ${logs.length} Errors (${percent.toFixed(1)}%)`);
 }
 
 async function crawl(url, depth, browser) {
@@ -124,14 +117,13 @@ async function crawl(url, depth, browser) {
 
   const page = await browser.newPage();
   try {
-    console.log(`🌐 Seite (Tiefe ${depth}): ${url}`);
+    console.log(`🌐 Site (Depth ${depth}): ${url}`);
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
     let html = await fetch(url);
     html = await html.text();
 
     reportProgress();
 
-    // Ressourcen erfassen
     const resUrls = await page.$$eval('*', els => {
 
       const urls = new Set();
@@ -147,7 +139,6 @@ async function crawl(url, depth, browser) {
           urls.add(src || href);
         }
 
-        // <img srcset> und <source srcset>
         const srcset = el.getAttribute?.('srcset');
         if (srcset) {
           srcset.split(',').forEach(entry => {
@@ -156,7 +147,6 @@ async function crawl(url, depth, browser) {
           });
         }
 
-        // <video><source src=...>
         if (el.tagName === 'SOURCE' && el.getAttribute?.('src')) {
           urls.add(el.getAttribute('src').split("?")[0]);
         }
@@ -183,54 +173,47 @@ async function crawl(url, depth, browser) {
     };
 
     const limit = pLimit(8);
-  const assetTasks = [];
+    const assetTasks = [];
+  
+    for (const raw of resUrls) {
+      let res;
+      try {
+        res = new URL(raw, url).href;
+      } catch {
+        continue;
+      }
+  
+      const isSameHost = new URL(res).hostname === new URL(TARGET_URL).hostname;
+      if (!res || res.startsWith("data") || !isSameHost) continue;
 
-  for (const raw of resUrls) {
-    let res;
-    try {
-      res = new URL(raw, url).href;
-    } catch {
-      continue;
-    }
-
-    const isSameHost = new URL(res).hostname === new URL(TARGET_URL).hostname;
-    if (!res || res.startsWith("data") || !isSameHost) continue;
-
-    const isHtml = res.endsWith('.html');
-    const isCss = res.endsWith('.css');
-
-    if (isHtml && RECURSIVE && depth < MAX_DEPTH) {
-      // Unterseite: rekursiv crawlen
-      //htmlLinks.push(res);
-      assetTasks.push(limit(() => crawl(res, depth + 1, browser)));
-    } else {
-      // Asset (Bild, CSS, JS, etc.): herunterladen
-      assetTasks.push(limit(async () => {
-        await downloadResource(res, url);
-
-        // Falls CSS: darin eingebettete URLs parsen (Fonts, Background-Images)
-        if (isCss) {
-          try {
-            const cssPath = getLocalPath(res, url);
-            const cssContent = await fs.readFile(cssPath, 'utf8');
-            await extractCssResources(cssContent, res);
-          } catch (e) {
-            console.log(`❌ CSS-Analyse fehlgeschlagen: ${e.message || e.toString()}`);
-            logs.push({ url: res, error: e.message || e.toString() });
+      const isHtml = res.endsWith('.html');
+      const isCss = res.endsWith('.css');
+  
+      if (isHtml && RECURSIVE && depth < MAX_DEPTH) {
+        assetTasks.push(limit(() => crawl(res, depth + 1, browser)));
+      } else {
+        assetTasks.push(limit(async () => {
+          await downloadResource(res, url);
+          if (isCss) {
+            try {
+              const cssPath = getLocalPath(res, url);
+              const cssContent = await fs.readFile(cssPath, 'utf8');
+              await extractCssResources(cssContent, res);
+            } catch (e) {
+              console.log(`❌ Error on analyzing CSS: ${e.message || e.toString()}`);
+              logs.push({ url: res, error: e.message || e.toString() });
+            }
           }
-        }
-      }));
+        }));
+      }
     }
-  }
-
-  await Promise.all(assetTasks);
-
-    // Jetzt HTML-Dateien rekursiv **nacheinander** crawlen
+  
+    await Promise.all(assetTasks);
+    
     for (const link of htmlLinks) {
       await crawl(link, depth + 1, browser);
     }
 
-    // HTML anpassen & speichern
     const adjusted = adjustLinks(html, url);
     const locHtml = getLocalPath(url, TARGET_URL);
     await fs.mkdir(path.dirname(locHtml), { recursive: true });
@@ -238,17 +221,17 @@ async function crawl(url, depth, browser) {
     await page.close();
 
   } catch (e) {
-    console.log(`⚠️ Fehler beim Laden von ${url}: ${e.message || e.toString()}`);
+    console.log(`⚠️ Error while loading ${url}: ${e.message || e.toString()}`);
     logs.push({ url, error: e.message || e.toString() });
     await page.close();
   }
 }
 
 (async () => {
-  console.log(`settings:Ziel: ${TARGET_URL}#Unterseiten durchsuchen: ${RECURSIVE ? "Ja" : "Nein"}#Tiefe: ${MAX_DEPTH}#ZIP erstellen: ${ZIP_EXPORT ? "Ja" : "Nein"}#Ordner leeren: ${CLEAN_MODE ? "Ja" : "Nein"}`);
+  console.log(`settings:\nURL: ${TARGET_URL}\nCrawl recursive: ${RECURSIVE ? "Yes" : "No"}\nDepth: ${MAX_DEPTH}\nCreate ZIP: ${ZIP_EXPORT ? "Yes" : "No"}\nClean folder: ${CLEAN_MODE ? "Yes" : "No"}`);
   if (CLEAN_MODE && existsSync(OUTPUT_DIR)) {
     await fs.rm(OUTPUT_DIR, { recursive: true, force: true });
-    console.log('♻️ Clean: Ordner gelöscht');
+    console.log('♻️ Clean: Folder deleted.');
   }
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
 
@@ -256,12 +239,11 @@ async function crawl(url, depth, browser) {
   await crawl(TARGET_URL, 0, browser);
   await browser.close();
 
-  // Sitemap & Logs
   const map = [...resourceMap].map(r => r[0]);
   await fs.writeFile(path.join(OUTPUT_DIR, 'sitemap.json'), JSON.stringify([...sitemap, ...map], null, 2));
-  console.log('🧭 Sitemap erstellt');
+  console.log('🧭 Sitemap created.');
   await fs.writeFile(path.join(OUTPUT_DIR, 'log.json'), JSON.stringify(logs, null, 2));
-  console.log('📝 Log erstellt');
+  console.log('📝 Log created.');
 
   if (ZIP_EXPORT) {
     const zip = new JSZip();
@@ -275,6 +257,6 @@ async function crawl(url, depth, browser) {
     await addDir(OUTPUT_DIR, zip.folder(path.basename(OUTPUT_DIR)));
     const buf = await zip.generateAsync({ type: 'nodebuffer' });
     await fs.writeFile(`${OUTPUT_DIR}.zip`, buf);
-    console.log('📦 ZIP erstellt');
+    console.log('📦 ZIP created.');
   }
 })();
