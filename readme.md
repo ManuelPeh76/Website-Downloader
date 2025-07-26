@@ -61,6 +61,23 @@ To download a web page with a link depth of 1, recursion and ZIP export, use the
 node downloader.js https://example.com -d=1 -r -z -o=C:\Users\<username>\documents
 ```
 
+## Build the App
+
+You can build this tool using electron, so you can run an .exe file to start it. Type:
+```
+npm run build
+```
+A 'dist' folder will be created, containing the tool. 
+Unfortunately, to make it run propperly, you have to put a copy of the download.js directly into the dist/website-downloader-win32-x64 folder (where the website-downloader.exe file is located).
+
+## Build a Windows Installer
+
+Simply run:
+```
+npm run setup
+```
+to create a windows installer package from the app.
+
 ---
 ## License
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
