@@ -14,7 +14,7 @@
     "node.js"
   ],
   "author": "Manuel Pelzer",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "electron": "^37.2.3",
     "jszip": "^3.10.1",
