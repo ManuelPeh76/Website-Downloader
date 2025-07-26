@@ -10,7 +10,7 @@ document.getElementById('start').addEventListener('click', async () => {
   const outdir = document.getElementById('outdir').value.trim();
   
   document.getElementById('start').disabled = true;
-  document.getElementById('log').textContent = url ? 'Starte Download...\n' : "";
+  document.getElementById('log').textContent = url ? 'Starting download...\n' : "";
   document.getElementById('progressText').innerHTML = "";
   
   window.api.startDownload({ url, zip, clean, depth, recursive, outdir });
@@ -25,17 +25,16 @@ document.getElementById('start').addEventListener('click', async () => {
       return;
     }
     if (msg.startsWith("settings:")) {
-      msg = msg.slice(9).split("#");
-      document.getElementById("settings").innerHTML = msg.join("<br>");
+      document.getElementById("settings").textContent = msg.slice(9);
       return;
     }
     const log = document.getElementById('log');
     log.textContent += msg;
     log.scrollTop = log.scrollHeight;
 
-    if (msg.includes('Log erstellt')) {
+    if (msg.includes('Log created')) {
       document.getElementById('start').disabled = false;
-    } else if (msg.includes("Bitte gib eine URL")) {
+    } else if (msg.includes("Please enter a URL")) {
       isStarted = 0;
     }
   });
@@ -47,7 +46,7 @@ document.getElementById('start').addEventListener('click', async () => {
 document.getElementById('abort').addEventListener('click', () => {
   if (!isStarted) return;
   isStarted = 0;
-  document.getElementById('log').textContent += '\nAbbruch durch den Benutzer.';
+  document.getElementById('log').textContent += '\nAborted by user.';
   document.getElementById('start').disabled = false;
   window.api.abortCrawling();
 });
