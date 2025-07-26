@@ -25,7 +25,7 @@ document.getElementById('start').addEventListener('click', async () => {
       return;
     }
     if (msg.startsWith("settings:")) {
-      document.getElementById("settings").textContent = msg.slice(9);
+      document.getElementById("settings").innerHTML = msg.slice(9).replace(/\n/g, "<br>");
       return;
     }
     const log = document.getElementById('log');
