@@ -18,9 +18,9 @@ const ZIP_EXPORT = args.includes('--zip') || args.includes('-z');
 const CLEAN_MODE = args.includes('--clean') || args.includes('-c');
 const RECURSIVE = args.includes('--recursive') || args.includes('-r');
 const MAX_DEPTH = depthArg ? parseInt(depthArg.split('=')[1], 10) : Infinity;
-const SIMULTAANEOUS = simulArg ? parseInt(simulArg.split('=')[1], 10) : 4;
+const SIMULTANEOUS = simulArg ? parseInt(simulArg.split('=')[1], 10) : 4;
 
-const limit = pLimit(SIMULTAANEOUS);
+const limit = pLimit(SIMULTANEOUS);
 const htmlLinks = [];
 const assetTasks = [];
 const isElectron = !!process.send;
