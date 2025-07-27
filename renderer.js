@@ -11,6 +11,7 @@ const pause = document.getElementById('pause');
 start.addEventListener('click', async () => {
   const url = document.getElementById('url').value;
   const depth = document.getElementById('depth').value;
+  const simultaneous = document.getElementById('simultaneous').value;
   const zip = document.getElementById('zip').checked;
   const clean = document.getElementById('clean').checked;
   const recursive = document.getElementById('recursive').checked;
@@ -22,7 +23,7 @@ start.addEventListener('click', async () => {
   settings.innerHTML = "";
   settings.style.display = "block";
 
-  window.api.startDownload({ url, zip, clean, depth, recursive, outdir });
+  window.api.startDownload({ url, zip, clean, depth, recursive, outdir, simultaneous });
 
   if (isStarted) return;
   isStarted = 1;
