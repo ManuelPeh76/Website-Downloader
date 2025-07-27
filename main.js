@@ -21,7 +21,7 @@ function createWindow() {
 let proc, pid;
 
 app.whenReady().then(() => {
-  ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir }) => {
+  ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir, simultaneous }) => {
     return new Promise((resolve, reject) => {
       
       const args = ['downloader.js', url];
@@ -31,7 +31,7 @@ app.whenReady().then(() => {
       if (recursive) args.push('--recursive');
       if (depth) args.push(`--depth=${depth}`);
       if (outdir) args.push(`--outdir=${outdir}`);
-      
+      if (simultaneous) args.push(`--simultaneous=${simultaneous}`);
       proc = spawn('node', args);
       pid = proc.pid;
 
