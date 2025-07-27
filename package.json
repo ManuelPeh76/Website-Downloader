@@ -18,6 +18,7 @@
   "dependencies": {
     "electron": "^37.2.3",
     "jszip": "^3.10.1",
+    "ntsuspend": "^1.0.2",
     "p-limit": "^3.1.0",
     "puppeteer": "^24.14.0"
   },
