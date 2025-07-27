@@ -52,7 +52,7 @@ node downloader.js <url> [options]
 | `-r`, `--recursive` | Enables recursive downloading of linked pages (default: true). |
 | `-z`, `--zip` | Creates a ZIP archive after downloads are complete (default: false). |
 | `-c`, `--clean` | Empties the destination folder before saving downloads (default: false). |
-| `-o=<path>`, `--outdir=<path>` | The full path to the folder the website is saved to.
+| `-o=<path>`, `--outdir=<path>` | The full path to the folder the website is saved to (default: repo folder).
 
 ## Example
 
