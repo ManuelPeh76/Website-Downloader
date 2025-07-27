@@ -1,10 +1,11 @@
 ---
 # <img src="electron.svg" width="50" height="50" style="transform: translate(0, 10px)"> Website-Downloader
-A universal downloader for dynamic websites, created with electron.
+A fast and universal downloader for dynamic websites, created with electron.
 
 ## Features
 
-- 🚀 Dynamic Loading: Also loads assets that are loaded during page loading.
+- 🔎 Dynamic Loading: Also loads assets that are loaded during page loading.
+- 🚀 Fast Loading: Up to 12 files are downloaded simultaneously.
 - 🔁 Recursive Download: Searches linked pages and downloads files found there.
 - 📏 Limit Depth: Specifies how deep links should be traced.
 - 🧹 Cleanup Mode: Empties the destination folder before saving downloads.
