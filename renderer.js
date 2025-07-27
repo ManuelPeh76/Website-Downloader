@@ -1,7 +1,14 @@
 let isStarted = 0;
 let isInit = 0;
 
-document.getElementById('start').addEventListener('click', async () => {
+const settings = document.getElementById("settings");
+const progress = document.getElementById('progressText');
+const start = document.getElementById('start');
+const log = document.getElementById('log');
+const abort = document.getElementById('abort');
+const pause = document.getElementById('pause');
+
+start.addEventListener('click', async () => {
   const url = document.getElementById('url').value;
   const depth = document.getElementById('depth').value;
   const zip = document.getElementById('zip').checked;
@@ -9,11 +16,11 @@ document.getElementById('start').addEventListener('click', async () => {
   const recursive = document.getElementById('recursive').checked;
   const outdir = document.getElementById('outdir').value.trim();
   
-  document.getElementById('start').disabled = true;
-  document.getElementById('log').textContent = url ? 'Starting download...\n' : "";
-  document.getElementById('progressText').innerHTML = "";
-  document.getElementById('settings').innerHTML = "";
-  document.getElementById('settings').style.display = "block";
+  start.disabled = true;
+  log.textContent = url ? 'Starting download...\n' : "";
+  progress.innerHTML = "";
+  settings.innerHTML = "";
+  settings.style.display = "block";
 
   window.api.startDownload({ url, zip, clean, depth, recursive, outdir });
 
@@ -21,39 +28,40 @@ document.getElementById('start').addEventListener('click', async () => {
   isStarted = 1;
   if (isInit) return;
 
-  window.api.onLog((msg) => {
-    if (msg.startsWith("progress:")) {
-      document.getElementById('progressText').textContent = msg.slice(9);
-      return;
-    }
-    if (msg.startsWith("settings:")) {
-      document.getElementById("settings").innerHTML = msg.slice(9).replace(/\n/g, "<br>");
-      return;
-    }
-    const log = document.getElementById('log');
-    log.textContent += msg;
-    log.scrollTop = log.scrollHeight;
-
-    if (msg.includes('Log created')) {
-      document.getElementById('start').disabled = false;
-    } else if (msg.includes("enter a URL")) {
-      isStarted = 0;
-      document.getElementById('start').disabled = false;
-      document.getElementById('settings').style.display = "none";
-    }
+  window.api.onLog(msg => {
+    msg.startsWith("progress:") ? progress.innerHTML = msg.slice(9) :
+    msg.startsWith("settings:") ? settings.innerHTML = msg.slice(9).replace(/\n/g, "<br>") : (
+      log.textContent += msg,
+      log.scrollTop = log.scrollHeight,
+      msg.includes('Log created') ? start.disabled = false :
+      msg.includes("enter a URL") && (
+        isStarted = 0,
+        start.disabled = false,
+        settings.style.display = "none"
+      )
+    );
   });
-  
   isInit = 1;
-
 });
 
-document.getElementById('abort').addEventListener('click', () => {
+abort.addEventListener('click', () => {
   if (!isStarted) return;
   isStarted = 0;
-  document.getElementById('log').textContent += '\nAborted by user.';
-  document.getElementById('start').disabled = false;
-  document.getElementById('settings').style.display = "none";
+  log.textContent += '\nAborted by user.';
+  start.disabled = false;
+  settings.style.display = "none";
   window.api.abortCrawling();
+});
+
+pause.addEventListener('click', () => {
+  if (pause.textContent === "Pause") {
+    console.log("...Pause...");
+    pause.textContent = "Resume";
+    return window.api.pause();
+  }
+  console.log("...Resuming...");
+  pause.innerText = "Pause";
+  window.api.resume();
 });
 
 document.getElementById('select-folder').addEventListener('click', async () => {

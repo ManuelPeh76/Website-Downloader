@@ -1,7 +1,9 @@
+const isWin = process.platform === 'win32';
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const { dialog } = require('electron');
+const ntsuspend = require('ntsuspend');
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -16,7 +18,7 @@ function createWindow() {
   win.loadFile('gui.html');
 }
 
-let proc;
+let proc, pid;
 
 app.whenReady().then(() => {
   ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir }) => {
@@ -31,6 +33,7 @@ app.whenReady().then(() => {
       if (outdir) args.push(`--outdir=${outdir}`);
       
       proc = spawn('node', args);
+      pid = proc.pid;
 
       proc.stdout.on('data', data => {
         event.sender.send('log', data.toString());
@@ -54,6 +57,21 @@ app.whenReady().then(() => {
     return false;
   });
 
+  ipcMain.handle('pause', async () => {
+    if (proc && pid) {
+      isWin ? ntsuspend.suspend(pid) : proc.kill('SIGSTOP');
+      return true;
+    }
+    return false;
+  });
+
+  ipcMain.handle('resume', async () => {
+    if (proc && pid) {
+      isWin ? ntsuspend.resume(pid) : proc.kill('SIGCONT');
+      return true;
+    }
+    return false;
+  });
 
   ipcMain.handle('select-folder', async () => {
     const result = await dialog.showOpenDialog({ properties: ['openDirectory'] });

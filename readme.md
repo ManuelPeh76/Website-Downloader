@@ -68,12 +68,11 @@ You can build this tool using electron, so you can run an .exe file to start it.
 npm run build
 ```
 A 'dist' folder will be created, containing the tool. 
-Unfortunately, to make it run properly, you have to put a copy of the download.js directly into the dist/website-downloader-win32-x64 folder (where the website-downloader.exe file is located).
+Unfortunately, to make it run propperly, you have to put a copy of the download.js directly into the dist/website-downloader-win32-x64 folder (where the website-downloader.exe file is located).
 
 ## Build a Windows Installer
 
-First run `npm run build`.
-Now you can run:
+Simply run:
 ```
 npm run setup
 ```

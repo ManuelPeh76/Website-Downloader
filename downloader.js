@@ -36,7 +36,7 @@ const sitemap = [];
 const logs = [];
 
 function sanitize(p) {
-  return p.replace(/[^a-z0-9\-_.]/gi, '_').replace(/_+/g, '_');
+  return p.replace(/[^a-z0-9/\-_.]/gi, '_').replace(/_+/g, '_');
 }
 
 function getLocalPath(resourceUrl, baseUrl) {
@@ -52,27 +52,30 @@ async function downloadResource(url, baseUrl) {
     const loc = getLocalPath(url, baseUrl);
     if (await fs.access(loc).then(() => true).catch(() => false)) return;
     const parsedUrl = new URL(url);
+    if (!parsedUrl.href.startsWith(TARGET_URL)) return;
     const filename = parsedUrl.href.split("/").pop();
-    if (!parsedUrl.href.includes(TARGET_URL)) return;
     if (!filename.includes(".") || filename.includes("#")) return;
 
     console.log(`🌐 File: ${url}`);
+
     await fs.mkdir(path.dirname(loc), { recursive: true });
+
     await new Promise((res, rej) => {
       const proto = url.startsWith('https') ? https : http;
       const req = proto.get(url, r => {
         if (r.statusCode !== 200) return rej(new Error(`Status ${r.statusCode}`));
         const ws = createWriteStream(loc);
         r.pipe(ws);
-        ws.on('finish', () => {
-          return res();
-        });
+        ws.on('finish', res);
         ws.on('error', rej);
       });
       req.on('error', rej);
     });
+
     resourceMap.set(new URL(url, baseUrl).href, path.relative(OUTPUT_DIR, loc).replace(/\\/g,'/'));
-    reportProgress();
+
+    await reportProgress();
+
   } catch (e) {
     logs.push({ url, error: e.message || e.toString() });
   }
@@ -112,42 +115,44 @@ async function extractCssResources(cssContent, baseUrl) {
 function reportProgress() {
   const total = visited.size + logs.length;
   const percent = total > 0 ? (visited.size / total) * 100 : 0;
-  console.log(`progress:📊 ${visited.size} Sites, ${resourceMap.size} Files, ${logs.length} Errors (${percent.toFixed(1)}%)`);
+  return console.log(`progress:📊 ${visited.size} Sites, ${resourceMap.size} Files, ${logs.length} Errors (${percent.toFixed(1)}%)`);
 }
 
 async function crawl(url, depth, browser) {
+
   if (visited.has(url) || depth > MAX_DEPTH) return;
+
   visited.add(url);
   sitemap.push(url);
 
   const page = await browser.newPage();
-page.on('request', async (request) => {
-  try {
-    const url = request.url();
-    const type = request.resourceType();
+  page.on('request', async (request) => {
+    try {
+      const url = decodeURIComponent(request.url());
+      const type = request.resourceType();
 
-    if (url.startsWith("blob:") || url.startsWith("data:")) return;    
-    if (!['image', 'stylesheet', 'script', 'font', 'xhr', 'other'].includes(type)) return;
-    const parsedUrl = new URL(url);
-    const filename = parsedUrl.href.split("/").pop();
-    if (!parsedUrl.href.includes(TARGET_URL)) return;
-    if (!filename.includes(".") || filename.includes("#")) return;
+      if (url.startsWith("blob:") || url.startsWith("data:")) return;
+      if (!['image', 'stylesheet', 'script', 'font', 'xhr', 'other'].includes(type)) return;
+      const parsedUrl = new URL(url);
+      const filename = parsedUrl.href.split("/").pop();
+      if (!parsedUrl.href.includes(TARGET_URL)) return;
+      if (!filename.includes(".") || filename.includes("#")) return;
 
-    let resourcePath = sanitize(parsedUrl.pathname);
-    const ext = path.extname(resourcePath) || '.bin';
-    if (!resourcePath.endsWith(ext)) resourcePath += ext;
+      let resourcePath = sanitize(parsedUrl.pathname);
+      const ext = path.extname(resourcePath) || '.bin';
+      if (!resourcePath.endsWith(ext)) resourcePath += ext;
 
-    const localPath = path.join(OUTPUT_DIR, resourcePath);
-    const relativePath = path.relative(OUTPUT_DIR, localPath).replace(/\\/g, '/');
+      const localPath = path.join(OUTPUT_DIR, resourcePath);
+      const relativePath = path.relative(OUTPUT_DIR, localPath).replace(/\\/g, '/');
 
-    if (!resourceMap.has(url)) {
-      resourceMap.set(url, relativePath);
-      await downloadResource(url, localPath);
+      if (!resourceMap.has(url)) {
+        resourceMap.set(url, relativePath);
+        await downloadResource(url, localPath);
+      }
+    } catch (err) {
+      console.error('Request Error:', err.message);
     }
-  } catch (err) {
-    console.error('Request Error:', err.message);
-  }
-});
+  });
 
   try {
     console.log(`🌐 Site (Depth ${depth}): ${url}`);
@@ -158,8 +163,6 @@ page.on('request', async (request) => {
     let html = await fetch(url);
     html = await html.text();
 
-    reportProgress();
-
     const resUrls = await page.$$eval('*', els => {
 
       const urls = new Set();
@@ -168,8 +171,8 @@ page.on('request', async (request) => {
       for (const el of els) {
         [src, href] = [el.src, el.href];
         if (src || href) {
-          if (src && src.endsWith("/")) continue;
-          if (href && href.endsWith("/")) continue;
+          if (src && src.endsWith("/")) src += "index.html"; //continue;
+          if (href && href.endsWith("/")) href += "index.html"; //continue;
           src && (src = src.split("?")[0]);
           href && (href = href.split("?")[0]);
           urls.add(src || href);
@@ -189,7 +192,7 @@ page.on('request', async (request) => {
       }
       return  [...urls].filter(Boolean).filter(h => h.startsWith(location.origin || '') && !h.endsWith("#"));
     });
-
+/*
     const pLimit = (concurrency) => {
       const queue = [];
       let active = 0;
@@ -209,22 +212,24 @@ page.on('request', async (request) => {
     };
 
     const limit = pLimit(8);
+    */
     const assetTasks = [];
-  
+    await reportProgress();
     for (const raw of resUrls) {
+
       let res;
       try {
-        res = new URL(raw, url).href;
+        res = new URL(decodeURIComponent(raw), url).href;
       } catch {
         continue;
       }
-  
+
       const isSameHost = new URL(res).hostname === new URL(TARGET_URL).hostname;
       if (!res || res.startsWith("data") || !isSameHost) continue;
 
       const isHtml = res.endsWith('.html');
       const isCss = res.endsWith('.css');
-  
+
       if (isHtml && RECURSIVE && depth < MAX_DEPTH) {
         assetTasks.push(limit(() => crawl(res, depth + 1, browser)));
       } else {
@@ -243,9 +248,9 @@ page.on('request', async (request) => {
         }));
       }
     }
-  
+
     await Promise.all(assetTasks);
-    
+
     for (const link of htmlLinks) {
       await crawl(link, depth + 1, browser);
     }
@@ -263,6 +268,14 @@ page.on('request', async (request) => {
   }
 }
 
+async function finish() {
+  const map = [...resourceMap].map(r => r[0]);
+  await fs.writeFile(path.join(OUTPUT_DIR, 'sitemap.json'), JSON.stringify([...sitemap, ...map], null, 2));
+  console.log('🧭 Sitemap created.');
+  await fs.writeFile(path.join(OUTPUT_DIR, 'log.json'), JSON.stringify(logs, null, 2));
+  console.log('📝 Log created.');
+}
+
 (async () => {
   console.log(`settings:\nURL: ${TARGET_URL}\nCrawl recursive: ${RECURSIVE ? "Yes" : "No"}\nDepth: ${MAX_DEPTH}\nCreate ZIP: ${ZIP_EXPORT ? "Yes" : "No"}\nClean folder: ${CLEAN_MODE ? "Yes" : "No"}`);
   if (CLEAN_MODE && existsSync(OUTPUT_DIR)) {
@@ -275,11 +288,7 @@ page.on('request', async (request) => {
   await crawl(TARGET_URL, 0, browser);
   await browser.close();
 
-  const map = [...resourceMap].map(r => r[0]);
-  await fs.writeFile(path.join(OUTPUT_DIR, 'sitemap.json'), JSON.stringify([...sitemap, ...map], null, 2));
-  console.log('🧭 Sitemap created.');
-  await fs.writeFile(path.join(OUTPUT_DIR, 'log.json'), JSON.stringify(logs, null, 2));
-  console.log('📝 Log created.');
+  await finish();
 
   if (ZIP_EXPORT) {
     const zip = new JSZip();

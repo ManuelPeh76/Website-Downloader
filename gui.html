@@ -2,8 +2,8 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <title>Website Downloader</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <style>
     body { font-family: sans-serif; margin: 2em; }
     label { display: block; margin-top: 1em; }
@@ -22,7 +22,9 @@
   <label id="clean-label"><input type="checkbox" id="clean" /> Clean-Mode</label>
   <label>Target Folder:<input type="text" id="outdir" size="50" readonly /><button id="select-folder">Choose…</button></label>
 
-  <button id="start" data-is-started="0" data-is-init="0">Start</button><button id="abort">Cancel</button>
+  <button id="start">Start</button>
+  <button id="abort">Cancel</button>
+  <button id="pause">Pause</button>
 
   <div id="settings" style="border:#000 1px solid;border-radius:5px;font-family:monospace;padding:8px;display:none"></div>
   <div id="progressContainer" style="margin-top: 20px;">
