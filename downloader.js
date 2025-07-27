@@ -7,19 +7,23 @@ const puppeteer = require('puppeteer');
 const JSZip = require('jszip');
 const pLimit = require('p-limit');
 
-const limit = pLimit(8);
-const htmlLinks = [];
-const assetTasks = [];
-const isElectron = !!process.send;
-
 const args = process.argv.slice(2);
+
+const simulArg = args.find(arg => arg.startsWith('--simultaneous=') || arg.startsWith('-s='));
+const depthArg = args.find(arg => arg.startsWith('--depth=') || arg.startsWith('-d='));
+const outArg = args.find(arg => arg.startsWith('--outdir=') || arg.startsWith('-o='));
+
 const TARGET_URL = args[0];
 const ZIP_EXPORT = args.includes('--zip') || args.includes('-z');
 const CLEAN_MODE = args.includes('--clean') || args.includes('-c');
 const RECURSIVE = args.includes('--recursive') || args.includes('-r');
-const depthArg = args.find(arg => arg.startsWith('--depth=') || arg.startsWith('-d='));
 const MAX_DEPTH = depthArg ? parseInt(depthArg.split('=')[1], 10) : Infinity;
-const outArg = args.find(arg => arg.startsWith('--outdir=') || arg.startsWith('-o='));
+const SIMULTAANEOUS = simulArg ? parseInt(simulArg.split('=')[1], 10) : 4;
+
+const limit = pLimit(SIMULTAANEOUS);
+const htmlLinks = [];
+const assetTasks = [];
+const isElectron = !!process.send;
 
 if (!TARGET_URL) {
   console.log('❌ Please enter a URL!');
