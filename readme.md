@@ -54,7 +54,7 @@ node downloader.js <url> [options]
 | `-z`, `--zip` | Creates a ZIP archive after downloads are complete (default: false). |
 | `-c`, `--clean` | Empties the destination folder before saving downloads (default: false). |
 | `-o=<path>`, `--outdir=<path>` | The full path to the folder the website is saved to (default: repo folder).
-
+| `-s=<number>`, `--simultaneous=<number>` | The amount of simultaneously active downloads (default: 4).
 ## Example
 
 To download a web page with a link depth of 1, recursion and ZIP export, use the following command:
