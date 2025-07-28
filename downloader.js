@@ -5,7 +5,6 @@ const https = require('https');
 const http = require('http');
 const puppeteer = require('puppeteer');
 const JSZip = require('jszip');
-const pLimit = require('p-limit');
 
 const args = process.argv.slice(2);
 
@@ -20,7 +19,6 @@ const RECURSIVE = args.includes('--recursive') || args.includes('-r');
 const MAX_DEPTH = depthArg ? parseInt(depthArg.split('=')[1], 10) : Infinity;
 const SIMULTANEOUS = simulArg ? parseInt(simulArg.split('=')[1], 10) : 4;
 
-const limit = pLimit(SIMULTANEOUS);
 const htmlLinks = [];
 const assetTasks = [];
 const isElectron = !!process.send;
@@ -196,7 +194,7 @@ async function crawl(url, depth, browser) {
       }
       return  [...urls].filter(Boolean).filter(h => h.startsWith(location.origin || '') && !h.endsWith("#"));
     });
-/*
+
     const pLimit = (concurrency) => {
       const queue = [];
       let active = 0;
@@ -215,8 +213,8 @@ async function crawl(url, depth, browser) {
       });
     };
 
-    const limit = pLimit(8);
-    */
+    const limit = pLimit(SIMULTANEOUS);
+
     const assetTasks = [];
     await reportProgress();
     for (const raw of resUrls) {
@@ -275,10 +273,17 @@ async function crawl(url, depth, browser) {
 async function finish() {
   const map = [...resourceMap].map(r => r[0]);
   await fs.writeFile(path.join(OUTPUT_DIR, 'sitemap.json'), JSON.stringify([...sitemap, ...map], null, 2));
-  console.log('🧭 Sitemap created.');
+  console.log('🧭 Sitemap created.\n');
   await fs.writeFile(path.join(OUTPUT_DIR, 'log.json'), JSON.stringify(logs, null, 2));
-  console.log('📝 Log created.');
+  console.log('📝 Log created.\n');
 }
+
+process.stdin.on('data', (data) => {
+  const command = data.toString().trim();
+  if (command === 'abort'){
+    finish();
+  }
+});
 
 (async () => {
   console.log(`settings:\nURL: ${TARGET_URL}\nCrawl recursive: ${RECURSIVE ? "Yes" : "No"}\nDepth: ${MAX_DEPTH}\nCreate ZIP: ${ZIP_EXPORT ? "Yes" : "No"}\nClean folder: ${CLEAN_MODE ? "Yes" : "No"}`);

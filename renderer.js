@@ -7,6 +7,9 @@ const start = document.getElementById('start');
 const log = document.getElementById('log');
 const abort = document.getElementById('abort');
 const pause = document.getElementById('pause');
+const selectFolder = document.getElementById('select-folder');
+
+pause.disabled = true;
 
 start.addEventListener('click', async () => {
   const url = document.getElementById('url').value;
@@ -18,6 +21,7 @@ start.addEventListener('click', async () => {
   const outdir = document.getElementById('outdir').value.trim();
   
   start.disabled = true;
+  pause.disabled = false;
   log.textContent = url ? 'Starting download...\n' : "";
   progress.innerHTML = "";
   settings.innerHTML = "";
@@ -34,10 +38,14 @@ start.addEventListener('click', async () => {
     msg.startsWith("settings:") ? settings.innerHTML = msg.slice(9).replace(/\n/g, "<br>") : (
       log.textContent += msg,
       log.scrollTop = log.scrollHeight,
-      msg.includes('Log created') ? start.disabled = false :
+      msg.includes('Log created') ? (
+        start.disabled = false,
+        pause.disabled = true
+      ) :
       msg.includes("enter a URL") && (
         isStarted = 0,
         start.disabled = false,
+        pause.disabled = true,
         settings.style.display = "none"
       )
     );
@@ -48,24 +56,26 @@ start.addEventListener('click', async () => {
 abort.addEventListener('click', () => {
   if (!isStarted) return;
   isStarted = 0;
-  log.textContent += '\nAborted by user.';
+  log.textContent += '\nAborted by user.\n';
   start.disabled = false;
+  pause.disabled = true;
   settings.style.display = "none";
-  window.api.abortCrawling();
+  window.api.abortDownload();
 });
 
 pause.addEventListener('click', () => {
+  if (!isStarted) return;
   if (pause.textContent === "Pause") {
-    console.log("...Pause...");
+    log.textContent += ("\n...Pause...");
     pause.textContent = "Resume";
-    return window.api.pause();
+    return window.api.pauseDownload();
   }
-  console.log("...Resuming...");
+  log.textContent += ("\n...Resuming...");
   pause.innerText = "Pause";
-  window.api.resume();
+  window.api.resumeDownload();
 });
 
-document.getElementById('select-folder').addEventListener('click', async () => {
+selectFolder.addEventListener('click', async () => {
   const folder = await window.api.selectFolder();
   if (folder) document.getElementById('outdir').value = folder;
 });

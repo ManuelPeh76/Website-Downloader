@@ -49,15 +49,16 @@ app.whenReady().then(() => {
     });
   });
 
-  ipcMain.handle('abort-crawling', async () => {
+  ipcMain.handle('abort-download', async () => {
     if (proc && !proc.killed) {
-      proc.kill('SIGINT');
+      proc.stdin.write('abort');
+      setTimeout(() => proc.kill('SIGINT'), 500);
       return true;
     }
     return false;
   });
 
-  ipcMain.handle('pause', async () => {
+  ipcMain.handle('pause-download', async () => {
     if (proc && pid) {
       isWin ? ntsuspend.suspend(pid) : proc.kill('SIGSTOP');
       return true;
@@ -65,7 +66,7 @@ app.whenReady().then(() => {
     return false;
   });
 
-  ipcMain.handle('resume', async () => {
+  ipcMain.handle('resume-download', async () => {
     if (proc && pid) {
       isWin ? ntsuspend.resume(pid) : proc.kill('SIGCONT');
       return true;
