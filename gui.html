@@ -1,4 +1,13 @@
 <!DOCTYPE html>
+
+<!--
+    Website Downloader
+
+    File: gui.html
+    Copyright © 2025 By Manuel Pelzer
+    MIT License
+-->
+
 <html>
 <head>
   <meta charset="UTF-8">
@@ -17,17 +26,18 @@
   <h1>Website Downloader</h1>
   <label id="url-label">URL: <input class="input" type="text" id="url" size="50" placeholder="https://example.com"/></label>
   <label id="depth-label">Depth: <input class="input" type="number" id="depth" min="0" placeholder="Infinity" /></label>
-  <label id="simultaneous-label">Simultaneously Downloads: <input class="input" type="number" id="simultaneous" min="1" max="12" value="4"/></label>
+  <label id="dwt-label">Dynamic Wait Time: <input class="input" type="number" id="dwt" min="1000" placeholder="3000" /></label>
+  <label id="simultaneous-label">Simultaneously Downloads: <input class="input" type="number" id="simultaneous" min="1" max="12" placeholder="4"/></label>
   <label id="recursive-label"><input class="input" type="checkbox" id="recursive" checked /> Recursive</label>
   <label id="zip-label"><input class="input" type="checkbox" id="zip" /> Export ZIP</label>
   <label id="clean-label"><input class="input" type="checkbox" id="clean" /> Clean Mode</label>
   <label>Target Folder:<input class="input" type="text" id="outdir" size="50" readonly /><button id="select-folder">Choose…</button></label>
 
   <button id="start">Start</button>
-  <button id="abort">Cancel</button>
-  <button id="pause">Pause</button>
+  <button id="abort" disabled>Cancel</button>
+  <button id="pause" disabled>Pause</button>
 
-  <div id="settings-container" style="border:#000 1px solid;border-radius:5px;font-family:monospace;padding:8px;display:none">
+  <div id="settings-container" style="border:#000 1px solid;border-radius:5px;font-family:monospace;padding:8px">
     <b>Settings</b>
     <hr>
     <div id="settings"></div>
@@ -37,7 +47,7 @@
     <div id="progressText">No data...</div>
   </div>
 
-  <pre id="log"></pre>
+  <div id="log"></div>
   <script>
     const inputs = [...document.getElementsByClassName("input")];
     const title = {
@@ -45,7 +55,9 @@
       depth: "The depth of links to consider.",
       recursive: "If enabled, links on downloaded HTML pages will be searched and any files found there will also be downloaded.",
       zip: "If enabled, a ZIP archive containing the entire website will be created after downloads are complete.",
-      clean: "If enabled, the folder where the files are saved will be emptied before downloading."
+      clean: "If enabled, the folder where the files are saved will be emptied before downloading.",
+      simultaneous: "Determines how many downloads run simultaneously.",
+      dwt: "The time (in ms) to wait after calling an HTML file to see if any content is dynamically loaded."
     }
     Object.entries(title).forEach(([id, content]) => document.getElementById(`${id}-label`).title = content);
     if (window.localStorage) {
@@ -54,6 +66,7 @@
       else obj = {};
       if (obj.url) document.getElementById("url").value = obj.url;
       if (obj.depth) document.getElementById("depth").value = obj.depth;
+      if (obj.dwt) document.getElementById("dwt").value = obj.dwt;
       if (obj.simultaneous) document.getElementById("simultaneous").value = obj.simultaneous;
       if (obj.recursive) document.getElementById("recursive").checked = obj.recursive;
       if (obj.zip) document.getElementById("zip").checked = obj.zip;

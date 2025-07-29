@@ -1,4 +1,13 @@
+
+/*  Website Downloader
+
+    File: renderer.js
+    Copyright © 2025 By Manuel Pelzer
+    MIT License
+*/
+
 let isStarted = 0;
+let isActive = 0;
 let isInit = 0;
 let canLog = 0;
 
@@ -10,8 +19,6 @@ const abort = document.getElementById('abort');
 const pause = document.getElementById('pause');
 const selectFolder = document.getElementById('select-folder');
 
-pause.disabled = true;
-
 start.addEventListener('click', async () => {
   const url = document.getElementById('url').value;
   const depth = document.getElementById('depth').value;
@@ -20,16 +27,21 @@ start.addEventListener('click', async () => {
   const clean = document.getElementById('clean').checked;
   const recursive = document.getElementById('recursive').checked;
   const outdir = document.getElementById('outdir').value.trim();
-  
+  const dwt = document.getElementById('dwt').value;
+
   start.disabled = true;
   pause.disabled = false;
-  log.textContent = url ? 'Starting download...\n' : "";
+  abort.disabled = false;
+  selectFolder.disabled = true;
+
+  log.innerHTML = url ? 'Starting download...<br>' : "";
   progress.innerHTML = "";
   settings.innerHTML = "";
   settings.parentElement.style.display = "block";
   canLog = 1;
-  window.api.startDownload({ url, zip, clean, depth, recursive, outdir, simultaneous });
 
+  window.api.startDownload({ url, zip, clean, depth, recursive, outdir, simultaneous, dwt });
+  isActive = 1;
   if (isStarted) return;
   isStarted = 1;
   if (isInit) return;
@@ -38,17 +50,22 @@ start.addEventListener('click', async () => {
     if (!canLog) return;
     msg.startsWith("progress:") ? progress.innerHTML = msg.slice(9) :
     msg.startsWith("settings:") ? settings.innerHTML = msg.slice(9).replace(/\n/g, "<br>") : (
-      log.textContent += msg,
+      log.innerHTML += msg.replace(/\n/g, "<br>"),
       log.scrollTop = log.scrollHeight,
       msg.includes('Log created') ? (
         start.disabled = false,
-        pause.disabled = true
+        pause.disabled = true,
+        abort.disabled = true,
+        selectFolder.disabled = false,
+        isActive = 0
       ) :
       msg.includes("enter a URL") && (
         isStarted = 0,
+        isActive = 0,
         start.disabled = false,
-        pause.disabled = true
-        // settings.parentElement.style.display = "none"
+        pause.disabled = true,
+        abort.disabled = true,
+        selectFolder.disabled = false
       )
     );
   });
@@ -57,28 +74,32 @@ start.addEventListener('click', async () => {
 
 abort.addEventListener('click', () => {
   if (!isStarted) return;
-  log.textContent += '\nAborted by user.\n';
+  document.getElementById('paused')?.remove();
+  log.innerHTML += '<b>Aborted by user!</b><br>';
   start.disabled = false;
   pause.disabled = true;
-  // settings.parentElement.style.display = "none";
+  abort.disabled = true;
+  selectFolder.disabled = false;
   window.api.abortDownload();
   isStarted = 0;
-  setTimeout(() => canLog = 0, 500);
+  isActive = 0;
+  canLog = 0;
 });
 
 pause.addEventListener('click', () => {
   if (!isStarted) return;
   if (pause.textContent === "Pause") {
-    log.textContent += ("\n...Pause...");
+    log.innerHTML += ("<span id='paused'>⏸️<b> Downloading paused...</b><br></span>");
     pause.textContent = "Resume";
     return window.api.pauseDownload();
   }
-  log.textContent += ("\n...Resuming...");
+  document.getElementById('paused').remove();
   pause.innerText = "Pause";
   window.api.resumeDownload();
 });
 
 selectFolder.addEventListener('click', async () => {
+  if (isActive) return;
   const folder = await window.api.selectFolder();
   if (folder) document.getElementById('outdir').value = folder;
 });

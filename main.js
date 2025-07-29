@@ -1,9 +1,19 @@
-const isWin = process.platform === 'win32';
+
+/*  Website Downloader
+
+    File: main.js
+    Copyright © 2025 By Manuel Pelzer
+    MIT License
+*/
+
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const { dialog } = require('electron');
 const ntsuspend = require('ntsuspend');
+
+const isWin = process.platform === 'win32';
+let proc, pid;
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -18,20 +28,20 @@ function createWindow() {
   win.loadFile('gui.html');
 }
 
-let proc, pid;
-
 app.whenReady().then(() => {
-  ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir, simultaneous }) => {
+  ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir, simultaneous, dwt }) => {
     return new Promise((resolve, reject) => {
-      
+
       const args = ['downloader.js', url];
-      
+
       if (zip) args.push('--zip');
       if (clean) args.push('--clean');
       if (recursive) args.push('--recursive');
       if (depth) args.push(`--depth=${depth}`);
       if (outdir) args.push(`--outdir=${outdir}`);
       if (simultaneous) args.push(`--simultaneous=${simultaneous}`);
+      if (dwt) args.push(`--dyn_wait_time=${dwt}`);
+
       proc = spawn('node', args);
       pid = proc.pid;
 
@@ -52,7 +62,6 @@ app.whenReady().then(() => {
   ipcMain.handle('abort-download', args => {
     if (proc && !proc.killed) {
       proc.stdin.write('abort');
-      //setTimeout(() => proc.kill('SIGINT'), 500);
       return true;
     }
     return false;
