@@ -195,7 +195,7 @@ async function crawl(url, depth, browser) {
       return  [...urls].filter(Boolean).filter(h => h.startsWith(location.origin || '') && !h.endsWith("#"));
     });
 
-    const pLimit = (concurrency) => {
+    const pLimit = concurrency => {
       const queue = [];
       let active = 0;
       const next = () => {
@@ -273,20 +273,21 @@ async function crawl(url, depth, browser) {
 async function finish() {
   const map = [...resourceMap].map(r => r[0]);
   await fs.writeFile(path.join(OUTPUT_DIR, 'sitemap.json'), JSON.stringify([...sitemap, ...map], null, 2));
-  console.log('🧭 Sitemap created.\n');
+  console.log('🧭 Sitemap created.');
   await fs.writeFile(path.join(OUTPUT_DIR, 'log.json'), JSON.stringify(logs, null, 2));
-  console.log('📝 Log created.\n');
+  console.log('📝 Log created.');
 }
 
-process.stdin.on('data', (data) => {
+process.stdin.on('data', async data => {
   const command = data.toString().trim();
-  if (command === 'abort'){
-    finish();
+  if (command === 'abort') {
+    await finish();
+    process.exit(1);
   }
 });
 
 (async () => {
-  console.log(`settings:\nURL: ${TARGET_URL}\nCrawl recursive: ${RECURSIVE ? "Yes" : "No"}\nDepth: ${MAX_DEPTH}\nCreate ZIP: ${ZIP_EXPORT ? "Yes" : "No"}\nClean folder: ${CLEAN_MODE ? "Yes" : "No"}`);
+  console.log(`settings:\nDownloading with ${SIMULTANEOUS} channels from ${TARGET_URL}\nFiles are saved to: ${OUTPUT_DIR}\nRecursion is ${RECURSIVE ? "enabled" : "disabled"}\nDepth: ${MAX_DEPTH}\n${ZIP_EXPORT ? "A" : "No"} ZIP archive will be created\nTarget folder is${CLEAN_MODE ? " cleaned" : "n't cleaned\n\n"}`);
   if (CLEAN_MODE && existsSync(OUTPUT_DIR)) {
     await fs.rm(OUTPUT_DIR, { recursive: true, force: true });
     console.log('♻️ Clean: Folder deleted.');

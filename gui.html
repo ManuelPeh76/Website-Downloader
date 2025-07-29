@@ -7,6 +7,7 @@
   <style>
     body { font-family: sans-serif; margin: 2em; }
     label { display: block; margin-top: 1em; }
+    progress { width: 100%; margin-top: 1em; }
     #log { height: 200px; overflow-y: auto; background: #eee; padding: 1em; font-family: Consolas; }
     input { font-family: monospace; }
     button { margin: 2em 1em 2em 0 ; padding: 2px 10px; font-size: 16px; }
@@ -14,19 +15,23 @@
 </head>
 <body>
   <h1>Website Downloader</h1>
-  <label id="url-label">URL: <input type="text" id="url" size="50" placeholder="https://example.com"/></label>
-  <label id="depth-label">Depth: <input type="number" id="depth" min="0" placeholder="Infinity" /></label>
-  <label id="simultaneous-label">Simultaneously Downloads: <input type="number" id="simultaneous" min="1" max="12" value="4"/></label>
-  <label id="recursive-label"><input type="checkbox" id="recursive" checked /> Recursive</label>
-  <label id="zip-label"><input type="checkbox" id="zip" /> Export ZIP</label>
-  <label id="clean-label"><input type="checkbox" id="clean" /> Clean Mode</label>
-  <label>Target Folder:<input type="text" id="outdir" size="50" readonly /><button id="select-folder">Choose…</button></label>
+  <label id="url-label">URL: <input class="input" type="text" id="url" size="50" placeholder="https://example.com"/></label>
+  <label id="depth-label">Depth: <input class="input" type="number" id="depth" min="0" placeholder="Infinity" /></label>
+  <label id="simultaneous-label">Simultaneously Downloads: <input class="input" type="number" id="simultaneous" min="1" max="12" value="4"/></label>
+  <label id="recursive-label"><input class="input" type="checkbox" id="recursive" checked /> Recursive</label>
+  <label id="zip-label"><input class="input" type="checkbox" id="zip" /> Export ZIP</label>
+  <label id="clean-label"><input class="input" type="checkbox" id="clean" /> Clean Mode</label>
+  <label>Target Folder:<input class="input" type="text" id="outdir" size="50" readonly /><button id="select-folder">Choose…</button></label>
 
   <button id="start">Start</button>
   <button id="abort">Cancel</button>
   <button id="pause">Pause</button>
 
-  <div id="settings" style="border:#000 1px solid;border-radius:5px;font-family:monospace;padding:8px;display:none"></div>
+  <div id="settings-container" style="border:#000 1px solid;border-radius:5px;font-family:monospace;padding:8px;display:none">
+    <b>Settings</b>
+    <hr>
+    <div id="settings"></div>
+  </div>
   <div id="progressContainer" style="margin-top: 20px;">
     <strong>Progress:</strong>
     <div id="progressText">No data...</div>
@@ -34,6 +39,7 @@
 
   <pre id="log"></pre>
   <script>
+    const inputs = [...document.getElementsByClassName("input")];
     const title = {
       url: "The web address of the site you want to download.",
       depth: "The depth of links to consider.",
@@ -42,6 +48,28 @@
       clean: "If enabled, the folder where the files are saved will be emptied before downloading."
     }
     Object.entries(title).forEach(([id, content]) => document.getElementById(`${id}-label`).title = content);
+    if (window.localStorage) {
+      let obj;
+      if (localStorage.downloader_obj) obj = JSON.parse(localStorage.downloader_obj);
+      else obj = {};
+      if (obj.url) document.getElementById("url").value = obj.url;
+      if (obj.depth) document.getElementById("depth").value = obj.depth;
+      if (obj.simultaneous) document.getElementById("simultaneous").value = obj.simultaneous;
+      if (obj.recursive) document.getElementById("recursive").checked = obj.recursive;
+      if (obj.zip) document.getElementById("zip").checked = obj.zip;
+      if (obj.clean) document.getElementById("clean").checked = obj.clean;
+      if (obj.outdir) document.getElementById("outdir").value = obj.outdir;
+      inputs.forEach(el => {
+        el.addEventListener("change", function() {
+          inputs.forEach(el => {
+            const name = el.id;
+            const value = el.type === "checkbox" ? el.checked : el.value;
+            obj[name] = value;
+          });
+          localStorage.downloader_obj = JSON.stringify(obj);
+        });
+      });
+    }
   </script>
   <script src="renderer.js"></script>
 </body>

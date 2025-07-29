@@ -39,7 +39,7 @@ app.whenReady().then(() => {
         event.sender.send('log', data.toString());
       });
 
-      proc.stderr.on('data', (data) => {
+      proc.stderr.on('data', data => {
         event.sender.send('log', data.toString());
       });
 
@@ -49,10 +49,10 @@ app.whenReady().then(() => {
     });
   });
 
-  ipcMain.handle('abort-download', async () => {
+  ipcMain.handle('abort-download', args => {
     if (proc && !proc.killed) {
       proc.stdin.write('abort');
-      setTimeout(() => proc.kill('SIGINT'), 500);
+      //setTimeout(() => proc.kill('SIGINT'), 500);
       return true;
     }
     return false;

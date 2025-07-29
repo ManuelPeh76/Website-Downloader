@@ -1,5 +1,6 @@
 let isStarted = 0;
 let isInit = 0;
+let canLog = 0;
 
 const settings = document.getElementById("settings");
 const progress = document.getElementById('progressText');
@@ -25,8 +26,8 @@ start.addEventListener('click', async () => {
   log.textContent = url ? 'Starting download...\n' : "";
   progress.innerHTML = "";
   settings.innerHTML = "";
-  settings.style.display = "block";
-
+  settings.parentElement.style.display = "block";
+  canLog = 1;
   window.api.startDownload({ url, zip, clean, depth, recursive, outdir, simultaneous });
 
   if (isStarted) return;
@@ -34,6 +35,7 @@ start.addEventListener('click', async () => {
   if (isInit) return;
 
   window.api.onLog(msg => {
+    if (!canLog) return;
     msg.startsWith("progress:") ? progress.innerHTML = msg.slice(9) :
     msg.startsWith("settings:") ? settings.innerHTML = msg.slice(9).replace(/\n/g, "<br>") : (
       log.textContent += msg,
@@ -45,8 +47,8 @@ start.addEventListener('click', async () => {
       msg.includes("enter a URL") && (
         isStarted = 0,
         start.disabled = false,
-        pause.disabled = true,
-        settings.style.display = "none"
+        pause.disabled = true
+        // settings.parentElement.style.display = "none"
       )
     );
   });
@@ -55,12 +57,13 @@ start.addEventListener('click', async () => {
 
 abort.addEventListener('click', () => {
   if (!isStarted) return;
-  isStarted = 0;
   log.textContent += '\nAborted by user.\n';
   start.disabled = false;
   pause.disabled = true;
-  settings.style.display = "none";
+  // settings.parentElement.style.display = "none";
   window.api.abortDownload();
+  isStarted = 0;
+  setTimeout(() => canLog = 0, 500);
 });
 
 pause.addEventListener('click', () => {
