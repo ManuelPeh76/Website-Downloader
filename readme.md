@@ -4,7 +4,7 @@ A fast and universal downloader for dynamic websites, created with electron.
 
 ## Features
 
-- 🔎 Dynamic Loading: Also loads assets that are loaded during page loading.
+- 🔎 Dynamic Loading: Catches files that are dynamically loaded (e.g. from a script).
 - 🚀 Fast Loading: Up to 12 files are downloaded simultaneously.
 - 🔁 Recursive Download: Searches linked pages and downloads files found there.
 - 📏 Limit Depth: Specifies how deep links should be traced.
@@ -61,6 +61,11 @@ To download a web page with a link depth of 1, recursion and ZIP export, use the
 ```
 node downloader.js https://example.com -d=1 -r -z -o=C:\Users\<username>\documents
 ```
+## Some Infos about this Tool
+
+- Files that are dynamically loaded during the website's runtime are only recorded if the request occurs within the first three seconds after opening the page. Understandably, the downloader cannot wait forever for such a request to occur, as this would block the corresponding download channel.
+- CSS files (whether linked or dynamically loaded) are searched for 'url(...)' to include fonts and images that are loaded by the CSS.
+- Only files whose storage location matches that of the website are saved.
 
 ## Build the App
 
@@ -72,12 +77,11 @@ A 'dist' folder will be created, containing the tool.
 Unfortunately, to make it run propperly, you have to put a copy of the download.js directly into the dist/website-downloader-win32-x64 folder (where the website-downloader.exe file is located).
 
 ## Build a Windows Installer
-
-Simply run:
 ```
+npm run build
 npm run setup
 ```
-to create a windows installer package from the app.
+Thist creates a windows installer package from the app.
 
 ---
 ## License
