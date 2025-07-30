@@ -37,7 +37,7 @@ npm install
 #### GUI
 1. Start the GUI with `npm start`.
 2. Enter the URL of the website you want to download.
-3. Select the desired options (link depth, recursive download, ZIP export, cleanup mode).
+3. Select the desired options.
 4. Choose the target folder, in which the website folder will be created.
 5. Start the download with the `Start` button.
 
