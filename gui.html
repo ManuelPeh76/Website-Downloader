@@ -14,16 +14,174 @@
   <title>Website Downloader</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <style>
-    body { font-family: sans-serif; margin: 2em; }
-    label { display: block; margin-top: 1em; }
-    progress { width: 100%; margin-top: 1em; }
-    #log { height: 200px; overflow-y: auto; background: #eee; padding: 1em; font-family: Consolas; }
-    input { font-family: monospace; }
-    button { margin: 2em 1em 2em 0 ; padding: 2px 10px; font-size: 16px; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+:root {
+  --bg: #f9fafb;
+  --fg: #111;
+  --accent: #2563eb;
+  --card: #ffffff;
+  --log-bg: #f3f4f6;
+  --border: #d1d5db;
+}
+
+/* Only active if no data-theme found */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg: #1f2937;
+    --fg: #f9fafb;
+    --accent: #3b82f6;
+    --card: #111827;
+    --log-bg: #374151;
+    --border: #4b5563;
+  }
+}
+
+/* Light Theme */
+:root[data-theme="light"] {
+  --bg: #f9fafb;
+  --fg: #111;
+  --accent: #2563eb;
+  --card: #ffffff;
+  --log-bg: #f3f4f6;
+  --border: #d1d5db;
+}
+
+/* Dark Theme */
+:root[data-theme="dark"] {
+  --bg: #1f2937;
+  --fg: #ddd;
+  --accent: #3b82f6;
+  --card: #111827;
+  --log-bg: #374151;
+  --border: #4b5563;
+}
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg);
+    color: var(--fg);
+    margin: 2em;
+  }
+
+  h1 {
+    font-size: 2em;
+    margin-bottom: 1em;
+  }
+
+  label {
+    display: block;
+    margin-top: 1em;
+    font-weight: 500;
+  }
+
+  input[type="text"],
+  input[type="number"] {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--fg);
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 0.25em;
+  }
+
+  input[type="checkbox"] {
+    margin-right: 0.5em;
+  }
+
+  button {
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.6em 1.2em;
+    font-size: 16px;
+    border-radius: 6px;
+    margin: 1.5em 1em 1.5em 0;
+    cursor: pointer;
+    transition: background-color 0.4s ease, transform 0.2s ease;
+    box-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
+  }
+
+  button:hover {
+    background-color: #1d4ed8;
+    transform: scale(1.05);
+  }
+
+  #log {
+    height: 200px;
+    overflow-y: auto;
+    background: var(--log-bg);
+    padding: 1em;
+    font-family: Consolas, monospace;
+    border-radius: 6px;
+    margin-top: 2em;
+    white-space: pre-wrap;
+  }
+
+  progress {
+    width: 100%;
+    margin-top: 1em;
+  }
+
+  #settings-container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: monospace;
+    padding: 12px;
+    margin-top: 1em;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+
+  #progressContainer {
+    margin-top: 2em;
+    font-weight: 500;
+  }
+
+  #progressText {
+    margin-top: 0.5em;
+    font-family: monospace;
+  }
+
+/* Tooltips (modern) */
+[data-tooltip] {
+  position: relative;
+  cursor: help;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 0;
+  bottom: 120%;
+  background-color: var(--fg);
+  color: var(--bg);
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  white-space: pre-line;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(5px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 10;
+  width: max-content;
+  max-width: 300px;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+}
   </style>
 </head>
 <body>
   <h1>Website Downloader</h1>
+  <div style="position: fixed; top: 10px; right: 10px; z-index: 1;/*text-align: right;*/ margin-bottom: 1em;">
+    <button id="theme-toggle" title="Toggle Dark/Light Mode 🌓"></button>
+  </div>
   <label id="url-label">URL: <input class="input" type="text" id="url" size="50" placeholder="https://example.com"/></label>
   <label id="depth-label">Depth: <input class="input" type="number" id="depth" min="0" placeholder="Infinity" /></label>
   <label id="dwt-label">Dynamic Wait Time: <input class="input" type="number" id="dwt" min="1000" placeholder="3000" /></label>
@@ -59,7 +217,11 @@
       simultaneous: "Determines how many downloads run simultaneously.",
       dwt: "The time (in ms) to wait after calling an HTML file to see if any content is dynamically loaded."
     }
-    Object.entries(title).forEach(([id, content]) => document.getElementById(`${id}-label`).title = content);
+Object.entries(title).forEach(([id, content]) => {
+  const el = document.getElementById(`${id}-label`);
+  el.removeAttribute("title");
+  el.setAttribute("data-tooltip", content);
+});
     if (window.localStorage) {
       let obj;
       if (localStorage.downloader_obj) obj = JSON.parse(localStorage.downloader_obj);
@@ -83,6 +245,32 @@
         });
       });
     }
+
+  // Theme Toggle Logic
+  const root = document.documentElement;
+  const toggleBtn = document.getElementById("theme-toggle");
+  const storedTheme = localStorage.getItem("theme");
+
+  function setTheme(mode) {
+    root.setAttribute("data-theme", mode);
+    localStorage.setItem("theme", mode);
+    toggleBtn.textContent = mode === "dark" ? '🌙 Theme' : '☀️ Theme';
+  }
+
+  if (storedTheme) {
+    setTheme(storedTheme);
+  } else {
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setTheme(prefersDark ? "dark" : "light");
+    toggleBtn.textContent = prefersDark ? '🌙 Theme' : '☀️ Theme';
+
+  }
+
+  toggleBtn.addEventListener("click", () => {
+    const current = root.getAttribute("data-theme");
+    setTheme(current === "dark" ? "light" : "dark");
+    toggleBtn.textContent = current === "dark" ? '☀️ Theme' : '🌙 Theme';
+  });
   </script>
   <script src="renderer.js"></script>
 </body>

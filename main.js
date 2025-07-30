@@ -88,5 +88,13 @@ app.whenReady().then(() => {
     return result.canceled ? null : result.filePaths[0];
   });
 
+  ipcMain.handle('save-progress', async (_, log) => {
+    if (proc && !proc.killed) {
+      proc.stdin.write(log);
+      return true;
+    }
+    return false;
+  });
+
   createWindow();
 });

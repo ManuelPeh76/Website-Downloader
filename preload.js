@@ -14,5 +14,6 @@ contextBridge.exposeInMainWorld('api', {
   selectFolder: () => ipcRenderer.invoke('select-folder'),
   abortDownload: args => ipcRenderer.invoke('abort-download', args),
   pauseDownload: () => ipcRenderer.invoke('pause-download'),
-  resumeDownload: () => ipcRenderer.invoke('resume-download')
+  resumeDownload: () => ipcRenderer.invoke('resume-download'),
+  saveProgress: args => ipcRenderer.invoke('save-progress', args)
 });

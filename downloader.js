@@ -312,12 +312,37 @@ async function finish() {
   console.log('📝 Log created.');
 }
 
+async function getFolderSize(dirPath) {
+  let totalSize = 0;
+  async function walk(currentPath) {
+    const entries = await fs.readdir(currentPath, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(currentPath, entry.name);
+      if (entry.isDirectory()) {
+        await walk(fullPath); // rekursiv
+      } else if (entry.isFile()) {
+        const stats = await fs.stat(fullPath);
+        totalSize += stats.size;
+      }
+    }
+  }
+  await walk(dirPath);
+  let b = "Bytes";
+  if (totalSize > 1024) { totalSize /= 1024; b = "kB"; }
+  if (totalSize > 1024) { totalSize /= 1024; b = "MB"; }
+  if (totalSize > 1024) { totalSize /= 1024; b = "GB"; }
+  return `${totalSize.toFixed(2)}${b}`;
+}
+
 /* Stop any activity of the tool, if the abort button in the gui is pressed */
 process.stdin.on('data', async data => {
   const command = data.toString().trim();
   if (command === 'abort') {
     await finish();
     process.exit(1);
+  } else if (command.startsWith('save-progress:')) {
+    let progressLog = command.slice(14);
+    await fs.writeFile(path.join(OUTPUT_DIR, 'progress.log'), progressLog.replace(/<br>/g, "\n"));
   }
 });
 
@@ -343,7 +368,8 @@ process.stdin.on('data', async data => {
 
   /* Write sitemap and log files */
   await finish();
-
+  const size = await getFolderSize(OUTPUT_DIR);
+  console.log(`Downloaded Size: ${size}.`);
   /* Create a zip file containing the whole website */
   if (ZIP_EXPORT) {
     const zip = new JSZip();

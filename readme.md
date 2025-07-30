@@ -15,6 +15,7 @@ A fast and universal downloader for dynamic websites, created with electron.
 - 🔧 Progress Status: Displays the current status of the download process.
 - 💻 GUI or CLI usage.
 - 🌐 Offline support: Adapts all links inside the HTML files, so the website can be used offline.
+- 🌓 Supports Light Mode and Dark Mode
 
 ## Installation
 I assume you have node.js, npm and git already installed.

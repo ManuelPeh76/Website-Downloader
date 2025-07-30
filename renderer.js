@@ -57,7 +57,8 @@ start.addEventListener('click', async () => {
         pause.disabled = true,
         abort.disabled = true,
         selectFolder.disabled = false,
-        isActive = 0
+        isActive = 0,
+        window.api.saveProgress('save-progress:' + log.innerHTML)
       ) :
       msg.includes("enter a URL") && (
         isStarted = 0,
