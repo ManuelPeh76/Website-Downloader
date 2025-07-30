@@ -35,6 +35,9 @@ npm install
 ## Usage
 
 #### GUI
+
+<img src="app.png" width="400">
+
 1. Start the GUI with `npm start`.
 2. Enter the URL of the website you want to download.
 3. Select the desired options.
@@ -46,7 +49,7 @@ Start the tool from the command line with
 ```
 node downloader.js <url> [options]
 ``` 
-
+  
 #### Options
 | Option | Description |
 | --- | --- |
@@ -92,3 +95,4 @@ Thist creates a windows installer package from the app.
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
