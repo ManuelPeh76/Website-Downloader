@@ -50,6 +50,8 @@ node downloader.js <url> [options]
 | Option | Description |
 | --- | --- |
 | `-d=<number>`, `--depth=<number>` | The depth of links to consider (default: infinity). |
+| `--dyn_wait_time=<ms>`, `-dwt=<ms>` | 
+The time in ms the tool waits for dynamic content to load after the page is loaded (default 3000) |
 | `-r`, `--recursive` | Enables recursive downloading of linked pages (default: true). |
 | `-z`, `--zip` | Creates a ZIP archive after downloads are complete (default: false). |
 | `-c`, `--clean` | Empties the destination folder before saving downloads (default: false). |
