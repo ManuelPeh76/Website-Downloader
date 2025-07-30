@@ -68,6 +68,7 @@ node downloader.js https://example.com -d=1 -r -z -o=C:\Users\<username>\documen
 - CSS files (whether linked or dynamically loaded) are searched for 'url(...)' to include fonts and images that are loaded by the CSS.
 - Only files whose storage location matches that of the website are saved.
 - When a file has been downloaded, the tool checks, if the containing links are absolute or relative, in order to adapt them if necessary. If absolute links are found, and they point to the same origin, they are changed to relative links. Thus the functionality of that site remains intact (works offline, except for files that are loaded from other sources).
+- When using the GUI, all settings you change (incl. the url) are saved via local storage. The next time you start the GUI your own settings will be restored.
 
 ## Build the App
 
