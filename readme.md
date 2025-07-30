@@ -64,7 +64,7 @@ node downloader.js https://example.com -d=1 -r -z -o=C:\Users\<username>\documen
 ```
 ## Some Infos about this Tool
 
-- Files that are dynamically loaded during the website's runtime are only recorded if the request occurs within the first three seconds after opening the page. Understandably, the downloader cannot wait forever for such a request to occur, as this would block the corresponding download channel.
+- Files that are dynamically loaded during the website's runtime are only recorded if the request occurs within the dynamical wait time (3000ms by default) after opening the page. Understandably, the downloader cannot wait forever for such a request to occur, as this would block the corresponding download channel.
 - CSS files (whether linked or dynamically loaded) are searched for 'url(...)' to include fonts and images that are loaded by the CSS.
 - Only files whose storage location matches that of the website are saved.
 - When a file has been downloaded, the tool checks, if the containing links are absolute or relative, in order to adapt them if necessary. If absolute links are found, and they point to the same origin, they are changed to relative links. Thus the functionality of that site remains intact (works offline, except for files that are loaded from other sources).
