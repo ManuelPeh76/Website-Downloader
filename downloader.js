@@ -49,7 +49,7 @@ const logs = []; // List of all errors occured in the process
 
 /* Clean any url or filename */
 function sanitize(p) {
-  return decodeURIComponent(p.replace(/[^a-z0-9/\-_.]/gi, '_').replace(/_+/g, '_'));
+  return decodeURIComponent(p.replace(/[^a-z0-9/\-_.\[\]()]/gi, '_').replace(/_+/g, '_'));
 }
 
 /* The download queue function */
@@ -79,7 +79,8 @@ function getLocalPath(resourceUrl, baseUrl) {
   return path.join(OUTPUT_DIR, safe);
 }
 
-async function downloadResource(url, baseUrl) {
+async function downloadResource(url, baseUrl, dyn = "") {
+  dyn = dyn === "css" ? " (css resource)" : dyn === "dyn" ? " (dynamic)" : dyn;
   try {
     /* Check cases where the file will not be downloaded */
     const loc = getLocalPath(url, baseUrl);
@@ -90,7 +91,7 @@ async function downloadResource(url, baseUrl) {
     if (!filename.includes(".") || filename.includes("#")) return;
 
     /* The file is ok, going on...*/
-    console.log(`🌐 File: ${url}`);
+    console.log(`🌐 File${dyn}: ${url}`);
 
     await fs.mkdir(path.dirname(loc), { recursive: true });
 
@@ -144,7 +145,7 @@ async function extractCssResources(cssContent, baseUrl) {
       } catch {}
     }
   }
-  for (const u of matches) await downloadResource(u, baseUrl);
+  for (const u of matches) await downloadResource(u, baseUrl, "css");
 }
 
 /* Print information about the download progress */
@@ -188,7 +189,7 @@ async function crawl(url, depth, browser) {
 
       if (!resourceMap.has(url)) {
         resourceMap.set(url, relativePath);
-        await downloadResource(url, localPath);
+        await downloadResource(url, localPath, "dyn");
       }
     } catch (err) {
       console.error('Request Error:', err.message);
@@ -273,7 +274,7 @@ async function crawl(url, depth, browser) {
         /* If it is no html file, just download it. If it is a css file,
            check it for further sources that have to be downloaded as well */
         queue.push(limit(async () => {
-          await downloadResource(res, url);
+          await downloadResource(res, url, "");
           if (isCss) {
             try {
               const cssPath = getLocalPath(res, url);
