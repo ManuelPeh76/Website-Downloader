@@ -4,8 +4,9 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "start_wget": "electron ./main_wget.js",
     "build": "electron-packager . Website-Downloader --platform win32 --arch x64 --out dist/",
-    "setup": "electron-installer-windows --src dist/app-win32-x64/ --dest dist/installers/"
+    "setup": "electron-installer-windows --src dist/Website-Downloader-win32-x64/ --dest dist/installers/"
   },
   "keywords": [
     "crawler",
@@ -19,6 +20,7 @@
     "electron": "^37.2.3",
     "jszip": "^3.10.1",
     "ntsuspend": "^1.0.2",
+    "p-limit": "^6.2.0",
     "puppeteer": "^24.14.0"
   },
   "description": "A universal downloader for dynamic websites, built with Puppeteer. Saves HTML, CSS, JS, fonts, images, and external resources — including recursive crawling, offline support, and ZIP export.",
