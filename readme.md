@@ -68,7 +68,7 @@ node downloader.js https://example.com -d=1 -r -z -o=C:\Users\<username>\documen
 ```
 ## Some Infos about this Tool
 
-- Under the hood the Downloader opens each website (means HTML files) with Puppeteer in headless mode and listens to requests from the site, in order to catch all dynamically loaded files. This, of course, only works, if the request occurs within the dynamical wait time (3000ms by default) after opening the page. The dynamic wait time must be smaller than 30 seconds. After that timespan the connection will be closed.
+- Under the hood the Downloader opens each website (means HTML files) with Puppeteer in headless mode and listens to requests from the site, in order to catch all dynamically loaded files. This, of course, only works, if requests occur within the dynamical wait time (3000ms by default) after opening the page. The dynamic wait time must be smaller than 30 seconds. After that timespan the connection will be closed.
 - CSS files (whether linked or dynamically loaded) are searched for 'url(...)' to include fonts and images that are loaded by the CSS.
 - Only files whose storage location matches that of the website are saved.
 - When a file has been downloaded, the tool checks, if the containing links are absolute or relative, in order to adapt them if necessary. If absolute links are found, and they point to the same origin, they are changed to relative links. Thus the functionality of that site remains intact (works offline, except for files that are loaded from other sources).
@@ -95,5 +95,6 @@ Thist creates a windows installer package from the app.
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
