@@ -6,10 +6,9 @@
     MIT License
 */
 
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
-const { dialog } = require('electron');
 const ntsuspend = require('ntsuspend');
 
 const isWin = process.platform === 'win32';

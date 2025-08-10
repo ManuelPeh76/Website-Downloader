@@ -73,6 +73,16 @@
     display: block;
     margin-top: 1em;
     font-weight: 500;
+    padding-left: 10px;
+  }
+
+  #log-container label {
+    display: block;
+    height: 0;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: -14px;
+
   }
 
   input[type="text"],
@@ -109,8 +119,8 @@
     transform: scale(1.05);
   }
 
-  #log {
-    height: 200px;
+  #log, #error-log {
+    height: 300px;
     overflow-y: auto;
     background: var(--log-bg);
     padding: 1em;
@@ -118,6 +128,10 @@
     border-radius: 6px;
     margin-top: 2em;
     white-space: pre-wrap;
+  }
+
+  #error-log {
+    height: 100px;
   }
 
   progress {
@@ -204,8 +218,12 @@
     <strong>Progress:</strong>
     <div id="progressText">No data...</div>
   </div>
-
-  <div id="log"></div>
+  <div id="log-container">
+    <label for="log">Log</label>
+    <div id="log"></div>
+    <label for="error-log">Errors</label>
+    <div id="error-log"></div>
+  </div>
   <script>
     const inputs = [...document.getElementsByClassName("input")];
     const title = {
@@ -249,12 +267,12 @@ Object.entries(title).forEach(([id, content]) => {
   // Theme Toggle Logic
   const root = document.documentElement;
   const toggleBtn = document.getElementById("theme-toggle");
-  const storedTheme = localStorage.getItem("theme");
+  const storedTheme = localStorage.theme;
 
   function setTheme(mode) {
     root.setAttribute("data-theme", mode);
-    localStorage.setItem("theme", mode);
-    toggleBtn.textContent = mode === "dark" ? '🌙 Theme' : '☀️ Theme';
+    localStorage.theme = mode;
+    toggleBtn.textContent = mode === "dark" ? '🌙 Theme' : '🌞 Theme';
   }
 
   if (storedTheme) {
@@ -262,14 +280,14 @@ Object.entries(title).forEach(([id, content]) => {
   } else {
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     setTheme(prefersDark ? "dark" : "light");
-    toggleBtn.textContent = prefersDark ? '🌙 Theme' : '☀️ Theme';
+    toggleBtn.textContent = prefersDark ? '🌙 Theme' : '🌞 Theme';
 
   }
 
   toggleBtn.addEventListener("click", () => {
     const current = root.getAttribute("data-theme");
     setTheme(current === "dark" ? "light" : "dark");
-    toggleBtn.textContent = current === "dark" ? '☀️ Theme' : '🌙 Theme';
+    toggleBtn.textContent = current === "dark" ? '🌞 Theme' : '🌙 Theme';
   });
   </script>
   <script src="renderer.js"></script>

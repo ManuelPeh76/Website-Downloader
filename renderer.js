@@ -10,14 +10,31 @@ let isStarted = 0;
 let isActive = 0;
 let isInit = 0;
 let canLog = 0;
+let doScrollLog = true;
+let doScrollErrorLog = true;
 
 const settings = document.getElementById("settings");
 const progress = document.getElementById('progressText');
 const start = document.getElementById('start');
 const log = document.getElementById('log');
+const errorLog = document.getElementById('error-log');
 const abort = document.getElementById('abort');
 const pause = document.getElementById('pause');
 const selectFolder = document.getElementById('select-folder');
+
+function resetButtons() {
+  start.disabled = false;
+  pause.disabled = true;
+  abort.disabled = true;
+  selectFolder.disabled = false;
+}
+
+function setButtons() {
+  start.disabled = true;
+  pause.disabled = false;
+  abort.disabled = false;
+  selectFolder.disabled = true;
+}
 
 start.addEventListener('click', async () => {
   const url = document.getElementById('url').value;
@@ -29,15 +46,12 @@ start.addEventListener('click', async () => {
   const outdir = document.getElementById('outdir').value.trim();
   const dwt = document.getElementById('dwt').value;
 
-  start.disabled = true;
-  pause.disabled = false;
-  abort.disabled = false;
-  selectFolder.disabled = true;
+  setButtons();
 
   log.innerHTML = url ? 'Starting download...<br>' : "";
+  errorLog.innerHTML = "";
   progress.innerHTML = "";
   settings.innerHTML = "";
-  settings.parentElement.style.display = "block";
   canLog = 1;
 
   window.api.startDownload({ url, zip, clean, depth, recursive, outdir, simultaneous, dwt });
@@ -48,25 +62,27 @@ start.addEventListener('click', async () => {
 
   window.api.onLog(msg => {
     if (!canLog) return;
-    msg.startsWith("progress:") ? progress.innerHTML = msg.slice(9) :
-    msg.startsWith("settings:") ? settings.innerHTML = msg.slice(9).replace(/\n/g, "<br>") : (
+    msg.includes("📊") ? progress.innerHTML = msg :
+    msg.includes("📃") ? settings.innerHTML = msg.slice(2).replace(/\n/g, "<br>") :
+    msg.includes("❌") ? (
+      doScrollErrorLog = errorLog.scrollHeight - errorLog.scrollTop < 500 ? true : false,
+      errorLog.innerHTML += msg.replace(/\n/g, "<br>"),
+      doScrollErrorLog && (
+        errorLog.scrollTop = errorLog.scrollHeight,
+        errorLog.scrollIntoView({ behavior: "smooth", block: "end" })
+      )
+    ) : (
+      doScrollLog = log.scrollHeight - log.scrollTop < 500 ? true : false,
       log.innerHTML += msg.replace(/\n/g, "<br>"),
-      log.scrollTop = log.scrollHeight,
+      doScrollLog && (log.scrollTop = log.scrollHeight),
       msg.includes('Log created') ? (
-        start.disabled = false,
-        pause.disabled = true,
-        abort.disabled = true,
-        selectFolder.disabled = false,
+        resetButtons(),
         isActive = 0,
         window.api.saveProgress('save-progress:' + log.innerHTML)
-      ) :
-      msg.includes("enter a URL") && (
+      ) : msg.includes("enter a URL") && (
         isStarted = 0,
         isActive = 0,
-        start.disabled = false,
-        pause.disabled = true,
-        abort.disabled = true,
-        selectFolder.disabled = false
+        resetButtons()
       )
     );
   });
@@ -104,3 +120,11 @@ selectFolder.addEventListener('click', async () => {
   const folder = await window.api.selectFolder();
   if (folder) document.getElementById('outdir').value = folder;
 });
+
+function resize() {
+  log.style.width = (window.innerWidth - 110) + "px";
+  errorLog.style.width = (window.innerWidth - 110) + "px";
+}
+
+window.addEventListener("resize", resize);
+resize();
