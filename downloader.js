@@ -142,10 +142,10 @@ function shouldIgnoreUrl(url) {
     url.startsWith('blob:') ||
     url.startsWith('about:') ||
     url.startsWith('chrome:') ||
-    url.startsWith('filesystem:') ||
-    url.includes("#")
+    url.startsWith('filesystem:')
   ) return true;
   url = url.split("?")[0];
+  url = url.split("#")[0];
   if (!path.extname(new URL(url).pathname)) url += url.endsWith("/") ? "index.html" : "/index.html";
   if (url.endsWith(".html") || url.endsWith(".htm")) {
     if (visited.has(url)) return true;
@@ -251,8 +251,10 @@ function getLocalPath(resourceUrl, baseUrl) {
 
 async function downloadResource(url, baseUrl, dyn = "") {
   if (shouldIgnoreUrl(url)) return;
-  url = url.split(url.includes("#") ? "#" : "?")[0];
+  url = url.split("?")[0];
+  url = url.split("#")[0];
   const type = dyn === "css" ? " CSS Resource" : dyn === "dyn" ? " Dynamic Request" : " Asset";
+  if (!path.extname(url)) url += url.endsWith("/") ? "index.html" : "/index.html";
   let filename = url.split("/").pop();
   if (filename.length) filename = " " + filename;
   try {
