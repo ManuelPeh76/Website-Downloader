@@ -19,16 +19,9 @@ A fast and universal downloader for dynamic websites, created with electron.
 
 ## Installation
 I assume you have node.js, npm and git already installed.
-1. Open a command window (`cmd` on windows machines).
-
-2. Clone this repository:
 ```
 git clone https://github.com/ManuelPeh76/website-downloader.git
-```
-3. Switch into the newly created folder with `cd website-downloader`
-
-4. Install the dependencies:
-```
+cd website-downloader
 npm install
 ```
 
