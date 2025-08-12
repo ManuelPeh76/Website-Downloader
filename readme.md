@@ -20,9 +20,11 @@ A fast and universal downloader for dynamic websites, created with electron.
 ## Installation
 I assume you have node.js, npm and git already installed.
 ```
-git clone https://github.com/ManuelPeh76/website-downloader.git
-cd website-downloader
-npm install
+>git clone https://github.com/ManuelPeh76/website-downloader.git
+
+>cd website-downloader
+
+>npm install
 ```
 
 ## Usage
