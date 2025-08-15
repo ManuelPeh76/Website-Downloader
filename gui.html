@@ -14,282 +14,268 @@
   <title>Website Downloader</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
-:root {
-  --bg: #f9fafb;
-  --fg: #111;
-  --accent: #2563eb;
-  --card: #ffffff;
-  --log-bg: #f3f4f6;
-  --border: #d1d5db;
-}
+    :root {
+      --bg: #f9fafb;
+      --fg: #111;
+      --accent: #2563eb;
+      --card: #ffffff;
+      --log-bg: #bdd1ff;
+      --border: #d1d5db;
+    }
 
-/* Only active if no data-theme found */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    --bg: #1f2937;
-    --fg: #f9fafb;
-    --accent: #3b82f6;
-    --card: #111827;
-    --log-bg: #374151;
-    --border: #4b5563;
-  }
-}
+    /* Only active if no data-theme found */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --bg: #1f2937;
+        --fg: #f9fafb;
+        --accent: #3b82f6;
+        --card: #111827;
+        --log-bg: #32364b;
+        --border: #4b5563;
+      }
+    }
 
-/* Light Theme */
-:root[data-theme="light"] {
-  --bg: #f9fafb;
-  --fg: #111;
-  --accent: #2563eb;
-  --card: #ffffff;
-  --log-bg: #f3f4f6;
-  --border: #d1d5db;
-}
+    /* Light Theme */
+    :root[data-theme="light"] {
+      --bg: #f9fafb;
+      --fg: #111;
+      --accent: #2563eb;
+      --card: #ffffff;
+      --log-bg: #bdd1ff;
+      --border: #d1d5db;
+    }
 
-/* Dark Theme */
-:root[data-theme="dark"] {
-  --bg: #1f2937;
-  --fg: #ddd;
-  --accent: #3b82f6;
-  --card: #111827;
-  --log-bg: #374151;
-  --border: #4b5563;
-}
+    /* Dark Theme */
+    :root[data-theme="dark"] {
+      --bg: #1f2937;
+      --fg: #ddd;
+      --accent: #3b82f6;
+      --card: #111827;
+      --log-bg: #32364b;
+      --border: #4b5563;
+    }
 
-  body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg);
-    color: var(--fg);
-    margin: 2em;
-  }
+      body {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.8em;
+        background-color: var(--bg);
+        color: var(--fg);
+        margin: 2em;
+        user-select: none;
+      }
 
-  h1 {
-    font-size: 2em;
-    margin-bottom: 1em;
-  }
+      h1 {
+        font-size: 2em;
+        margin-bottom: 1em;
+      }
 
-  label {
-    display: block;
-    margin-top: 1em;
-    font-weight: 500;
-    padding-left: 10px;
-  }
+      svg {
+        fill: var(--fg);
+        color: var(--card);
+      }
 
-  #log-container label {
-    display: block;
-    height: 0;
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: -14px;
+      svg.electron {
+        margin: 0 0.4em;
+        transform: translateY(15px);
+        width: 55px;
+        height: 55px;
+      }
 
-  }
+      svg.github {
+        position: fixed;
+        top: 0;
+        border: 0;
+        right: 0;
+      }
 
-  input[type="text"],
-  input[type="number"] {
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    background: var(--card);
-    color: var(--fg);
-    width: 100%;
-    box-sizing: border-box;
-    margin-top: 0.25em;
-  }
+      .light {
+        position: fixed;
+        top: 0;
+        right: 150px;
+        z-index: 1;
+      }
 
-  input[type="checkbox"] {
-    margin-right: 0.5em;
-  }
+      .dark {
+        position: fixed;
+        top: 0;
+        right: 110px;
+        z-index: 1;
+      }
 
-  button {
-    background-color: var(--accent);
-    color: white;
-    border: none;
-    padding: 0.6em 1.2em;
-    font-size: 16px;
-    border-radius: 6px;
-    margin: 1.5em 1em 1.5em 0;
-    cursor: pointer;
-    transition: background-color 0.4s ease, transform 0.2s ease;
-    box-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
-  }
+      .light svg {
+        display: block;
+        width: 50px;
+        cursor: pointer;
+      }
 
-  button:hover {
-    background-color: #1d4ed8;
-    transform: scale(1.05);
-  }
+      .dark svg {
+        display: block;
+        width: 32px;
+        cursor: pointer;
+      }
 
-  #log, #error-log {
-    height: 300px;
-    overflow-y: auto;
-    background: var(--log-bg);
-    padding: 1em;
-    font-family: Consolas, monospace;
-    border-radius: 6px;
-    margin-top: 2em;
-    white-space: pre-wrap;
-  }
+      label {
+        display: block;
+        margin-top: 1.2em;
+        font-weight: 500;
+        padding-left: 10px;
+      }
 
-  #error-log {
-    height: 100px;
-  }
+      input[type="text"],
+      input[type="number"] {
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--fg);
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 0.25em;
+      }
 
-  progress {
-    width: 100%;
-    margin-top: 1em;
-  }
+      input[type="checkbox"] {
+        margin-right: 0.5em;
+      }
 
-  #settings-container {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-family: monospace;
-    padding: 12px;
-    margin-top: 1em;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  }
+      button {
+        background-color: var(--accent);
+        color: white;
+        border: none;
+        padding: 0.6em 1.2em;
+        font-size: 16px;
+        border-radius: 6px;
+        margin: 1.5em 1em 1.5em 0;
+        cursor: pointer;
+        transition: background-color 0.4s ease, transform 0.2s ease;
+        box-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
+      }
 
-  #progressContainer {
-    margin-top: 2em;
-    font-weight: 500;
-  }
+      button:hover {
+        background-color: #1d4ed8;
+        transform: scale(1.05);
+      }
 
-  #progressText {
-    margin-top: 0.5em;
-    font-family: monospace;
-  }
+      button:disabled {
+        opacity: 0.3;
+        pointer-events: none;
+      }
 
-/* Tooltips (modern) */
-[data-tooltip] {
-  position: relative;
-  cursor: help;
-}
+      .select-folder {
+        cursor: pointer;
+      }
 
-[data-tooltip]::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  left: 0;
-  bottom: 120%;
-  background-color: var(--fg);
-  color: var(--bg);
-  padding: 6px 10px;
-  border-radius: 4px;
-  font-size: 0.85em;
-  white-space: pre-line;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(5px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  z-index: 10;
-  width: max-content;
-  max-width: 300px;
-}
+      #log {
+        height: 250px;
+        overflow-y: auto;
+        background-color: var(--log-bg);
+        padding: 1em;
+        font-family: Consolas, monospace;
+        border-radius: 6px;
+        margin-top: 2em;
+        white-space: pre-wrap;
+      }
 
-[data-tooltip]:hover::after {
-  opacity: 1;
-  transform: translateY(0);
-}
+      progress {
+        width: 100%;
+        margin-top: 1em;
+      }
+
+      #progressContainer {
+        margin-top: 2em;
+        font-weight: 500;
+      }
+
+      #progressText {
+        margin-top: 0.5em;
+        font-family: monospace;
+      }
+
+    /* Tooltips (modern) */
+    [data-tooltip] {
+      position: relative;
+      cursor: help;
+    }
+
+    [data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 0;
+      bottom: 120%;
+      background-color: var(--fg);
+      color: var(--bg);
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      white-space: pre-line;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(5px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 10;
+      width: max-content;
+      max-width: 300px;
+    }
+
+    [data-tooltip]:hover::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .github-corner:hover .octo-arm {
+      animation: octocat-wave 700ms ease-in-out;
+    }
+
+    @keyframes octocat-wave {
+       0%, 100% { transform:rotate(0) }
+      20%,  60% { transform:rotate(-25deg) }
+      40%,  80% { transform:rotate(10deg) }
+    }
   </style>
 </head>
 <body>
-  <h1>Website Downloader</h1>
-  <div style="position: fixed; top: 10px; right: 10px; z-index: 1;/*text-align: right;*/ margin-bottom: 1em;">
-    <button id="theme-toggle" title="Toggle Dark/Light Mode 🌓"></button>
+  <h1>
+    <svg class="electron" fill="#ddd" width="50px" height="50px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2.648 11.678c-1.038-1.81-1.249-3.504-.511-4.781.988-1.712 3.468-2.31 6.604-1.739a.322.322 0 1 1-.115.633c-2.9-.528-5.111.005-5.932 1.428-.605 1.047-.423 2.509.512 4.14a.322.322 0 1 1-.558.32zm14.92-6.069c1.835.024 3.156.596 3.751 1.626.82 1.419.18 3.595-1.718 5.837a.322.322 0 1 0 .49.416c2.054-2.426 2.771-4.866 1.785-6.575-.726-1.257-2.26-1.92-4.299-1.947a.322.322 0 1 0-.008.643zm-1.854 15.239a.322.322 0 0 0-.442.11c-.934 1.553-2.08 2.399-3.26 2.399-1.642 0-3.208-1.647-4.2-4.418a.322.322 0 1 0-.606.217C8.279 22.154 10.036 24 12.01 24c1.44 0 2.773-.982 3.813-2.71a.322.322 0 0 0-.11-.442zm7.356-2.594a1.54 1.54 0 0 1-2.436 1.25c-2.455 1.445-7.146.71-11.56-1.84-1.88-1.085-3.527-2.392-4.795-3.785a.322.322 0 1 1 .476-.433c1.222 1.343 2.817 2.609 4.64 3.661 4.167 2.406 8.553 3.12 10.797 1.906a1.54 1.54 0 1 1 2.878-.759zm-19.062 0a1.54 1.54 0 1 1-2.285-1.345c-.233-2.877 2.79-6.734 7.36-9.372 1.898-1.096 3.874-1.874 5.731-2.271a.322.322 0 0 1 .135.628c-1.79.384-3.703 1.137-5.545 2.2-4.304 2.485-7.148 6.067-7.048 8.627.038-.003.075-.006.113-.006.85 0 1.54.69 1.54 1.54zM10.472 1.54a1.54 1.54 0 0 1 3.078 0c0 .023-.002.045-.003.067 2.549 1.317 4.32 5.81 4.32 11.003 0 2.135-.298 4.184-.854 5.96a.322.322 0 1 1-.614-.192c.536-1.712.825-3.697.825-5.768 0-4.89-1.626-9.095-3.847-10.363a1.538 1.538 0 0 1-2.905-.707zm1.304 9.981a1.114 1.114 0 1 0 .47 2.178 1.114 1.114 0 0 0-.47-2.178z"/>
+    </svg> Website Downloader
+  </h1>
+  <div class="light">
+    <svg id="light" class="theme-toggle sun" width="50" height="50" viewBox="0 0 1195 1195" xmlns="http://www.w3.org/2000/svg">
+      <path d="M597.333 352c-123.5 0-224 100.5-224 224s100.5 224 224 224 224-100.5 224-224-100.5-224-224-224zm0 384c-88.376 0-160-71.624-160-160s71.624-160 160-160 160 71.624 160 160-71.624 160-160 160zm0-448c17.666 0 32-14.334 32-32v-64c0-17.666-14.334-32-32-32s-32 14.334-32 32v64c0 17.666 14.334 32 32 32zm0 576c-17.666 0-32 14.334-32 32v64c0 17.666 14.334 32 32 32s32-14.334 32-32v-64c0-17.666-14.334-32-32-32zM846.21 372.334l45.25-45.25c12.5-12.5 12.5-32.75 0-45.25s-32.75-12.5-45.25 0l-45.25 45.25c-12.5 12.5-12.5 32.75 0 45.25 12.498 12.5 32.75 12.5 45.25 0zM348.457 779.668l-45.25 45.25c-12.5 12.498-12.5 32.748 0 45.248s32.75 12.5 45.25 0l45.25-45.248c12.5-12.542 12.5-32.752 0-45.25-12.498-12.502-32.75-12.544-45.25 0zM309.333 576c0-17.666-14.334-32-32-32h-64c-17.666 0-32 14.334-32 32s14.334 32 32 32h64c17.666 0 32-14.334 32-32zm672-32h-64c-17.666 0-32 14.334-32 32s14.334 32 32 32h64c17.666 0 32-14.334 32-32s-14.334-32-32-32zM348.415 372.334c12.502 12.5 32.752 12.5 45.25 0 12.502-12.5 12.502-32.75 0-45.25l-45.25-45.25c-12.5-12.5-32.748-12.5-45.25 0-12.5 12.5-12.5 32.75 0 45.25l45.25 45.25zm497.836 407.29c-12.542-12.5-32.752-12.5-45.25 0-12.502 12.5-12.542 32.75 0 45.25l45.25 45.25c12.498 12.5 32.748 12.5 45.248 0s12.5-32.748 0-45.25l-45.248-45.25z"/>
+    </svg>
   </div>
-  <label id="url-label">URL: <input class="input" type="text" id="url" size="50" placeholder="https://example.com"/></label>
-  <label id="depth-label">Depth: <input class="input" type="number" id="depth" min="0" placeholder="Infinity" /></label>
-  <label id="dwt-label">Dynamic Wait Time: <input class="input" type="number" id="dwt" min="1000" placeholder="3000" /></label>
-  <label id="simultaneous-label">Simultaneously Downloads: <input class="input" type="number" id="simultaneous" min="1" max="12" placeholder="4"/></label>
+  <div class="dark">
+    <svg id="dark" class="theme-toggle moon" width="50" height="50" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1390 1303q-54 9-110 9-182 0-337-90t-245-245-90-337q0-192 104-357-201 60-328.5 229t-127.5 384q0 130 51 248.5t136.5 204 204 136.5 248.5 51q144 0 273.5-61.5t220.5-171.5zm203-85q-94 203-283.5 324.5t-413.5 121.5q-156 0-298-61t-245-164-164-245-61-298q0-153 57.5-292.5t156-241.5 235.5-164.5 290-68.5q44-2 61 39 18 41-15 72-86 78-131.5 181.5t-45.5 218.5q0 148 73 273t198 198 273 73q118 0 228-51 41-18 72 13 14 14 17.5 34t-4.5 38z"/>
+    </svg>
+  </div>
+  <div id="github-label" class="github-corner" aria-label="View source on GitHub">
+    <svg id="github" class="github" width="80" height="80" viewBox="0 0 250 250" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+      <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path>
+    </svg>
+  </div>
+
+  <label id="url-label">URL<input class="input" type="text" id="url" size="50" placeholder="https://example.com"/></label>
+  <label id="depth-label">Depth<input class="input" type="number" id="depth" min="0" placeholder="Infinity" /></label>
+  <label id="dwt-label">Dynamic Wait Time<input class="input" type="number" id="dwt" min="1000" max="30000" placeholder="3000" /></label>
+  <label id="simultaneous-label">Simultaneously Downloads<input class="input" type="number" id="simultaneous" min="1" max="12" placeholder="4"/></label>
+
   <label id="recursive-label"><input class="input" type="checkbox" id="recursive" checked /> Recursive</label>
   <label id="zip-label"><input class="input" type="checkbox" id="zip" /> Export ZIP</label>
   <label id="clean-label"><input class="input" type="checkbox" id="clean" /> Clean Mode</label>
-  <label>Target Folder:<input class="input" type="text" id="outdir" size="50" readonly /><button id="select-folder">Choose…</button></label>
 
+  <label id="outdir-label">Target Folder<input type="text" id="outdir" class="select-folder" placeholder="Select Folder" readonly></label>
   <button id="start">Start</button>
   <button id="abort" disabled>Cancel</button>
   <button id="pause" disabled>Pause</button>
-
-  <div id="settings-container" style="border:#000 1px solid;border-radius:5px;font-family:monospace;padding:8px">
-    <b>Settings</b>
-    <hr>
-    <div id="settings"></div>
-  </div>
   <div id="progressContainer" style="margin-top: 20px;">
     <strong>Progress:</strong>
     <div id="progressText">No data...</div>
   </div>
-  <div id="log-container">
-    <label for="log">Log</label>
-    <div id="log"></div>
-    <label for="error-log">Errors</label>
-    <div id="error-log"></div>
-  </div>
-  <script>
-    const inputs = [...document.getElementsByClassName("input")];
-    const title = {
-      url: "The web address of the site you want to download.",
-      depth: "The depth of links to consider.",
-      recursive: "If enabled, links on downloaded HTML pages will be searched and any files found there will also be downloaded.",
-      zip: "If enabled, a ZIP archive containing the entire website will be created after downloads are complete.",
-      clean: "If enabled, the folder where the files are saved will be emptied before downloading.",
-      simultaneous: "Determines how many downloads run simultaneously.",
-      dwt: "The time (in ms) to wait after calling an HTML file to see if any content is dynamically loaded."
-    }
-Object.entries(title).forEach(([id, content]) => {
-  const el = document.getElementById(`${id}-label`);
-  el.removeAttribute("title");
-  el.setAttribute("data-tooltip", content);
-});
-    if (window.localStorage) {
-      let obj;
-      if (localStorage.downloader_obj) obj = JSON.parse(localStorage.downloader_obj);
-      else obj = {};
-      if (obj.url) document.getElementById("url").value = obj.url;
-      if (obj.depth) document.getElementById("depth").value = obj.depth;
-      if (obj.dwt) document.getElementById("dwt").value = obj.dwt;
-      if (obj.simultaneous) document.getElementById("simultaneous").value = obj.simultaneous;
-      if (obj.recursive) document.getElementById("recursive").checked = obj.recursive;
-      if (obj.zip) document.getElementById("zip").checked = obj.zip;
-      if (obj.clean) document.getElementById("clean").checked = obj.clean;
-      if (obj.outdir) document.getElementById("outdir").value = obj.outdir;
-      inputs.forEach(el => {
-        el.addEventListener("change", function() {
-          inputs.forEach(el => {
-            const name = el.id;
-            const value = el.type === "checkbox" ? el.checked : el.value;
-            obj[name] = value;
-          });
-          localStorage.downloader_obj = JSON.stringify(obj);
-        });
-      });
-    }
-
-  // Theme Toggle Logic
-  const root = document.documentElement;
-  const toggleBtn = document.getElementById("theme-toggle");
-  const storedTheme = localStorage.theme;
-
-  function setTheme(mode) {
-    root.setAttribute("data-theme", mode);
-    localStorage.theme = mode;
-    toggleBtn.textContent = mode === "dark" ? '🌙 Theme' : '🌞 Theme';
-  }
-
-  if (storedTheme) {
-    setTheme(storedTheme);
-  } else {
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setTheme(prefersDark ? "dark" : "light");
-    toggleBtn.textContent = prefersDark ? '🌙 Theme' : '🌞 Theme';
-
-  }
-
-  toggleBtn.addEventListener("click", () => {
-    const current = root.getAttribute("data-theme");
-    setTheme(current === "dark" ? "light" : "dark");
-    toggleBtn.textContent = current === "dark" ? '🌞 Theme' : '🌙 Theme';
-  });
-  </script>
+  <div id="log-container"><div id="log"></div></div>
   <script src="renderer.js"></script>
 </body>
 </html>

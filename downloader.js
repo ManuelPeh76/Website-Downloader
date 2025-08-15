@@ -14,7 +14,6 @@ const https = require('https');
 const http = require('http');
 const puppeteer = require('puppeteer');
 const JSZip = require('jszip');
-//const pLimit = require("p-limit").default;
 
 /* Get arguments */
 const args = process.argv.slice(2);
@@ -41,94 +40,30 @@ const OUTPUT_DIR = outArg ? path.join(outArg.split('=')[1].replace(/^["']|["']$/
 const DYNAMIC_WAIT_TIME = dynArg ? parseInt(dynArg.split('=')[1], 10) : 3000;
 const START_TIME = Date.now();
 
-const resourceMap = new Map(); // Contains all resource urls together with the corresponding local adresses
-const visited = new Set(); // Contains all downloaded html file urls, to check if an html file is already downloaded
+const resourceMap = new Map(); // Contains all resource urls together with the corresponding local addresses
+const visited = new Set(); // Hold html file urls, to check if an html file is already downloaded
 
 const tasks = []; // Stack for downloads
-const sitemap = []; // List of the original addresses of all downloaded files
+const sitemap = []; // List of the local addresses of all downloaded files
 const logs = []; // List of all errors occured in the process
 const limit = pLimit(SIMULTANEOUS);
-const httpStatusCodes = {
-  // 1xx: Informational
-  100: "Continue",
-  101: "Switching Protocols",
-  102: "Processing",
-  103: "Early Hints",
+const httpStatusCodes = { 100: "Continue", 101: "Switching Protocols", 102: "Processing", 103: "Early Hints", 200: "OK", 201: "Created", 202: "Accepted", 203: "Non-Authoritative Information", 204: "No Content", 205: "Reset Content", 206: "Partial Content", 207: "Multi-Status", 208: "Already Reported", 226: "IM Used", 300: "Multiple Choices", 301: "Moved Permanently", 302: "Found", 303: "See Other", 304: "Not Modified", 305: "Use Proxy", 307: "Temporary Redirect", 308: "Permanent Redirect", 400: "Bad Request", 401: "Unauthorized", 402: "Payment Required", 403: "Forbidden", 404: "Not Found", 405: "Method Not Allowed", 406: "Not Acceptable", 407: "Proxy Authentication Required", 408: "Request Timeout", 409: "Conflict", 410: "Gone", 411: "Length Required", 412: "Precondition Failed", 413: "Payload Too Large", 414: "URI Too Long", 415: "Unsupported Media Type", 416: "Range Not Satisfiable", 417: "Expectation Failed", 418: "I'm a Teapot", 421: "Misdirected Request", 422: "Unprocessable Content", 423: "Locked", 424: "Failed Dependency", 425: "Too Early", 426: "Upgrade Required", 428: "Precondition Required", 429: "Too Many Requests", 431: "Request Header Fields Too Large", 451: "Unavailable For Legal Reasons", 500: "Internal Server Error", 501: "Not Implemented", 502: "Bad Gateway", 503: "Service Unavailable", 504: "Gateway Timeout", 505: "HTTP Version Not Supported", 506: "Variant Also Negotiates", 507: "Insufficient Storage", 508: "Loop Detected", 510: "Not Extended", 511: "Network Authentication Required" };
 
-  // 2xx: Success
-  200: "OK",
-  201: "Created",
-  202: "Accepted",
-  203: "Non-Authoritative Information",
-  204: "No Content",
-  205: "Reset Content",
-  206: "Partial Content",
-  207: "Multi-Status",
-  208: "Already Reported",
-  226: "IM Used",
+const stripHash = url => url.includes("#") ? url.split("#")[0] : url;
+const stripSearch = url => url.includes("?") ? url.split("?")[0] : url;
+const sanitize = p => p.replace(/[^a-z0-9/\-_.%\[\]()]/gi, '_').replace(/_+/g, '_');
+const log = msg => console.log(msg);
+const isLocalFile = async (url, baseUrl = TARGET_URL) => await fs.access(getLocalPath(url, baseUrl)).then(() => true).catch(() => false);
 
-  // 3xx: Redirection
-  300: "Multiple Choices",
-  301: "Moved Permanently",
-  302: "Found",
-  303: "See Other",
-  304: "Not Modified",
-  305: "Use Proxy",
-  307: "Temporary Redirect",
-  308: "Permanent Redirect",
-
-  // 4xx: Client Error
-  400: "Bad Request",
-  401: "Unauthorized",
-  402: "Payment Required",
-  403: "Forbidden",
-  404: "Not Found",
-  405: "Method Not Allowed",
-  406: "Not Acceptable",
-  407: "Proxy Authentication Required",
-  408: "Request Timeout",
-  409: "Conflict",
-  410: "Gone",
-  411: "Length Required",
-  412: "Precondition Failed",
-  413: "Payload Too Large",
-  414: "URI Too Long",
-  415: "Unsupported Media Type",
-  416: "Range Not Satisfiable",
-  417: "Expectation Failed",
-  418: "I'm a Teapot", // RFC 2324 (April Fools joke, but sometimes used)
-  421: "Misdirected Request",
-  422: "Unprocessable Content",
-  423: "Locked",
-  424: "Failed Dependency",
-  425: "Too Early",
-  426: "Upgrade Required",
-  428: "Precondition Required",
-  429: "Too Many Requests",
-  431: "Request Header Fields Too Large",
-  451: "Unavailable For Legal Reasons",
-
-  // 5xx: Server Error
-  500: "Internal Server Error",
-  501: "Not Implemented",
-  502: "Bad Gateway",
-  503: "Service Unavailable",
-  504: "Gateway Timeout",
-  505: "HTTP Version Not Supported",
-  506: "Variant Also Negotiates",
-  507: "Insufficient Storage",
-  508: "Loop Detected",
-  510: "Not Extended",
-  511: "Network Authentication Required"
-};
-
-/* Stop any activity of the tool, if the abort button in the gui is pressed */
+// Reacts on requests from the main process (main.js)
 process.stdin.on('data', async data => {
   const command = data.toString().trim();
   if (command === 'abort') {
+    /* Write log and sitemap, then exit this script, if the abort button is pressed */
     await finish();
     process.exit(1);
   } else if (command.startsWith('save-progress:')) {
+    // Write the content of the log div to a file
     let progressLog = command.slice(14);
     await fs.writeFile(path.join(OUTPUT_DIR, 'progress.log'), progressLog.replace(/<br>/g, "\n"));
   }
@@ -136,22 +71,12 @@ process.stdin.on('data', async data => {
 
 /* Functions */
 function shouldIgnoreUrl(url) {
+  url = stripHash(url);
+  url = stripSearch(url);
   if (!url) return true;
-  if (
-    url.startsWith('data:') ||
-    url.startsWith('blob:') ||
-    url.startsWith('about:') ||
-    url.startsWith('chrome:') ||
-    url.startsWith('filesystem:')
-  ) return true;
-  url = url.split("?")[0];
-  url = url.split("#")[0];
-  if (!path.extname(new URL(url).pathname)) url += url.endsWith("/") ? "index.html" : "/index.html";
-  if (url.endsWith(".html") || url.endsWith(".htm")) {
-    if (visited.has(url)) return true;
-  } else {
-    if (resourceMap.has(url)) return true;
-  }
+  if (url.startsWith('data:') || url.startsWith('blob:') || url.startsWith('about:') || url.startsWith('chrome:') || url.startsWith('javascript:') || url.startsWith('filesystem:')) return true;
+  if (visited.has(url)) return true;
+  if (resourceMap.has(url)) return true;
   try {
      if (new URL(url, TARGET_URL).origin === "null") return true;
      if (new URL(url, TARGET_URL).hostname !== new URL(TARGET_URL).hostname) return true;
@@ -161,25 +86,7 @@ function shouldIgnoreUrl(url) {
   return false;
 }
 
-/* Clean any url or filename */
-function sanitize(p) {
-  return p.replace(/[^a-z0-9/\-_.%\[\]()]/gi, '_').replace(/_+/g, '_');
-}
-
-function log(msg) {
-  let time = "";
-  const pics = ["📊", "❌", "📃", "🧭", "📝", "🏁", "📦"];
-  if (!pics.includes(msg.substring(0, 2))) {
-    const date = Date.now();
-    const dif = (date - START_TIME) / 1000;
-    time = "[" + ("0" + parseInt(dif / 60, 10)).substr(-2) + ":" + ("0" + parseInt(dif, 10)).substr(-2) + ":" + ("0" + parseInt((date - START_TIME) % 1000, 10)).substring(0,2) + "] ";
-  }
-  console.log(`${time}${msg}`);
-  return;
-}
-
-
-/* Print information about the download progress */
+// Print information about the download progress
 function reportProgress() {
   const total = visited.size + resourceMap.size;
   const err = logs.length;
@@ -187,7 +94,8 @@ function reportProgress() {
   return log(`📊 ${visited.size} Sites, ${resourceMap.size} Files, ${logs.length} Errors (${percent.toFixed(2)}%)`);
 }
 
-/* When the downloads are finished, create the sitemap.json and the log.json */
+// When the downloads are finished, create the sitemap.json and the log.json,
+// and print the size of the downloaded website and how long it took to download it
 async function finish() {
   const map = [...resourceMap].map(r => r[0]);
   await fs.writeFile(path.join(OUTPUT_DIR, 'sitemap.json'), JSON.stringify([...sitemap, ...map], null, 2));
@@ -200,13 +108,14 @@ async function finish() {
   log(`🏁 Overall Size: ${size}.\n🕧 Finished in ${time} seconds.`);
 }
 
+// Get the size of the website folder, recursively
 async function getFolderSize(dirPath) {
   const walk = async currentPath => {
     let totalSize = 0;
     const entries = await fs.readdir(currentPath, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = path.join(currentPath, entry.name);
-      if (entry.isDirectory()) await walk(fullPath); // recursive
+      if (entry.isDirectory()) totalSize += await walk(fullPath);
       else if (entry.isFile()) {
         const stats = await fs.stat(fullPath);
         totalSize += stats.size;
@@ -222,7 +131,7 @@ async function getFolderSize(dirPath) {
   return `${total.toFixed(2)}${b}`;
 }
 
-/* The download queue function */
+// A limit function, to not run more than SIMULTANEOUS download tasks
 function pLimit(concurrency) {
   const queue = [];
   let active = 0;
@@ -241,6 +150,7 @@ function pLimit(concurrency) {
   });
 }
 
+// Creates the local path for a downloaded file, based on its URL
 function getLocalPath(resourceUrl, baseUrl) {
   const u = new URL(resourceUrl, baseUrl);
   let pathname = u.pathname.replace(/\/+$|^\//g, '');
@@ -249,45 +159,42 @@ function getLocalPath(resourceUrl, baseUrl) {
   return path.join(OUTPUT_DIR, safe);
 }
 
+// Download any file, except for HTML (HTML is processed by the crawl() function)
 async function downloadResource(url, baseUrl, dyn = "") {
+  url = stripHash(url);
+  // Check wether the url should be processed
   if (shouldIgnoreUrl(url)) return;
-  url = url.split("?")[0];
-  url = url.split("#")[0];
-  const type = dyn === "css" ? " CSS Resource" : dyn === "dyn" ? " Dynamic Request" : " Asset";
-  if (!path.extname(url)) url += url.endsWith("/") ? "index.html" : "/index.html";
-  let filename = url.split("/").pop();
-  if (filename.length) filename = " " + filename;
+  const loc = getLocalPath(stripSearch(url), baseUrl);
+  if (await isLocalFile(url, baseUrl)) {
+    if (!resourceMap.has(url)) resourceMap.set(new URL(url, baseUrl).href, path.relative(OUTPUT_DIR, loc).replace(/\\/g,'/'));
+    return;
+  }
+
+  const type = dyn === "css" ? " CSS Resource" : dyn === "dyn" ? " Dynamic Resource" : " Asset Resource";
+  let filename = stripSearch(url).split("/").pop();
+
   try {
-    /* Check cases where the file will not be downloaded */
-    const loc = getLocalPath(url, baseUrl);
-    if (await fs.access(loc).then(() => true).catch(() => false)) {
-      if (!resourceMap.has(url)) resourceMap.set(new URL(url, baseUrl).href, path.relative(OUTPUT_DIR, loc).replace(/\\/g,'/'));
-      return;
-    }
-    const parsedUrl = new URL(url);
-
-    /* The file is ok, going on...*/
+    /* The file is still unknown, going on...*/
     log(`🌐${type}: ${url}`);
-
     await fs.mkdir(path.dirname(loc), { recursive: true });
     await new Promise((resolve, reject) => {
       const req = (url.startsWith('https') ? https : http).get(url, r => {
         if (r.statusCode !== 200) {
-          logs.push({ url, error: `Status: ${httpStatusCodes[r.statusCode]}` });
-          log(`❌ Status of${type?.toLowerCase()}${filename?.toLowerCase()}: ${httpStatusCodes[r.statusCode]}`);
+          logs.push({ url, error: `Status ${r.statusCode} (${httpStatusCodes[r.statusCode]})` });
+          log(`❌${type} '${filename}': ${r.statusCode} (${httpStatusCodes[r.statusCode]})`);
         }
         resourceMap.set(new URL(url, baseUrl).href, path.relative(OUTPUT_DIR, loc).replace(/\\/g,'/'));
-        reportProgress();
         const ws = createWriteStream(loc);
         r.pipe(ws);
         ws.on('finish', resolve);
-        ws.on('error', msg => { log(`❌ Error on writing${filename}: ${msg}`); reject(); });
+        ws.on('error', msg => { log(`❌ Download Error on writing resource '${filename}': ${msg}`); reject(); });
       });
-      req.on('error', msg => { log(`❌ Error while retrieving${filename}: ${msg}`); reject(); });
+      req.on('error', msg => { log(`❌  Download Error while retrieving resource '${filename}': ${msg}`); reject(); });
     });
+    reportProgress();
   } catch (e) {
     logs.push({ url, error: e.message || e.toString() });
-    log(`❌ Error:${type}${filename}: ${e.message || e.toString()}`);
+    log(`❌ Error in Download Resource:${type} '${filename}': ${e.message || e.toString()}`);
   }
 }
 
@@ -296,7 +203,7 @@ function adjustLinks(html, baseUrl) {
   const fromPath = getLocalPath(baseUrl, TARGET_URL);
   return html.replace(/(href|src)=["']([^"']+)["']/g, (m, attr, link) => {
     try {
-      const full = new URL(link, baseUrl).href;
+      const full = stripSearch(new URL(link, baseUrl).href);
       if (resourceMap.has(full)) {
         const toRel = resourceMap.get(full);
         const toPath = path.join(OUTPUT_DIR, toRel);
@@ -313,27 +220,27 @@ async function extractCssResources(cssContent, baseUrl) {
   const regex = /url\((['"]?)([^'")]+)\1\)/g;
   const matches = new Set();
   let match;
-  while ((match = regex.exec(cssContent)) !== null) {
-    const relUrl = match[2];
-    if (!relUrl.startsWith("data") && new URL(relUrl, baseUrl).href.startsWith(baseUrl)) {
-      try {
-        matches.add(new URL(relUrl, baseUrl).href);
-      } catch {}
-    }
+  while ((match = regex.exec(cssContent))) {
+    try {
+      const url = new URL(match[2], baseUrl).href;
+      if (!shouldIgnoreUrl(url)) matches.add(url);
+    } catch {}
   }
-  for (const u of matches) tasks.push(limit(async () => await downloadResource(u, baseUrl, "css")));
+  for (const match of matches) tasks.push(limit(async () => await downloadResource(match, baseUrl, "css")));
 }
 
 /* Starting point for downloading any html file */
 async function crawl(url, depth, browser, recursive = null) {
-  if (visited.has(url) || depth > MAX_DEPTH) return;
+  url = stripHash(url);
+  if (visited.has(stripSearch(url)) || depth > MAX_DEPTH) return;
+  if (shouldIgnoreUrl(url)) return;
 
   /* Remember the url of this html file */
-  visited.add(url);
-  sitemap.push(url);
+  visited.add(stripSearch(url));
+  sitemap.push(stripSearch(url));
 
   // Print the progress
-  await reportProgress();
+  reportProgress();
 
   /* Open a new page (puppeteer) */
   const page = await browser.newPage();
@@ -344,8 +251,9 @@ async function crawl(url, depth, browser, recursive = null) {
     const type = request.resourceType();
     try {
       if (shouldIgnoreUrl(url)) return;
+      if (await isLocalFile(url)) return;
       if (!['image', 'stylesheet', 'script', 'font', 'xhr', 'other'].includes(type)) return;
-      const parsedUrl = new URL(url.split(url.includes("#") ? "#" : "?")[0]);
+      const parsedUrl = new URL(url);
       const href = parsedUrl.href;
       let resourcePath = sanitize(parsedUrl.pathname);
       if (!path.extname(resourcePath)) resourcePath += resourcePath.endsWith("/") ? "index.html" : "/index.html";
@@ -380,7 +288,7 @@ async function crawl(url, depth, browser, recursive = null) {
     log(`🌐 Site (Depth ${depth}): ${url}`);
 
     /* Open the website url in puppeteer */
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 0 });
 
     /* Scroll down the body of the site in order to catch
        files that are dynamically requested by an on-scroll trigger */
@@ -393,28 +301,25 @@ async function crawl(url, depth, browser, recursive = null) {
     const resUrls = await page.evaluate(() => {
       const urls = new Set();
       const shouldIgnoreUrl = u => {
-        if (!u) return true;
-        if (u.startsWith('data:') || u.startsWith('blob:') || u.startsWith('about:') || u.startsWith('chrome:') || u.startsWith('filesystem:')) return true;
-        if (u.includes("#")) return true;
+        if (!u || u.startsWith('data:') || u.startsWith('blob:') || u.startsWith('about:') || u.startsWith('chrome:') || u.startsWith('filesystem:')) return true;
+        u = u.split("#")[0];
         try { if (new URL(u, location.origin).origin === "null" || new URL(u, location.origin).hostname !== new URL(location.href).hostname) return true; } catch { return true; }
         return false;
       };
       const els = Array.from(document.querySelectorAll('[src], [href], source[src], source[srcset], img[srcset], video[poster]'));
       for (const el of els) {
         try {
-          if (el.src && !shouldIgnoreUrl(el.src)) urls.add(el.src);
-          if (el.href && !shouldIgnoreUrl(el.href)) urls.add(el.href);
-          if (el.poster && !shouldIgnoreUrl(el.poster)) urls.add(el.poster);
+          const link = el.src || el.href || el.poster;
+          if (link && !shouldIgnoreUrl(link)) urls.add(link);
           if (el.srcset) {
-            const srcset = el.srcset;
-            srcset.split(',').forEach(s => {
+            el.srcset.split(',').forEach(s => {
               const parts = s.trim().split(' ');
               if (parts[0] && !shouldIgnoreUrl(parts[0])) urls.add(parts[0]);
             });
           }
-        } catch (e) { /* ignore individual element issues */ }
+        } catch { /* ignore individual element issues */ }
       }
-      // also scan inline styles for url(...)
+      /* also scan inline styles for url(...) */
       const styleEls = Array.from(document.querySelectorAll('style'));
       for (const s of styleEls) {
         if (s.textContent) {
@@ -423,87 +328,45 @@ async function crawl(url, depth, browser, recursive = null) {
           let match;
           while ((match = regex.exec(s.textContent))) {
             const relUrl = match[2];
-            if (!shouldIgnoreUrl(relUrl)) {
-              try {
-                matches.add(new URL(relUrl, location.origin).href);
-              } catch {}
-            }
+            if (!shouldIgnoreUrl(relUrl)) try { matches.add(new URL(relUrl, location.origin).href); } catch {}
           }
           for (const match of [...matches]) urls.add(match);
         }
       }
-      // return array
       return Array.from(urls);
     });
-
-    //
-    // const resUrls = await page.$$eval('*', els => {
-    //
-    //   const urls = new Set();
-    //   let linkUrl;
-    //
-    //   /* Run through all html elements to see if any element has a src, a href
-    //      or a srcset attribute, or if there are any <source...> elements */
-    //   for (const el of els) {
-    //     let src = el.src || el.href;
-    //     if (src) {
-    //       if (!src.startsWith("data:") && !src.startsWith("blob:")) {
-    //         src = (new URL(src).href).split(src.includes("?") ? "?" : "#")[0];
-    //         if (!/\./.test(src.split("/").pop())) src += src.endsWith("/") ? "index.html" : "/index.html";
-    //         urls.add(src);
-    //       }
-    //     }
-    //
-    //     const srcset = el.getAttribute?.('srcset');
-    //     if (srcset) {
-    //       srcset.split(',').forEach(entry => {
-    //         const [url] = entry.trim().split(' ');
-    //         if (url) urls.add(url.split("?")[0]);
-    //       });
-    //     }
-    //
-    //     if (el.tagName === 'SOURCE' && el.getAttribute?.('src')) {
-    //       urls.add(el.getAttribute('src').split("?")[0]);
-    //     }
-    //   }
-    //
-    //   const filteredUrls = [...urls].filter(Boolean).filter(h => h.startsWith(location.origin || ''));
-    //   return filteredUrls;
-    // });
-
     /* Loop through all found urls */
-
     for (const raw of resUrls) {
       let res;
-      try {
-        res = new URL(raw, url).href;
-      } catch {
-        continue;
-      }
-      /* Check if a url is not a normally link or source */
-      if (shouldIgnoreUrl(res)) continue;
+      try { res = new URL(raw, url).href; }
+      catch { continue; }
+      res = stripHash(res);
+      res = stripSearch(res);
+      if (!path.extname(new URL(raw, url).pathname)) res += res.endsWith("/") ? "index.html" : "/index.html";
       if (!recursive || (RECURSIVE && depth < MAX_DEPTH)) {
-        if (!await fs.access(getLocalPath(res, TARGET_URL)).then(() => true).catch(() => false)) {
+        if (!await isLocalFile(res)) {
           if (res.endsWith('.html') || res.endsWith('.htm')) {
-            if (visited.has(res)) !sitemap.includes(res) && sitemap.push(res);
-            else tasks.push(limit(() => crawl(res, depth + 1, browser, 1)));
+            if (visited.has(res)) {
+              if (!sitemap.includes(res)) sitemap.push(res);
+              continue;
+            }
+            tasks.push(limit(() => crawl(res, depth + 1, browser, 1)));
           } else {
-            if (!resourceMap.has(res)) {
-              try {
-                if (res.endsWith(".css")) {
-                  tasks.push(limit(async () => {
-                    await downloadResource(res, url, "css");
-                    const cssPath = getLocalPath(res, url);
-                    const cssContent = await fs.readFile(cssPath, 'utf8');
-                    await extractCssResources(cssContent, res);
-                  }));
-                } else {
-                  tasks.push(limit(async () => await downloadResource(res, url, "Asset")));
-                }
-              } catch(e) {
-                console.log(`❌ Error fetching resource ${res}: ${e.message || e.toString()}`);
-                logs.push({ url: res, error: e.message || e.toString() });
+            if (resourceMap.has(res)) continue;
+            try {
+              if (res.endsWith(".css")) {
+                tasks.push(limit(async () => {
+                  await downloadResource(res, url, "css");
+                  const cssPath = getLocalPath(res, url);
+                  const cssContent = await fs.readFile(cssPath, 'utf8');
+                  await extractCssResources(cssContent, res);
+                }));
+              } else {
+                tasks.push(limit(async () => await downloadResource(res, url, "Asset")));
               }
+            } catch(e) {
+              console.log(`❌ Error fetching resource ${res}: ${e.message || e.toString()}`);
+              logs.push({ url: res, error: e.message || e.toString() });
             }
           }
         }
@@ -511,7 +374,7 @@ async function crawl(url, depth, browser, recursive = null) {
     }
 
     // Get the original source code from the html file (not the source from the rendered dom)
-    if (!await fs.access(getLocalPath(url, TARGET_URL)).then(() => true).catch(() => false)) {
+    if (!await isLocalFile(url)) {
       let html = await fetch(url);
       html = await html.text();
       const adjusted = adjustLinks(html, url); // Make links relative
@@ -530,27 +393,25 @@ async function crawl(url, depth, browser, recursive = null) {
 
 (async () => {
 
-  /* Show current settings in the gui
-    (or inside the console when using the cli) */
-  log(`📃URL: ${TARGET_URL}\nDownload channels: ${SIMULTANEOUS}\nLocal path: ${OUTPUT_DIR}\nRecursion: ${RECURSIVE ? "enabled" : "disabled"}\nDepth: ${MAX_DEPTH}\nWait time for dynamically fetched sources: ${DYNAMIC_WAIT_TIME}ms\n${ZIP_EXPORT ? "ZIP archive will be created" : ""}\n${CLEAN_MODE ? "Cleaning target folder" : ""}`);
-
   if (CLEAN_MODE && existsSync(OUTPUT_DIR)) {
     await fs.rm(OUTPUT_DIR, { recursive: true, force: true });
     log('♻️ Clean: Folder deleted.');
   }
 
-  /* Create the download folder for the website */
+  // Create the download folder for the website
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
 
-  /* Start the browser, wait for the whole website to download
-     and close the browser after all downloads are finished */
+  // Start the browser, wait for the whole website to download
+  // and close the browser after all downloads are finished
   const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   await crawl(TARGET_URL, 0, browser);
-  //await new Promise(m => setTimeout(m, 200));
+  await Promise.allSettled(tasks);
+  await new Promise(r => setTimeout(r, 1000));
   await Promise.allSettled(tasks);
   await browser.close();
   /* Create a zip file containing the whole website */
   if (ZIP_EXPORT) {
+    log("📦 Creating ZIP archive...");
     const zip = new JSZip();
     async function addDir(dir, zipFolder) {
       for (const entry of await fs.readdir(dir, { withFileTypes: true })) {

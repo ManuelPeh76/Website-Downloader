@@ -16,8 +16,8 @@ let proc, pid;
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 800,
-    height: 800,
+    width: 900,
+    height: 1024,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -89,7 +89,7 @@ app.whenReady().then(() => {
 
   ipcMain.handle('save-progress', async (_, log) => {
     if (proc && !proc.killed) {
-      proc.stdin.write(log);
+      proc.stdin.write("save-progress:" + log);
       return true;
     }
     return false;
