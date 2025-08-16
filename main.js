@@ -6,24 +6,33 @@
     MIT License
 */
 
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const ntsuspend = require('ntsuspend');
+
+const options = {
+  width: 900,
+  height: 1024,
+  autoHideMenuBar: false,
+  webPreferences: {
+    preload: path.join(__dirname, 'preload.js'),
+    contextIsolation: true,
+    nodeIntegration: false
+  }
+};
+
+const args = process.argv;
+console.log(args);
+
+if (args.includes('--noMenu') || args.includes('-nm')) Menu.setApplicationMenu(null);
+else if (args.includes('--hideMenu') || args.includes('-hm')) options.autoHideMenuBar = true;
 
 const isWin = process.platform === 'win32';
 let proc, pid;
 
 function createWindow() {
-  const win = new BrowserWindow({
-    width: 900,
-    height: 1024,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false
-    }
-  });
+  const win = new BrowserWindow(options);
   win.loadFile('gui.html');
 }
 
@@ -31,7 +40,7 @@ app.whenReady().then(() => {
   ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir, simultaneous, dwt }) => {
     return new Promise((resolve, reject) => {
 
-      const args = ['downloader.js', url];
+      const args = ['download.js', url];
 
       if (zip) args.push('--zip');
       if (clean) args.push('--clean');
