@@ -42,7 +42,7 @@ npm install
 #### CLI
 Start the tool from the command line with 
 ```
-node downloader <url> [options]
+node download <url> [options]
 ``` 
   
 #### Options
@@ -59,7 +59,7 @@ node downloader <url> [options]
 
 To download a web page with a link depth of 1, recursion and ZIP export, use the following command:
 ```
-node downloader https://example.com -d=1 -r -z -o=C:\Users\<username>\documents
+node download https://example.com -d=1 -r -z -o=C:\Users\<username>\documents
 ```
 ## Some Infos about this Tool
 
@@ -90,6 +90,7 @@ Thist creates a windows installer package from the app.
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
 
