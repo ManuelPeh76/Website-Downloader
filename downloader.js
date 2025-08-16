@@ -41,7 +41,10 @@ const DYNAMIC_WAIT_TIME = dynArg ? parseInt(dynArg.split('=')[1], 10) : 3000;
 const START_TIME = Date.now();
 
 const resourceMap = new Map(); // Contains all resource urls together with the corresponding local addresses
-const visited = new Set(); // Hold html file urls, to check if an html file is already downloaded
+const visited = new Set(); // Contains all html file urls, to check if an html file has already been downloaded
+const failed = new Set(); // Remember broken urls
+let resourceMapSize = 0;
+let visitedSize = 0;
 
 const tasks = []; // Stack for downloads
 const sitemap = []; // List of the local addresses of all downloaded files
@@ -70,13 +73,15 @@ process.stdin.on('data', async data => {
 });
 
 /* Functions */
-function shouldIgnoreUrl(url) {
+async function shouldIgnoreUrl(url) {
   url = stripHash(url);
   url = stripSearch(url);
   if (!url) return true;
   if (url.startsWith('data:') || url.startsWith('blob:') || url.startsWith('about:') || url.startsWith('chrome:') || url.startsWith('javascript:') || url.startsWith('filesystem:')) return true;
   if (visited.has(url)) return true;
   if (resourceMap.has(url)) return true;
+  if (failed.has(url)) return true;
+  if (await isLocalFile(url)) return true;
   try {
      if (new URL(url, TARGET_URL).origin === "null") return true;
      if (new URL(url, TARGET_URL).hostname !== new URL(TARGET_URL).hostname) return true;
@@ -102,6 +107,8 @@ async function finish() {
   log('🧭 Sitemap created.');
   await fs.writeFile(path.join(OUTPUT_DIR, 'log.json'), JSON.stringify([...logs], null, 2));
   log('📝 Log created.');
+  await fs.writeFile(path.join(OUTPUT_DIR, 'failed.json'), JSON.stringify([...failed], null, 2));
+  log('📝 Failed files list created.');
   const size = await getFolderSize(OUTPUT_DIR);
   const date = Date.now();
   const time = parseInt((date - START_TIME) / 1000, 10);
@@ -162,17 +169,16 @@ function getLocalPath(resourceUrl, baseUrl) {
 // Download any file, except for HTML (HTML is processed by the crawl() function)
 async function downloadResource(url, baseUrl, dyn = "") {
   url = stripHash(url);
+  url = stripSearch(url);
   // Check wether the url should be processed
-  if (shouldIgnoreUrl(url)) return;
-  const loc = getLocalPath(stripSearch(url), baseUrl);
+  if (await shouldIgnoreUrl(url)) return;
+  const loc = getLocalPath(url, baseUrl);
   if (await isLocalFile(url, baseUrl)) {
     if (!resourceMap.has(url)) resourceMap.set(new URL(url, baseUrl).href, path.relative(OUTPUT_DIR, loc).replace(/\\/g,'/'));
     return;
   }
-
   const type = dyn === "css" ? " CSS Resource" : dyn === "dyn" ? " Dynamic Resource" : " Asset Resource";
-  let filename = stripSearch(url).split("/").pop();
-
+  let filename = url.split("/").pop();
   try {
     /* The file is still unknown, going on...*/
     log(`🌐${type}: ${url}`);
@@ -180,21 +186,21 @@ async function downloadResource(url, baseUrl, dyn = "") {
     await new Promise((resolve, reject) => {
       const req = (url.startsWith('https') ? https : http).get(url, r => {
         if (r.statusCode !== 200) {
-          logs.push({ url, error: `Status ${r.statusCode} (${httpStatusCodes[r.statusCode]})` });
-          log(`❌${type} '${filename}': ${r.statusCode} (${httpStatusCodes[r.statusCode]})`);
+          failed.add(url);
+          reject({ message: `${type} '${filename}': ${r.statusCode} (${httpStatusCodes[r.statusCode]})` });
         }
+        reportProgress();
         resourceMap.set(new URL(url, baseUrl).href, path.relative(OUTPUT_DIR, loc).replace(/\\/g,'/'));
         const ws = createWriteStream(loc);
         r.pipe(ws);
         ws.on('finish', resolve);
-        ws.on('error', msg => { log(`❌ Download Error on writing resource '${filename}': ${msg}`); reject(); });
+        ws.on('error', msg => reject({ message: ` Download Error on writing resource '${filename}': ${msg}` }));
       });
-      req.on('error', msg => { log(`❌  Download Error while retrieving resource '${filename}': ${msg}`); reject(); });
+      req.on('error', msg => reject({ message:` Download Error while retrieving resource '${filename}': ${msg}` }));
     });
-    reportProgress();
   } catch (e) {
     logs.push({ url, error: e.message || e.toString() });
-    log(`❌ Error in Download Resource:${type} '${filename}': ${e.message || e.toString()}`);
+    log("❌" + e.message || e.toString());
   }
 }
 
@@ -223,7 +229,7 @@ async function extractCssResources(cssContent, baseUrl) {
   while ((match = regex.exec(cssContent))) {
     try {
       const url = new URL(match[2], baseUrl).href;
-      if (!shouldIgnoreUrl(url)) matches.add(url);
+      if (!await shouldIgnoreUrl(url)) matches.add(url);
     } catch {}
   }
   for (const match of matches) tasks.push(limit(async () => await downloadResource(match, baseUrl, "css")));
@@ -232,8 +238,8 @@ async function extractCssResources(cssContent, baseUrl) {
 /* Starting point for downloading any html file */
 async function crawl(url, depth, browser, recursive = null) {
   url = stripHash(url);
-  if (visited.has(stripSearch(url)) || depth > MAX_DEPTH) return;
-  if (shouldIgnoreUrl(url)) return;
+  if (depth > MAX_DEPTH) return;
+  if (await shouldIgnoreUrl(url)) return;
 
   /* Remember the url of this html file */
   visited.add(stripSearch(url));
@@ -250,8 +256,7 @@ async function crawl(url, depth, browser, recursive = null) {
     const url = request.url();
     const type = request.resourceType();
     try {
-      if (shouldIgnoreUrl(url)) return;
-      if (await isLocalFile(url)) return;
+      if (await shouldIgnoreUrl(url)) return;
       if (!['image', 'stylesheet', 'script', 'font', 'xhr', 'other'].includes(type)) return;
       const parsedUrl = new URL(url);
       const href = parsedUrl.href;
@@ -406,8 +411,13 @@ async function crawl(url, depth, browser, recursive = null) {
   const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   await crawl(TARGET_URL, 0, browser);
   await Promise.allSettled(tasks);
-  await new Promise(r => setTimeout(r, 1000));
-  await Promise.allSettled(tasks);
+  while (visitedSize < visited.size || resourceMapSize < resourceMap.size) {
+    log("Waiting for last contents to finish...");
+    visitedSize = visited.size;
+    resourceMapSize = resourceMap.size;
+    await new Promise(r => setTimeout(r, DYNAMIC_WAIT_TIME));
+    await Promise.allSettled(tasks);
+  }
   await browser.close();
   /* Create a zip file containing the whole website */
   if (ZIP_EXPORT) {
