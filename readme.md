@@ -32,7 +32,7 @@ npm install
 
 ## Usage
 #### GUI
-<img src="app.png" width="400">
+<img src="app.png" width="600">
 
   1. Start the GUI with `npm start`.
   2. Enter the URL of the website you want to download.
@@ -90,4 +90,5 @@ Thist creates a windows installer package from the app.
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
