@@ -1,7 +1,7 @@
 
 /*  Website Downloader
 
-    File: downloader.js
+    File: download.js
     Copyright © 2025 By Manuel Pelzer
     MIT License
  */
@@ -448,3 +448,4 @@ async function crawl(url, depth, browser, recursive = null) {
   // Write Sitemap, Failed  and log
   await finish();
 })();
+
