@@ -20,13 +20,13 @@ I assume you have node.js, npm and git already installed.
 1. Open a command window (`cmd` on windows machines).
 
 2. Clone this repository:
-```
+```cmd
 git clone https://github.com/ManuelPeh76/website-downloader.git
 ```
 3. Switch into the newly created folder with `cd website-downloader`
 
 4. Install the dependencies:
-```
+```cmd
 npm install
 ```
 
@@ -42,7 +42,7 @@ npm install
 
 #### CLI
  Start the tool from the command line with
- ```javascript
+ ```cmd
  node download <url> [options]
  ```
 
@@ -73,14 +73,14 @@ node download https://example.com --depth=1 --recursive --zip --outdir=C:\Users\
 
 ## Build the App
 You can build this tool using electron, so you can run an .exe file to start it:
-```bash
+```cmd
 npm run build
 ```
 A 'dist' folder will be created, containing the tool.
 Unfortunately, to make it run propperly, you have to put a copy of the download.js directly into the dist/website-downloader-win32-x64 folder (where the website-downloader.exe file is located).
 
 ## Build a Windows Installer
-```bash
+```cmd
 npm run build
 npm run setup
 ```
@@ -90,6 +90,7 @@ Thist creates a windows installer package from the app.
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
 
