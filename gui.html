@@ -182,14 +182,19 @@
         margin-top: 1em;
       }
 
-      #progressContainer {
+      #progress-container {
         margin-top: 2em;
         font-family: Fira Code, Roboto, monospace;
         font-size: 16px;
         font-weight: 500;
       }
 
-      #progressText {
+      #progress-time {
+        margin-top: 0.5em;
+        padding-right: 20px;
+      }
+
+      #progress-text {
         margin-top: 0.5em;
       }
 
@@ -272,9 +277,9 @@
   <button id="start">Start</button>
   <button id="abort" disabled>Cancel</button>
   <button id="pause" disabled>Pause</button>
-  <div id="progressContainer" style="margin-top: 20px;">
+  <div id="progress-container" style="margin-top: 20px;">
     <strong>Progress:</strong>
-    <div id="progressText">No data...</div>
+    <div><span id="progress-time"></span><span id="progress-text">No data...</span></div>
   </div>
   <div id="log-container"><div id="log"></div></div>
   <script src="renderer.js"></script>

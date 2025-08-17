@@ -7,10 +7,12 @@
 */
 
 let isStarted = 0;
+let startTime, tempTime;
 let isActive = 0;
 let isInit = 0;
 let canLog = 0;
 let doScroll = true;
+let interval;
 
 const root = document.documentElement;
 const storedTheme = localStorage.theme;
@@ -25,16 +27,18 @@ const logMessage = msg => {
     isActive = 0,
     canLog = 0,
     resetButtons(),
+    window.clearInterval(interval),
     window.api.saveProgress(log.innerHTML)
   ) : msg.includes("a valid URL") && (
     isStarted = 0,
     isActive = 0,
     canLog = 0,
-    resetButtons()
+    resetButtons(),
+    window.clearInterval(interval)
   );
 };
 
-const progress = document.getElementById('progressText');
+const progress = document.getElementById('progress-text');
 const start = document.getElementById('start');
 const log = document.getElementById('log');
 const abort = document.getElementById('abort');
@@ -43,7 +47,14 @@ const inputs = [...document.getElementsByClassName("input")];
 const outdir = document.getElementById("outdir");
 const github = document.getElementById("github");
 const themeToggler = [...document.querySelectorAll(".theme-toggle")];
-
+const progressTime = document.getElementById("progress-time");
+const printTime = () => {
+  const now =  Date.now() - startTime;
+  const hours = String(parseInt(now / (1000 * 60 * 60), 10)).padStart(2, "0");
+  const mins = String(parseInt(now / (1000 * 60), 10)).padStart(2, "0");
+  const secs = String(parseInt((now / 1000) % 60, 10)).padStart(2, "0");
+  progressTime.innerHTML = `${hours}:${mins}:${secs}`;
+};
 const title = {
   url: "The web address of the site you want to download.\nMust start with 'http://' or 'https://'",
   depth: "The depth of links to consider.\nMin: 0, Default: Infinity",
@@ -109,8 +120,10 @@ start.addEventListener('click', async () => {
   const dwt = document.getElementById('dwt').value;
 
   setButtons();
-
-  log.innerHTML = url ? 'Starting download...<br>' : "";
+  startTime = Date.now();
+  progressTime.innerHTML = '00:00:00';
+  interval = window.setInterval(printTime, 1000);
+  url ? logMessage('*** Starting download ***<br>') : "";
   progress.innerHTML = "";
   canLog = 1;
   // Start Download
@@ -146,13 +159,14 @@ start.addEventListener('click', async () => {
 // Handle user initiated abort of download
 abort.addEventListener('click', () => {
   if (!isStarted) return;
+  window.clearInterval(interval);
   document.getElementById('paused')?.remove();
   log.innerHTML += '<font size="3"><b>*** Aborted by user ***</b></font><br>';
   resetButtons();
-  window.api.abortDownload();
   isStarted = 0;
   isActive = 0;
   canLog = 0;
+  window.api.abortDownload();
 });
 
 // Handle user initiated pause
@@ -162,8 +176,12 @@ pause.addEventListener('click', () => {
   if (pause.textContent === "Pause") {
     log.innerHTML += ("<span id='paused'>⏸️<b> Downloading paused...</b><br></span>");
     pause.textContent = "Resume";
+    window.clearInterval(interval);
+    tempTime = Date.now();
     return window.api.pauseDownload();
   }
+  startTime += Date.now() - tempTime;
+  interval = window.setInterval(printTime, 1000);
   document.getElementById('paused').remove();
   pause.innerText = "Pause";
   window.api.resumeDownload();

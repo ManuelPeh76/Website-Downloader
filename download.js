@@ -18,19 +18,19 @@ const JSZip = require('jszip');
 /* Get arguments */
 const args = process.argv.slice(2);
 
-/* Check which arguments are given and create constants with these infos */
-const simulArg = args.find(arg => arg.startsWith('--simultaneous=') || arg.startsWith('-s='));
-const depthArg = args.find(arg => arg.startsWith('--depth=') || arg.startsWith('-d='));
-const outArg = args.find(arg => arg.startsWith('--outdir=') || arg.startsWith('-o='));
-const dynArg = args.find(arg => arg.startsWith('--dyn_wait_time=') || arg.startsWith('-dwt='));
-
 const TARGET_URL = args[0];
-
 /* If no website url is found, exit the tool */
 if (!TARGET_URL.startsWith("http")) {
   log('❌ Please enter a valid URL!');
   return process.exit(1);
 }
+
+/* Check given arguments and create constants */
+const simulArg = args.find(arg => arg.startsWith('--simultaneous=') || arg.startsWith('-s='));
+const depthArg = args.find(arg => arg.startsWith('--depth=') || arg.startsWith('-d='));
+const outArg = args.find(arg => arg.startsWith('--outdir=') || arg.startsWith('-o='));
+const dynArg = args.find(arg => arg.startsWith('--dyn_wait_time=') || arg.startsWith('-dwt='));
+
 const ZIP_EXPORT = args.includes('--zip') || args.includes('-z');
 const CLEAN_MODE = args.includes('--clean') || args.includes('-c');
 const RECURSIVE = args.includes('--recursive') || args.includes('-r');
@@ -61,7 +61,7 @@ const isLocalFile = async (url, baseUrl = TARGET_URL) => await fs.access(getLoca
 // Reacts on requests from the main process (main.js)
 process.stdin.on('data', async data => {
   const command = data.toString().trim();
-  if (command === 'abort') {
+  if (command.startsWith('abort')) {
     await finish();
     process.exit(1);
   } else if (command.startsWith('save-progress:')) {
@@ -71,9 +71,7 @@ process.stdin.on('data', async data => {
   }
 });
 
-/*************
- * Functions *
- *************/
+/* Functions */
 
  // Check cases where the file will not be downloaded
 async function shouldIgnoreUrl(url) {
@@ -106,7 +104,7 @@ function reportProgress() {
 // and print the size of the downloaded website and how long it took to download it
 async function finish() {
   reportProgress();
-  setTimeout(async () => {
+  await new Promise((resolve) => setTimeout(async () => {
     log(`*** FINISHED ***`);
     const map = [...sitemap, ...[...resourceMap].map(r => r[0])];
     await fs.writeFile(path.join(OUTPUT_DIR, 'sitemap.json'), JSON.stringify(map, null, 2));
@@ -119,7 +117,8 @@ async function finish() {
     const date = Date.now();
     const time = parseInt((date - START_TIME) / 1000, 10);
     log(`🏁 Overall Size: ${size}.\n🕧 Finished in ${time} seconds.`);
-  }, 0);
+    resolve();
+  }, 0));
 }
 
 // Get the size of the website folder, recursively
