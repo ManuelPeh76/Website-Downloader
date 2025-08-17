@@ -1,5 +1,5 @@
 # <img src="electron.svg" width="50" height="50"> Website-Downloader
-A fast and universal downloader for dynamic websites, created with electron.
+A fast and universal downloader for dynamic websites, created with Puppeteer.
 
 ## Features
 - 🔎 Dynamic Loading: Catches files that are dynamically loaded (e.g. from a script).
@@ -90,3 +90,4 @@ Thist creates a windows installer package from the app.
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
