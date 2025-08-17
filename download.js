@@ -435,7 +435,7 @@ async function crawl(url, depth, browser, recursive = null) {
   const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   await crawl(TARGET_URL, 0, browser);
   await Promise.allSettled(tasks);
-  // Wait for more dynamic content to be added to the limit stack.
+  // Wait in case there are more tasks added to the limit stack.
   // This can still happen even if all the tasks on the limit stack have been processed.
   while (visitedSize < visited.size || resourceMapSize < resourceMap.size) {
     visitedSize = visited.size;
@@ -445,7 +445,8 @@ async function crawl(url, depth, browser, recursive = null) {
   }
   await browser.close();
   if (ZIP_EXPORT) await createZip();
-  // Write Sitemap, Failed  and log
+  // Write Sitemap and Log
   await finish();
 })();
+
 
