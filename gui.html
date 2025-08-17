@@ -92,27 +92,27 @@
 
       .light {
         position: fixed;
-        top: 0;
-        right: 150px;
+        top: 17px;
+        right: 57px;
         z-index: 1;
       }
 
       .dark {
         position: fixed;
-        top: 0;
-        right: 110px;
+        top: 47px;
+        right: 29px;
         z-index: 1;
       }
 
       .light svg {
         display: block;
-        width: 50px;
+        width: 30px;
         cursor: pointer;
       }
 
       .dark svg {
         display: block;
-        width: 32px;
+        width: 20px;
         cursor: pointer;
       }
 
@@ -184,12 +184,13 @@
 
       #progressContainer {
         margin-top: 2em;
+        font-family: Fira Code, Roboto, monospace;
+        font-size: 16px;
         font-weight: 500;
       }
 
       #progressText {
         margin-top: 0.5em;
-        font-family: monospace;
       }
 
     /* Tooltips (modern) */
@@ -201,8 +202,8 @@
     [data-tooltip]::after {
       content: attr(data-tooltip);
       position: absolute;
-      left: 0;
-      bottom: 120%;
+      right: 60%;
+      bottom: 75%;
       background-color: var(--fg);
       color: var(--bg);
       padding: 6px 10px;
@@ -240,15 +241,15 @@
       <path d="M2.648 11.678c-1.038-1.81-1.249-3.504-.511-4.781.988-1.712 3.468-2.31 6.604-1.739a.322.322 0 1 1-.115.633c-2.9-.528-5.111.005-5.932 1.428-.605 1.047-.423 2.509.512 4.14a.322.322 0 1 1-.558.32zm14.92-6.069c1.835.024 3.156.596 3.751 1.626.82 1.419.18 3.595-1.718 5.837a.322.322 0 1 0 .49.416c2.054-2.426 2.771-4.866 1.785-6.575-.726-1.257-2.26-1.92-4.299-1.947a.322.322 0 1 0-.008.643zm-1.854 15.239a.322.322 0 0 0-.442.11c-.934 1.553-2.08 2.399-3.26 2.399-1.642 0-3.208-1.647-4.2-4.418a.322.322 0 1 0-.606.217C8.279 22.154 10.036 24 12.01 24c1.44 0 2.773-.982 3.813-2.71a.322.322 0 0 0-.11-.442zm7.356-2.594a1.54 1.54 0 0 1-2.436 1.25c-2.455 1.445-7.146.71-11.56-1.84-1.88-1.085-3.527-2.392-4.795-3.785a.322.322 0 1 1 .476-.433c1.222 1.343 2.817 2.609 4.64 3.661 4.167 2.406 8.553 3.12 10.797 1.906a1.54 1.54 0 1 1 2.878-.759zm-19.062 0a1.54 1.54 0 1 1-2.285-1.345c-.233-2.877 2.79-6.734 7.36-9.372 1.898-1.096 3.874-1.874 5.731-2.271a.322.322 0 0 1 .135.628c-1.79.384-3.703 1.137-5.545 2.2-4.304 2.485-7.148 6.067-7.048 8.627.038-.003.075-.006.113-.006.85 0 1.54.69 1.54 1.54zM10.472 1.54a1.54 1.54 0 0 1 3.078 0c0 .023-.002.045-.003.067 2.549 1.317 4.32 5.81 4.32 11.003 0 2.135-.298 4.184-.854 5.96a.322.322 0 1 1-.614-.192c.536-1.712.825-3.697.825-5.768 0-4.89-1.626-9.095-3.847-10.363a1.538 1.538 0 0 1-2.905-.707zm1.304 9.981a1.114 1.114 0 1 0 .47 2.178 1.114 1.114 0 0 0-.47-2.178z"/>
     </svg> Website Downloader
   </h1>
-  <div class="light">
-    <svg id="light" class="theme-toggle sun" width="50" height="50" viewBox="0 0 1195 1195" xmlns="http://www.w3.org/2000/svg">
+  <div class="light theme-toggle" id="light">
+    <span  id="light-label"><svg class="sun" width="50" height="50" viewBox="0 0 1195 1195" xmlns="http://www.w3.org/2000/svg">
       <path d="M597.333 352c-123.5 0-224 100.5-224 224s100.5 224 224 224 224-100.5 224-224-100.5-224-224-224zm0 384c-88.376 0-160-71.624-160-160s71.624-160 160-160 160 71.624 160 160-71.624 160-160 160zm0-448c17.666 0 32-14.334 32-32v-64c0-17.666-14.334-32-32-32s-32 14.334-32 32v64c0 17.666 14.334 32 32 32zm0 576c-17.666 0-32 14.334-32 32v64c0 17.666 14.334 32 32 32s32-14.334 32-32v-64c0-17.666-14.334-32-32-32zM846.21 372.334l45.25-45.25c12.5-12.5 12.5-32.75 0-45.25s-32.75-12.5-45.25 0l-45.25 45.25c-12.5 12.5-12.5 32.75 0 45.25 12.498 12.5 32.75 12.5 45.25 0zM348.457 779.668l-45.25 45.25c-12.5 12.498-12.5 32.748 0 45.248s32.75 12.5 45.25 0l45.25-45.248c12.5-12.542 12.5-32.752 0-45.25-12.498-12.502-32.75-12.544-45.25 0zM309.333 576c0-17.666-14.334-32-32-32h-64c-17.666 0-32 14.334-32 32s14.334 32 32 32h64c17.666 0 32-14.334 32-32zm672-32h-64c-17.666 0-32 14.334-32 32s14.334 32 32 32h64c17.666 0 32-14.334 32-32s-14.334-32-32-32zM348.415 372.334c12.502 12.5 32.752 12.5 45.25 0 12.502-12.5 12.502-32.75 0-45.25l-45.25-45.25c-12.5-12.5-32.748-12.5-45.25 0-12.5 12.5-12.5 32.75 0 45.25l45.25 45.25zm497.836 407.29c-12.542-12.5-32.752-12.5-45.25 0-12.502 12.5-12.542 32.75 0 45.25l45.25 45.25c12.498 12.5 32.748 12.5 45.248 0s12.5-32.748 0-45.25l-45.248-45.25z"/>
-    </svg>
+    </svg></span>
   </div>
-  <div class="dark">
-    <svg id="dark" class="theme-toggle moon" width="50" height="50" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
+  <div class="dark theme-toggle" id="dark">
+    <span id="dark-label"><svg class="moon" width="50" height="50" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
       <path d="M1390 1303q-54 9-110 9-182 0-337-90t-245-245-90-337q0-192 104-357-201 60-328.5 229t-127.5 384q0 130 51 248.5t136.5 204 204 136.5 248.5 51q144 0 273.5-61.5t220.5-171.5zm203-85q-94 203-283.5 324.5t-413.5 121.5q-156 0-298-61t-245-164-164-245-61-298q0-153 57.5-292.5t156-241.5 235.5-164.5 290-68.5q44-2 61 39 18 41-15 72-86 78-131.5 181.5t-45.5 218.5q0 148 73 273t198 198 273 73q118 0 228-51 41-18 72 13 14 14 17.5 34t-4.5 38z"/>
-    </svg>
+    </svg></span>
   </div>
   <div id="github-label" class="github-corner" aria-label="View source on GitHub">
     <svg id="github" class="github" width="80" height="80" viewBox="0 0 250 250" aria-hidden="true">
@@ -261,7 +262,7 @@
   <label id="url-label">URL<input class="input" type="text" id="url" size="50" placeholder="https://example.com"/></label>
   <label id="depth-label">Depth<input class="input" type="number" id="depth" min="0" placeholder="Infinity" /></label>
   <label id="dwt-label">Dynamic Wait Time<input class="input" type="number" id="dwt" min="1000" max="30000" placeholder="3000" /></label>
-  <label id="simultaneous-label">Simultaneously Downloads<input class="input" type="number" id="simultaneous" min="1" max="12" placeholder="4"/></label>
+  <label id="simultaneous-label">Simultaneously Downloads<input class="input" type="number" id="simultaneous" min="1" max="25" placeholder="8"/></label>
 
   <label id="recursive-label"><input class="input" type="checkbox" id="recursive" checked /> Recursive</label>
   <label id="zip-label"><input class="input" type="checkbox" id="zip" /> Export ZIP</label>

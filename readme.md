@@ -1,11 +1,9 @@
----
-# <img src="electron.svg" width="50" height="50" style="transform: translate(0, 10px)"> Website-Downloader
+# <img src="electron.svg" width="50" height="50"> Website-Downloader
 A fast and universal downloader for dynamic websites, created with electron.
 
 ## Features
-
 - 🔎 Dynamic Loading: Catches files that are dynamically loaded (e.g. from a script).
-- 🚀 Fast Loading: Up to 12 files are downloaded simultaneously.
+- 🚀 Fast Loading: Up to 25 files are downloaded simultaneously.
 - 🔁 Recursive Download: Searches linked pages and downloads files found there.
 - 📏 Limit Depth: Specifies how deep links should be traced.
 - 🧹 Cleanup Mode: Empties the destination folder before saving downloads.
@@ -19,32 +17,35 @@ A fast and universal downloader for dynamic websites, created with electron.
 
 ## Installation
 I assume you have node.js, npm and git already installed.
-```cmd
+1. Open a command window (`cmd` on windows machines).
+
+2. Clone this repository:
+```
 git clone https://github.com/ManuelPeh76/website-downloader.git
+```
+3. Switch into the newly created folder with `cd website-downloader`
 
-cd website-downloader
-
+4. Install the dependencies:
+```
 npm install
 ```
 
 ## Usage
-
 #### GUI
+<img src="app.png" width="400">
 
-<img src="app.png" width="600">
-
-1. Start the GUI with `npm start`.
-2. Enter the URL of the website you want to download.
-3. Select the desired options.
-4. Choose the target folder, in which the website folder will be created.
-5. Start the download with the `Start` button.
+  1. Start the GUI with `npm start`.
+  2. Enter the URL of the website you want to download.
+  3. Select the desired options.
+  4. Choose the target folder, in which the website folder will be created.
+  5. Start the download with the `Start` button.
 
 #### CLI
-Start the tool from the command line with 
-```
-node download <url> [options]
-``` 
-  
+ Start the tool from the command line with
+ ```bash
+ node downloader.js <url> [options]
+ ```
+
 #### Options
 | Option | Description |
 | --- | --- |
@@ -54,46 +55,38 @@ node download <url> [options]
 | `-z`, `--zip` | Creates a ZIP archive after downloads are complete (default: false). |
 | `-c`, `--clean` | Empties the destination folder before saving downloads (default: false). |
 | `-o=<path>`, `--outdir=<path>` | The full path to the folder the website is saved to (default: repo folder).
-| `-s=<number>`, `--simultaneous=<number>` | The amount of simultaneously active downloads (default: 4).
-## Example
+| `-s=<number>`, `--simultaneous=<number>` | The amount of simultaneously active downloads (default: 8).
 
+## Example
 To download a web page with a link depth of 1, recursion and ZIP export, use the following command:
+```bash
+node downloader.js https://example.com --depth=1 --recursive --zip --outdir=C:\Users\<username>\documents
 ```
-node download https://example.com -d=1 -r -z -o=C:\Users\<username>\documents
-```
+
 ## Some Infos about this Tool
 
-- Under the hood the Downloader opens each website (means HTML files) with Puppeteer in headless mode and listens to requests from the site, in order to catch all dynamically loaded files. This, of course, only works, if requests occur within the dynamical wait time (3000ms by default) after opening the page.
+- Files that are dynamically loaded during the website's runtime are only recorded if the request occurs within the dynamical wait time (3000ms by default) after opening the page. Understandably, the downloader cannot wait forever for such a request to occur, as this would block the corresponding download channel.
 - CSS files (whether linked or dynamically loaded) are searched for 'url(...)' to include fonts and images that are loaded by the CSS.
 - Only files whose storage location matches that of the website are saved.
-- When a HTML file has been downloaded, the tool changes all absolute links that point to the same origin to relative ones, in order to keep the website working, even locally.
+- When a file has been downloaded, the tool checks, if the containing links are absolute or relative, in order to adapt them if necessary. If absolute links are found, and they point to the same origin, they are changed to relative links. Thus the functionality of that site remains intact (works offline, except for files that are loaded from other sources).
 - When using the GUI, all settings you change (incl. the url) are saved via local storage. The next time you start the GUI your own settings will be restored.
 
 ## Build the App
-
-You can build this tool using electron, so you can run an .exe file to start it. Type:
-```
+You can build this tool using electron, so you can run an .exe file to start it:
+```bash
 npm run build
 ```
-A 'dist' folder will be created, containing the tool. 
+A 'dist' folder will be created, containing the tool.
 Unfortunately, to make it run propperly, you have to put a copy of the download.js directly into the dist/website-downloader-win32-x64 folder (where the website-downloader.exe file is located).
 
 ## Build a Windows Installer
-```
+```bash
 npm run build
 npm run setup
 ```
 Thist creates a windows installer package from the app.
 
----
 ## License
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
-
-
-
-
-
-
-

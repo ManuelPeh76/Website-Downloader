@@ -10,11 +10,29 @@ let isStarted = 0;
 let isActive = 0;
 let isInit = 0;
 let canLog = 0;
-let doScrollLog = true;
+let doScroll = true;
 
 const root = document.documentElement;
 const storedTheme = localStorage.theme;
 const obj = localStorage.downloader_obj ? JSON.parse(localStorage.downloader_obj) : {};
+const logProgress = msg => progress.innerHTML = msg;
+const logMessage = msg => {
+  doScroll = log.scrollHeight - log.scrollTop < 400 ? true : false;
+  if (msg.startsWith("***")) msg = `<br><font size="3"><b>${msg}</b></font>`;
+  log.innerHTML += msg.replace(/\n/g, "<br>");
+  doScroll && (log.scrollTop = log.scrollHeight);
+  msg.includes('Finished') ? (
+    isActive = 0,
+    canLog = 0,
+    resetButtons(),
+    window.api.saveProgress(log.innerHTML)
+  ) : msg.includes("a valid URL") && (
+    isStarted = 0,
+    isActive = 0,
+    canLog = 0,
+    resetButtons()
+  );
+};
 
 const progress = document.getElementById('progressText');
 const start = document.getElementById('start');
@@ -27,15 +45,17 @@ const github = document.getElementById("github");
 const themeToggler = [...document.querySelectorAll(".theme-toggle")];
 
 const title = {
-  url: "The web address of the site you want to download.",
-  depth: "The depth of links to consider.",
+  url: "The web address of the site you want to download.\nMust start with 'http://' or 'https://'",
+  depth: "The depth of links to consider.\nMin: 0, Default: Infinity",
   recursive: "If enabled, links on downloaded HTML pages will be searched and any files found there will also be downloaded.",
   zip: "If enabled, a ZIP archive containing the entire website will be created after downloads are complete.",
   clean: "If enabled, the folder where the files are saved will be emptied before downloading.",
-  simultaneous: "Determines how many downloads run simultaneously.",
-  dwt: "The time (in ms) to wait after calling an HTML file to see if any content is dynamically loaded.",
+  simultaneous: "Determines how many downloads run simultaneously.\nMin: 1, Max: 25, Default: 8",
+  dwt: "The time (in ms) to wait after calling an HTML file to see if any content is dynamically loaded.\nMin: 1000, Max: 30000, Default: 3000",
   outdir: "Select a folder to save the downloaded web pages. Each downloaded page will have a separate folder derived from the page's URL. For example, for the URL 'https://example.com', a folder named 'example.com' would be created.",
-  github: "View source on GitHub"
+  github: "View source on GitHub",
+  light: "Set Light Mode",
+  dark: "Set Dark Mode"
 };
 
 Object.entries(title).forEach(([id, content]) => document.getElementById(`${id}-label`).setAttribute("data-tooltip", content));
@@ -102,23 +122,23 @@ start.addEventListener('click', async () => {
   // Redirection of console.log
   window.api.onLog(msg => {
     if (!canLog) return;
-    // 📊 is the icon for progress details
-    msg.includes("📊") ? progress.innerHTML = msg : (
-      doScrollLog = log.scrollHeight - log.scrollTop < 500 ? true : false,
-      log.innerHTML += msg.replace(/\n/g, "<br>"),
-      doScrollLog && (log.scrollTop = log.scrollHeight),
-      msg.includes('Finished') ? (
-        isActive = 0,
-        canLog = 0,
-        resetButtons(),
-        window.api.saveProgress(log.innerHTML)
-      ) : msg.includes("a valid URL") && (
-        isStarted = 0,
-        isActive = 0,
-        canLog = 0,
-        resetButtons()
-      )
-    );
+    let m, m1 = [], m2 = [];
+    const x = msg.includes("🌐") ? msg.split("🌐").map(e => msg.startsWith(e) ? e : "🌐" + e) : [msg];
+    for (m of x) {
+      if (m) {
+        if (m.includes("📊")) {
+          for (let e of m.split("📊")) e && m1.push(m.startsWith(e) ? e : "📊" + e);
+        } else m1.push(m);
+      }
+    }
+    for (m of m1) {
+      if (m) {
+        if (m.includes("*** ")) {
+          for (e of m.split("*** ")) e && m2.push(m.startsWith(e) ? e : "*** " + e);
+        } else m2.push(m);
+      }
+    }
+    for (msg of m2) msg.startsWith("📊") ? logProgress(msg) : logMessage(msg);
   });
   isInit = 1;
 });
@@ -127,7 +147,7 @@ start.addEventListener('click', async () => {
 abort.addEventListener('click', () => {
   if (!isStarted) return;
   document.getElementById('paused')?.remove();
-  log.innerHTML += '<font size="16px"<b>Aborted by user!</b></font><br>';
+  log.innerHTML += '<font size="3"><b>*** Aborted by user ***</b></font><br>';
   resetButtons();
   window.api.abortDownload();
   isStarted = 0;

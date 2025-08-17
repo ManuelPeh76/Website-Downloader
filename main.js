@@ -23,7 +23,6 @@ const options = {
 };
 
 const args = process.argv;
-console.log(args);
 
 if (args.includes('--noMenu') || args.includes('-nm')) Menu.setApplicationMenu(null);
 else if (args.includes('--hideMenu') || args.includes('-hm')) options.autoHideMenuBar = true;
