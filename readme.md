@@ -59,7 +59,7 @@ npm install
 
 ## Example
 To download a web page with a link depth of 1, recursion and ZIP export, use the following command:
-```javascript
+```cmd
 node download https://example.com --depth=1 --recursive --zip --outdir=C:\Users\<username>\documents
 ```
 
@@ -90,6 +90,7 @@ Thist creates a windows installer package from the app.
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
 
