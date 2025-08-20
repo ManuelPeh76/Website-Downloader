@@ -21,7 +21,7 @@ const args = process.argv.slice(2);
 const TARGET_URL = args[0];
 /* If no website url is found, exit the tool */
 if (!TARGET_URL.startsWith("http")) {
-  log('❌ Please enter a valid URL!');
+  console.log('❌ Please enter a valid URL!');
   return process.exit(1);
 }
 
