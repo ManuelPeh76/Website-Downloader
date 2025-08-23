@@ -173,7 +173,7 @@ abort.addEventListener('click', () => {
 });
 
 // Handle user initiated pause
-// TODO: Still problematic, since the browser instances could be dead when resuming.
+// TODO: The browser instances could be dead when resuming.
 pause.addEventListener('click', () => {
   if (!isStarted) return;
   if (pause.textContent === "Pause") {
@@ -200,9 +200,6 @@ outdir.addEventListener('click', async () => {
     localStorage.downloader_obj = JSON.stringify(obj);
   }
 });
-
-// Size adaption of the log area on window resize
-//addEventListener("resize", resize);
 
 function setTheme(mode) {
   root.setAttribute("data-theme", mode);
