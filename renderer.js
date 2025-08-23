@@ -142,7 +142,7 @@ start.addEventListener('click', async () => {
       }
     }
     for (m1 of m2) m1.startsWith("📊") ? logProgress(m1) : logMessage(m1);
-    msg.includes('FINISHED') ? (
+    msg.includes('Finished in') ? (
       isActive = 0,
       canLog = 0,
       resetButtons(),

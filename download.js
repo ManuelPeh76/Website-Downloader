@@ -110,7 +110,7 @@ async function shouldIgnoreUrl(url) {
 function reportProgress() {
   const total = visited.size + resourceMap.size + logs.length;
   const err = logs.length;
-  const percent = total > 0 ? 100 - (100 / total * err) : 0;
+  const percent = 100 - (100 / total * err);
   log(`📊 ${visited.size} Sites, ${resourceMap.size} Files, ${logs.length} Errors (${percent.toFixed(2)}%)`);
 }
 
@@ -118,7 +118,7 @@ function reportProgress() {
 // and print the size of the downloaded website and how long it took to download it
 async function finish() {
   reportProgress();
-  await new Promise((resolve) => setTimeout(async () => {
+  await new Promise(async resolve => {
     log(`*** FINISHED ***`);
     const map = [...sitemap, ...[...resourceMap].map(r => r[0])];
     await fs.writeFile(path.join(OUTPUT_DIR, 'sitemap.json'), JSON.stringify(map, null, 2));
@@ -132,7 +132,7 @@ async function finish() {
     const time = parseInt((date - START_TIME) / 1000, 10);
     log(`🏁 Overall Size: ${size}.\n🕧 Finished in ${time} seconds.`);
     resolve();
-  }, 0));
+  });
 }
 
 // Get the size of the website folder, recursively
