@@ -41,7 +41,7 @@
     :root[data-theme="light"] {
       --bg: #f9fafb;
       --fg: #111;
-      --accent: #2563eb;
+      --accent: #6699ff;
       --card: #ffffff;
       --log-bg: #bdd1ff;
       --border: #d1d5db;
@@ -60,7 +60,7 @@
       body {
         font-family: 'Inter', sans-serif;
         font-size: 0.8em;
-        background-color: var(--bg);
+        background: linear-gradient(180deg, var(--bg), var(--border));
         color: var(--fg);
         margin: 2em;
         user-select: none;
@@ -68,7 +68,7 @@
 
       h1 {
         font-size: 2em;
-        margin-bottom: 1em;
+        margin-bottom: 2em;
       }
 
       svg {
@@ -77,10 +77,17 @@
       }
 
       svg.electron {
+        position: relative;
+        top: 15px;
         margin: 0 0.4em;
-        transform: translateY(15px);
         width: 55px;
         height: 55px;
+        transition: transform 0.5s ease;
+        app-region: drag;
+      }
+
+      svg.electron:hover {
+        transform: rotate(120deg);
       }
 
       svg.github {
@@ -108,12 +115,18 @@
         display: block;
         width: 30px;
         cursor: pointer;
+        transition: transform 0.4s ease;
       }
 
       .dark svg {
         display: block;
         width: 20px;
         cursor: pointer;
+        transition: transform 0.4s ease;
+      }
+
+      .light svg:hover, .dark svg:hover {
+        transform: scale(1.2);
       }
 
       label {
@@ -130,9 +143,10 @@
         border: 1px solid var(--border);
         background: var(--card);
         color: var(--fg);
-        width: 100%;
+        width: 96%;
         box-sizing: border-box;
         margin-top: 0.25em;
+        margin-left: 2%;
       }
 
       input[type="checkbox"] {
@@ -157,7 +171,7 @@
         transform: scale(1.05);
       }
 
-      button:disabled {
+      button:disabled, input:disabled {
         opacity: 0.3;
         pointer-events: none;
       }
@@ -173,7 +187,7 @@
         padding: 1em;
         font-family: Consolas, monospace;
         border-radius: 6px;
-        margin-top: 2em;
+        margin: 2em 0;
         white-space: pre-wrap;
       }
 
@@ -217,8 +231,8 @@
       white-space: pre-line;
       opacity: 0;
       pointer-events: none;
-      transform: translateY(5px);
-      transition: opacity 0.2s ease, transform 0.2s ease;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
       z-index: 10;
       width: max-content;
       max-width: 300px;
@@ -264,16 +278,17 @@
     </svg>
   </div>
 
-  <label id="url-label">URL<input class="input" type="text" id="url" size="50" placeholder="https://example.com"/></label>
-  <label id="depth-label">Depth<input class="input" type="number" id="depth" min="0" placeholder="Infinity" /></label>
-  <label id="dwt-label">Dynamic Wait Time<input class="input" type="number" id="dwt" min="1000" max="30000" placeholder="3000" /></label>
-  <label id="simultaneous-label">Simultaneously Downloads<input class="input" type="number" id="simultaneous" min="1" max="25" placeholder="8"/></label>
+  <label id="url-label">URL</label><input class="input" type="text" id="url" size="50" placeholder="https://example.com"/>
+  <label id="depth-label">Depth</label><input class="input" type="number" id="depth" min="0" placeholder="Infinity" />
+  <label id="dwt-label">Dynamic Wait Time</label><input class="input" type="number" id="dwt" min="500" max="30000" placeholder="3000" />
+  <label id="simultaneous-label">Simultaneously Downloads</label><input class="input" type="number" id="simultaneous" min="1" max="25" placeholder="8"/>
 
   <label id="recursive-label"><input class="input" type="checkbox" id="recursive" checked /> Recursive</label>
   <label id="zip-label"><input class="input" type="checkbox" id="zip" /> Export ZIP</label>
   <label id="clean-label"><input class="input" type="checkbox" id="clean" /> Clean Mode</label>
+  <label id="use-index-label"><input class="input" type="checkbox" id="use-index" /> Add 'index.html' if no file extension found</label>
 
-  <label id="outdir-label">Target Folder<input type="text" id="outdir" class="select-folder" placeholder="Select Folder" readonly></label>
+  <label id="outdir-label">Target Folder</label><input type="text" id="outdir" class="select-folder" placeholder="Select Folder" readonly>
   <button id="start">Start</button>
   <button id="abort" disabled>Cancel</button>
   <button id="pause" disabled>Pause</button>

@@ -14,30 +14,6 @@ let canLog = 0;
 let doScroll = true;
 let interval;
 
-const root = document.documentElement;
-const storedTheme = localStorage.theme;
-const obj = localStorage.downloader_obj ? JSON.parse(localStorage.downloader_obj) : {};
-const logProgress = msg => progress.innerHTML = msg;
-const logMessage = msg => {
-  doScroll = log.scrollHeight - log.scrollTop < 400 ? true : false;
-  if (msg.startsWith("***")) msg = `<br><font size="3"><b>${msg}</b></font>`;
-  log.innerHTML += msg.replace(/\n/g, "<br>");
-  doScroll && (log.scrollTop = log.scrollHeight);
-  msg.includes('Finished') ? (
-    isActive = 0,
-    canLog = 0,
-    resetButtons(),
-    window.clearInterval(interval),
-    window.api.saveProgress(log.innerHTML)
-  ) : msg.includes("a valid URL") && (
-    isStarted = 0,
-    isActive = 0,
-    canLog = 0,
-    resetButtons(),
-    window.clearInterval(interval)
-  );
-};
-
 const progress = document.getElementById('progress-text');
 const start = document.getElementById('start');
 const log = document.getElementById('log');
@@ -48,6 +24,17 @@ const outdir = document.getElementById("outdir");
 const github = document.getElementById("github");
 const themeToggler = [...document.querySelectorAll(".theme-toggle")];
 const progressTime = document.getElementById("progress-time");
+
+const root = document.documentElement;
+const storedTheme = localStorage.theme;
+const obj = localStorage.downloader_obj ? JSON.parse(localStorage.downloader_obj) : {};
+const logProgress = msg => progress.innerHTML = msg;
+const logMessage = msg => {
+  if (msg.startsWith("***")) msg = `<br><font size="3"><b>${msg}</b></font>`;
+  log.innerHTML += msg.replace(/\n/g, "<br>");
+  if (log.scrollHeight - log.scrollTop < 400)  log.scrollTop = log.scrollHeight;
+};
+
 const printTime = () => {
   const now =  Date.now() - startTime;
   const hours = String(parseInt(now / (1000 * 60 * 60), 10)).padStart(2, "0");
@@ -55,12 +42,14 @@ const printTime = () => {
   const secs = String(parseInt((now / 1000) % 60, 10)).padStart(2, "0");
   progressTime.innerHTML = `${hours}:${mins}:${secs}`;
 };
+
 const title = {
   url: "The web address of the site you want to download.\nMust start with 'http://' or 'https://'",
   depth: "The depth of links to consider.\nMin: 0, Default: Infinity",
   recursive: "If enabled, links on downloaded HTML pages will be searched and any files found there will also be downloaded.",
   zip: "If enabled, a ZIP archive containing the entire website will be created after downloads are complete.",
   clean: "If enabled, the folder where the files are saved will be emptied before downloading.",
+  "use-index": "If no file extension is found in a path, the filename is assumed as 'index.html'.",
   simultaneous: "Determines how many downloads run simultaneously.\nMin: 1, Max: 25, Default: 8",
   dwt: "The time (in ms) to wait after calling an HTML file to see if any content is dynamically loaded.\nMin: 1000, Max: 30000, Default: 3000",
   outdir: "Select a folder to save the downloaded web pages. Each downloaded page will have a separate folder derived from the page's URL. For example, for the URL 'https://example.com', a folder named 'example.com' would be created.",
@@ -79,15 +68,14 @@ if (obj.recursive) document.getElementById("recursive").checked = obj.recursive;
 if (obj.zip) document.getElementById("zip").checked = obj.zip;
 if (obj.clean) document.getElementById("clean").checked = obj.clean;
 if (obj.outdir) document.getElementById("outdir").value = obj.outdir;
+if (obj["use-index"]) document.getElementById("use-index").checked = obj["use-index"];
 
 // Theme Toggle Logic
 if (storedTheme) setTheme(storedTheme);
 else {
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const prefersDark = matchMedia("(prefers-color-scheme: dark)").matches;
   setTheme(prefersDark ? "dark" : "light");
 }
-
-resize();
 
 //
 // Event Listeners
@@ -115,6 +103,7 @@ start.addEventListener('click', async () => {
   const simultaneous = document.getElementById('simultaneous').value;
   const zip = document.getElementById('zip').checked;
   const clean = document.getElementById('clean').checked;
+  const useIndex = document.getElementById('use-index').checked;
   const recursive = document.getElementById('recursive').checked;
   const outdir = document.getElementById('outdir').value.trim();
   const dwt = document.getElementById('dwt').value;
@@ -122,18 +111,19 @@ start.addEventListener('click', async () => {
   setButtons();
   startTime = Date.now();
   progressTime.innerHTML = '00:00:00';
-  interval = window.setInterval(printTime, 1000);
-  url ? logMessage('*** Starting download ***<br>') : "";
+  interval = setInterval(printTime, 1000);
+  log.innerHTML = "";
+  logMessage(url ? '*** Starting download ***<br>' : "");
   progress.innerHTML = "";
   canLog = 1;
   // Start Download
-  window.api.startDownload({ url, zip, clean, depth, recursive, outdir, simultaneous, dwt });
+  api.startDownload({ url, zip, clean, depth, recursive, outdir, simultaneous, dwt, useIndex });
   isActive = 1;
   if (isStarted) return;
   isStarted = 1;
   if (isInit) return;
   // Redirection of console.log
-  window.api.onLog(msg => {
+  api.onLog(msg => {
     if (!canLog) return;
     let m, m1 = [], m2 = [];
     const x = msg.includes("🌐") ? msg.split("🌐").map(e => msg.startsWith(e) ? e : "🌐" + e) : [msg];
@@ -151,7 +141,20 @@ start.addEventListener('click', async () => {
         } else m2.push(m);
       }
     }
-    for (msg of m2) msg.startsWith("📊") ? logProgress(msg) : logMessage(msg);
+    for (m1 of m2) m1.startsWith("📊") ? logProgress(m1) : logMessage(m1);
+    msg.includes('FINISHED') ? (
+      isActive = 0,
+      canLog = 0,
+      resetButtons(),
+      clearInterval(interval),
+      api.saveProgress(log.innerHTML)
+    ) : msg.includes("a valid URL") && (
+      isStarted = 0,
+      isActive = 0,
+      canLog = 0,
+      resetButtons(),
+      clearInterval(interval)
+    );
   });
   isInit = 1;
 });
@@ -159,39 +162,38 @@ start.addEventListener('click', async () => {
 // Handle user initiated abort of download
 abort.addEventListener('click', () => {
   if (!isStarted) return;
-  window.clearInterval(interval);
+  clearInterval(interval);
   document.getElementById('paused')?.remove();
   log.innerHTML += '<font size="3"><b>*** Aborted by user ***</b></font><br>';
   resetButtons();
   isStarted = 0;
   isActive = 0;
   canLog = 0;
-  window.api.abortDownload();
+  api.abortDownload();
 });
 
 // Handle user initiated pause
-// TODO: Still problematic, since the browser instances die after 30 seconds.
+// TODO: Still problematic, since the browser instances could be dead when resuming.
 pause.addEventListener('click', () => {
   if (!isStarted) return;
   if (pause.textContent === "Pause") {
     log.innerHTML += ("<span id='paused'>⏸️<b> Downloading paused...</b><br></span>");
     pause.textContent = "Resume";
-    window.clearInterval(interval);
+    clearInterval(interval);
     tempTime = Date.now();
-    return window.api.pauseDownload();
+    return api.pauseDownload();
   }
   startTime += Date.now() - tempTime;
-  interval = window.setInterval(printTime, 1000);
+  interval = setInterval(printTime, 1000);
   document.getElementById('paused').remove();
   pause.innerText = "Pause";
-  window.api.resumeDownload();
+  api.resumeDownload();
 });
 
 // Target folder selection
 outdir.addEventListener('click', async () => {
-  this.blur();
   if (isActive) return;
-  const folder = await window.api.selectFolder();
+  const folder = await api.selectFolder();
   if (folder) {
     document.getElementById('outdir').value = folder;
     obj.outdir = folder;
@@ -200,7 +202,7 @@ outdir.addEventListener('click', async () => {
 });
 
 // Size adaption of the log area on window resize
-window.addEventListener("resize", resize);
+//addEventListener("resize", resize);
 
 function setTheme(mode) {
   root.setAttribute("data-theme", mode);
@@ -221,8 +223,4 @@ function setButtons() {
   pause.disabled = false;
   abort.disabled = false;
   outdir.disabled = true;
-}
-
-function resize() {
-  log.style.width = (window.innerWidth - 110) + "px";
 }

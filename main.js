@@ -6,26 +6,21 @@
     MIT License
 */
 
-const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const ntsuspend = require('ntsuspend');
 
 const options = {
   width: 900,
-  height: 1024,
-  autoHideMenuBar: false,
+  height: 1000,
+  frame: false,
   webPreferences: {
     preload: path.join(__dirname, 'preload.js'),
     contextIsolation: true,
     nodeIntegration: false
   }
 };
-
-const args = process.argv;
-
-if (args.includes('--noMenu') || args.includes('-nm')) Menu.setApplicationMenu(null);
-else if (args.includes('--hideMenu') || args.includes('-hm')) options.autoHideMenuBar = true;
 
 const isWin = process.platform === 'win32';
 let proc, pid;
@@ -36,8 +31,8 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir, simultaneous, dwt }) => {
-    return new Promise((resolve, reject) => {
+  ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir, simultaneous, dwt, useIndex }) => {
+    return new Promise(resolve => {
 
       const args = ['download.js', url];
 
@@ -48,46 +43,26 @@ app.whenReady().then(() => {
       if (outdir) args.push(`--outdir=${outdir}`);
       if (simultaneous) args.push(`--simultaneous=${simultaneous}`);
       if (dwt) args.push(`--dyn_wait_time=${dwt}`);
+      if (useIndex) args.push('--use-index');
 
       proc = spawn('node', args);
       pid = proc.pid;
-
-      proc.stdout.on('data', data => {
-        event.sender.send('log', data.toString());
-      });
-
-      proc.stderr.on('data', data => {
-        event.sender.send('log', data.toString());
-      });
-
-      proc.on('close', (code) => {
-        resolve(code);
-      });
+      proc.stdout.on('data', data => event.sender.send('log', data.toString()));
+      proc.stderr.on('data', data => event.sender.send('log', data.toString()));
+      proc.on('close', resolve);
     });
   });
 
-  ipcMain.handle('abort-download', args => {
-    if (proc && !proc.killed) {
-      proc.stdin.write('abort');
-      return true;
-    }
-    return false;
+  ipcMain.handle('abort-download', () => {
+    proc && !proc.killed && proc.stdin.write('abort');
   });
 
   ipcMain.handle('pause-download', async () => {
-    if (proc && pid) {
-      isWin ? ntsuspend.suspend(pid) : proc.kill('SIGSTOP');
-      return true;
-    }
-    return false;
+    proc && pid && !proc.killed && (isWin ? ntsuspend.suspend(pid) : proc.kill('SIGSTOP'));
   });
 
   ipcMain.handle('resume-download', async () => {
-    if (proc && pid) {
-      isWin ? ntsuspend.resume(pid) : proc.kill('SIGCONT');
-      return true;
-    }
-    return false;
+    proc && pid && !proc.killed && (isWin ? ntsuspend.resume(pid) : proc.kill('SIGCONT'));
   });
 
   ipcMain.handle('select-folder', async () => {
@@ -96,11 +71,7 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle('save-progress', async (_, log) => {
-    if (proc && !proc.killed) {
-      proc.stdin.write("save-progress:" + log);
-      return true;
-    }
-    return false;
+    proc && !proc.killed && proc.stdin.write("save-progress:" + log);
   });
 
   createWindow();
