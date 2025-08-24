@@ -56,6 +56,7 @@ npm install
 | `-c`, `--clean` | Empties the destination folder before saving downloads (default: false). |
 | `-o=<path>`, `--outdir=<path>` | The full path to the folder the website is saved to (default: repo folder).
 | `-s=<number>`, `--simultaneous=<number>` | The amount of simultaneously active downloads (default: 8).
+| `-u`, `--use-index` | Append '/index.html' to urls, if no file extension is found.
 
 ## Example
 To download a web page with a link depth of 1, recursion and ZIP export, use the following command:
@@ -65,31 +66,37 @@ node download https://example.com --depth=1 --recursive --zip --outdir=C:\Users\
 
 ## Some Infos about this Tool
 
-- Files that are dynamically loaded during the website's runtime are only recorded if the request occurs within the dynamical wait time (3000ms by default) after opening the page. Understandably, the downloader cannot wait forever for such a request to occur, as this would block the corresponding download channel.
-- CSS files (whether linked or dynamically loaded) are searched for 'url(...)' to include fonts and images that are loaded by the CSS.
+- Files that are dynamically loaded during the website's runtime are only downloaded if the request occurs within the dynamical wait time (3000ms by default) after opening the page.
+- The opened pages are scrolled down to catch file requests triggered by an onscroll event.
+- All CSS files (whether linked or dynamically loaded) are searched for dynamic content (url(...)) and, if found, those files are downloaded as well.
 - Only files whose storage location matches that of the website are saved.
-- When a file has been downloaded, the tool checks, if the containing links are absolute or relative, in order to adapt them if necessary. If absolute links are found, and they point to the same origin, they are changed to relative links. Thus the functionality of that site remains intact (works offline, except for files that are loaded from other sources).
-- When using the GUI, all settings you change (incl. the url) are saved via local storage. The next time you start the GUI your own settings will be restored.
+- All links in downloaded pages are adjusted to make the pages work offline.
+- When using the GUI, all settings (incl. the url) are saved via local storage. The next time you start the GUI your own settings will be restored.
+- If no file extension is found in a URL, it is assumed that an index.html file is being requested and '/index.html' is appended to the URL. This behavior can be enabled or disabled in the GUI. It is disabled by default via the CLI and can be enabled with '--use-index'.
 
-## Build the App
-You can build this tool using electron, so you can run an .exe file to start it:
+## Build an App Package
 ```cmd
 npm run build
 ```
-A 'dist' folder will be created, containing the tool.
-Unfortunately, to make it run propperly, you have to put a copy of the download.js directly into the dist/website-downloader-win32-x64 folder (where the website-downloader.exe file is located).
+This step is required, if you want to create the windows installer (exe and msi) which is described in the next step. 
+A new folder will be created containing everything that's needed to run this tool without any further dependencies (not even node.js).
+When finished, you can start the Website-Downloader.exe inside of the newly created dist/Website-Downloader-win32-x64/ folder.
 
-## Build a Windows Installer
+
+## Build the Windows Installer
 ```cmd
 npm run build
 npm run setup
 ```
-Thist creates a windows installer package from the app.
+Thist creates a windows installer package from the app in the folder dist/Installers/.
+You can use the .exe or the .msi installer package, both do the same: Installing the Website Downloader fully automatic (in C:\Users\<username>\AppData\Local\Website_Downloader), register it and create a start menu entry.
+Wait until the installation is complete, even if the tool has already started during the installation. It will restart after the installation is complete.
 
 ## License
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
 
