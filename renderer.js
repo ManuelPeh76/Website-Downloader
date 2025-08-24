@@ -46,13 +46,13 @@ const printTime = () => {
 const title = {
   url: "The web address of the site you want to download.\nMust start with 'http://' or 'https://'",
   depth: "The depth of links to consider.\nMin: 0, Default: Infinity",
-  recursive: "If enabled, links on downloaded HTML pages will be searched and any files found there will also be downloaded.",
-  zip: "If enabled, a ZIP archive containing the entire website will be created after downloads are complete.",
-  clean: "If enabled, the folder where the files are saved will be emptied before downloading.",
-  "use-index": "If no file extension is found in a path, the filename is assumed as 'index.html'.",
+  recursive: "If enabled, links on downloaded HTML pages will be searched and any files found there will also be downloaded.\nDefault: Enabled",
+  zip: "If enabled, a ZIP archive containing the entire website will be created after downloads are complete.\nDefault: Disabled",
+  clean: "If enabled, the folder where the files are saved will be emptied before downloading.\nDefault: Disabled",
+  "use-index": "If no file extension is found at the end of a path, the filename is assumed as 'index.html'.\nDefault: Enabled",
   simultaneous: "Determines how many downloads run simultaneously.\nMin: 1, Max: 25, Default: 8",
-  dwt: "The time (in ms) to wait after calling an HTML file to see if any content is dynamically loaded.\nMin: 1000, Max: 30000, Default: 3000",
-  outdir: "Select a folder to save the downloaded web pages. Each downloaded page will have a separate folder derived from the page's URL. For example, for the URL 'https://example.com', a folder named 'example.com' would be created.",
+  dwt: "The time (in ms) to wait after calling an HTML file to see if any content is dynamically loaded.\nMin: 500, Max: 30000, Default: 3000",
+  outdir: "Select a folder in which to save the downloaded web pages. Each downloaded page will have a separate folder derived from the page's URL. For example, for the URL 'https://example.com', a folder named 'example.com' would be created.",
   github: "View source on GitHub",
   light: "Set Light Mode",
   dark: "Set Dark Mode"
@@ -108,53 +108,41 @@ start.addEventListener('click', async () => {
   const outdir = document.getElementById('outdir').value.trim();
   const dwt = document.getElementById('dwt').value;
 
+  if(!url.startsWith('http')) return logMessage('<br>❌ Please enter a valid URL!');
+
+  log.innerHTML = "";
+  progress.innerHTML = "";
+
   setButtons();
   startTime = Date.now();
   progressTime.innerHTML = '00:00:00';
   interval = setInterval(printTime, 1000);
-  log.innerHTML = "";
-  logMessage(url ? '*** Starting download ***<br>' : "");
-  progress.innerHTML = "";
+  logMessage('*** STARTING DOWNLOAD ***<br>');
   canLog = 1;
-  // Start Download
   api.startDownload({ url, zip, clean, depth, recursive, outdir, simultaneous, dwt, useIndex });
   isActive = 1;
   if (isStarted) return;
   isStarted = 1;
   if (isInit) return;
+
   // Redirection of console.log
   api.onLog(msg => {
     if (!canLog) return;
-    let m, m1 = [], m2 = [];
-    const x = msg.includes("🌐") ? msg.split("🌐").map(e => msg.startsWith(e) ? e : "🌐" + e) : [msg];
-    for (m of x) {
-      if (m) {
-        if (m.includes("📊")) {
-          for (let e of m.split("📊")) e && m1.push(m.startsWith(e) ? e : "📊" + e);
-        } else m1.push(m);
-      }
+    // If console.log() is called multiple times within a short period of time,
+    // all strings are automatically chained into a single string and sent at once.
+    // Therefore, it is necessary to separate them again to display them correctly.
+    // This is the purpose of the following line of code.
+    msg = msg.replace(/🌐/g, "!!🌐").replace(/📊/g, "!!📊").replace(/❌/g, "!!❌").replace(/\*\*\* /g, "!!*** ").split("!!").filter(e => e);
+    // Now iterate through all messages and display them.
+    for (m of msg) m.startsWith("📊") ? logProgress(m) : logMessage(m);
+    // If '🕧' (Finished icon) is found, reset the GUI and save the content of the Log DIV element.
+    if (msg.join("").includes('🕧')) {
+      isActive = 0;
+      canLog = 0;
+      resetButtons();
+      clearInterval(interval);
+      api.saveProgress(log.innerHTML.replace(/<br>/g, "\n").replace(/<.*?>/g, ""));
     }
-    for (m of m1) {
-      if (m) {
-        if (m.includes("*** ")) {
-          for (e of m.split("*** ")) e && m2.push(m.startsWith(e) ? e : "*** " + e);
-        } else m2.push(m);
-      }
-    }
-    for (m1 of m2) m1.startsWith("📊") ? logProgress(m1) : logMessage(m1);
-    msg.includes('Finished in') ? (
-      isActive = 0,
-      canLog = 0,
-      resetButtons(),
-      clearInterval(interval),
-      api.saveProgress(log.innerHTML)
-    ) : msg.includes("a valid URL") && (
-      isStarted = 0,
-      isActive = 0,
-      canLog = 0,
-      resetButtons(),
-      clearInterval(interval)
-    );
   });
   isInit = 1;
 });
@@ -164,7 +152,7 @@ abort.addEventListener('click', () => {
   if (!isStarted) return;
   clearInterval(interval);
   document.getElementById('paused')?.remove();
-  log.innerHTML += '<font size="3"><b>*** Aborted by user ***</b></font><br>';
+  log.innerHTML += '<font size="3"><b>*** ABORTED BY USER ***</b></font><br>';
   resetButtons();
   isStarted = 0;
   isActive = 0;
@@ -173,7 +161,7 @@ abort.addEventListener('click', () => {
 });
 
 // Handle user initiated pause
-// TODO: The browser instances could be dead when resuming.
+// TODO: Still problematic, since the browser instances could be dead when resuming.
 pause.addEventListener('click', () => {
   if (!isStarted) return;
   if (pause.textContent === "Pause") {
@@ -206,16 +194,18 @@ function setTheme(mode) {
   localStorage.theme = mode;
 }
 
-// Button toggle function
+// Enable inputs and buttons
 function resetButtons() {
+  inputs.forEach(input => input.disabled = false);
   start.disabled = false;
   pause.disabled = true;
   abort.disabled = true;
   outdir.disabled = false;
 }
 
-// Button toggle function
+// Disable inputs and buttons
 function setButtons() {
+  inputs.forEach(input => input.disabled = true);
   start.disabled = true;
   pause.disabled = false;
   abort.disabled = false;

@@ -13,7 +13,7 @@
   <meta charset="UTF-8">
   <title>Website Downloader</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link type="text/css" rel="stylesheet" href="style.css">
+  <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
   <h1>
@@ -43,13 +43,13 @@
   <label id="depth-label">Depth</label><input class="input" type="number" id="depth" min="0" placeholder="Infinity" />
   <label id="dwt-label">Dynamic Wait Time</label><input class="input" type="number" id="dwt" min="500" max="30000" placeholder="3000" />
   <label id="simultaneous-label">Simultaneously Downloads</label><input class="input" type="number" id="simultaneous" min="1" max="25" placeholder="8"/>
+  <label id="outdir-label">Target Folder</label><input type="text" id="outdir" class="select-folder" placeholder="Select Folder" readonly>
 
   <label id="recursive-label"><input class="input" type="checkbox" id="recursive" checked /> Recursive</label>
   <label id="zip-label"><input class="input" type="checkbox" id="zip" /> Export ZIP</label>
   <label id="clean-label"><input class="input" type="checkbox" id="clean" /> Clean Mode</label>
-  <label id="use-index-label"><input class="input" type="checkbox" id="use-index" /> Add 'index.html' if no file extension found</label>
+  <label id="use-index-label"><input class="input" type="checkbox" id="use-index" checked /> Add index.html</label>
 
-  <label id="outdir-label">Target Folder</label><input type="text" id="outdir" class="select-folder" placeholder="Select Folder" readonly>
   <button id="start">Start</button>
   <button id="abort" disabled>Cancel</button>
   <button id="pause" disabled>Pause</button>

@@ -31,11 +31,10 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+
   ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir, simultaneous, dwt, useIndex }) => {
     return new Promise(resolve => {
-
       const args = ['download.js', url];
-
       if (zip) args.push('--zip');
       if (clean) args.push('--clean');
       if (recursive) args.push('--recursive');
@@ -44,7 +43,6 @@ app.whenReady().then(() => {
       if (simultaneous) args.push(`--simultaneous=${simultaneous}`);
       if (dwt) args.push(`--dyn_wait_time=${dwt}`);
       if (useIndex) args.push('--use-index');
-
       proc = spawn('node', args);
       pid = proc.pid;
       proc.stdout.on('data', data => event.sender.send('log', data.toString()));

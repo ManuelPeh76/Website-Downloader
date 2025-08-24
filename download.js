@@ -21,7 +21,6 @@ const args = process.argv.slice(2);
 const TARGET_URL = args[0];
 /* If no website url is found, exit the tool */
 if (!TARGET_URL.startsWith("http")) {
-  console.log('❌ Please enter a valid URL!');
   process.exit(1);
 }
 
@@ -60,7 +59,7 @@ const sanitize = p => p.replace(/[^@a-z0-9/\-_.%\[\]()]/gi, '_').replace(/_+/g, 
 const log = msg => console.log(msg);
 const isLocalFile = async (url, baseUrl = TARGET_URL) => await fs.access(getLocalPath(url, baseUrl)).then(() => true).catch(() => false);
 
-// Reacts on requests from the main process (main.js)
+// Reacts on requests from the renderer process (renderer.js)
 process.stdin.on('data', async data => {
   const command = data.toString().trim();
   if (command.startsWith('abort')) {
@@ -68,8 +67,8 @@ process.stdin.on('data', async data => {
     setTimeout(() => process.exit(1), 0);
   } else if (command.startsWith('save-progress:')) {
     // Write the content of the log div to a file
-    let progressLog = command.slice(14);
-    await fs.writeFile(path.join(OUTPUT_DIR, 'progress.log'), progressLog.replace(/<br>/g, "\n"));
+    const progressLog = command.slice(14);
+    await fs.writeFile(path.join(OUTPUT_DIR, 'progress.log'), progressLog);
   }
 });
 
@@ -110,20 +109,19 @@ async function shouldIgnoreUrl(url) {
 function reportProgress() {
   const total = visited.size + resourceMap.size + logs.length;
   const err = logs.length;
-  const percent = 100 - (100 / total * err);
-  log(`📊 ${visited.size} Sites, ${resourceMap.size} Files, ${logs.length} Errors (${percent.toFixed(2)}%)`);
+  const percent = (100 - (100 / total * err)).toFixed(2);
+  log(`📊 ${visited.size} Sites, ${resourceMap.size} Files, ${logs.length} Errors (${percent}%)`);
 }
 
-// When the downloads are finished, create the sitemap.json and the log.json,
-// and print the size of the downloaded website and how long it took to download it
+// Last steps... Print stats and create Sitemap and Log files
 async function finish() {
   reportProgress();
   await new Promise(async resolve => {
     log(`*** FINISHED ***`);
-    const map = [...sitemap, ...[...resourceMap].map(r => r[0])];
+    let map = [...sitemap, ...[...resourceMap].map(r => r[0])].sort(([a, b]) => a > b);
     await fs.writeFile(path.join(OUTPUT_DIR, 'sitemap.json'), JSON.stringify(map, null, 2));
     log(`🧭 Sitemap created (${map.length} File${map.length === 1 ? "" : "s"}: ${sitemap.size} HTML file${sitemap.size === 1 ? "" : "s"}, ${resourceMap.size} Asset${resourceMap.size === 1 ? "" : "s"}).`);
-    if (logs.length) {
+    if (logs.length || failed.size) {
       await fs.writeFile(path.join(OUTPUT_DIR, 'log.json'), JSON.stringify({ Errors: [...logs], Failed_Downloads: [...failed] }, null, 2));
       log(`📝 ${logs.length} Error${logs.length === 1 ? "" : "s"}, Log created.`);
     } else log('📝 No errors, log creation is skipped.');
@@ -200,7 +198,7 @@ function pLimit(concurrency) {
 function getLocalPath(resourceUrl, baseUrl) {
   const u = new URL(resourceUrl, baseUrl);
   let pathname = u.pathname.replace(/\/+$|^\//g, '');
-  if (!path.extname(pathname)) pathname = path.join(pathname, 'index.html');
+  if (USE_INDEX && !path.extname(pathname)) pathname = path.join(pathname, 'index.html');
   const safe = pathname.split('/').map(sanitize).join('/');
   return path.join(OUTPUT_DIR, safe);
 }
@@ -229,7 +227,7 @@ async function dynamicPageRequest(request) {
     const parsedUrl = new URL(url);
     const href = parsedUrl.href;
     let resourcePath = sanitize(parsedUrl.pathname);
-    if (!path.extname(resourcePath)) resourcePath += resourcePath.endsWith("/") ? "index.html" : "/index.html";
+    if (USE_INDEX && !path.extname(resourcePath)) resourcePath += resourcePath.endsWith("/") ? "index.html" : "/index.html";
     const localPath = path.join(OUTPUT_DIR, resourcePath);
     const relativePath = path.relative(OUTPUT_DIR, localPath).replace(/\\/g, '/');
     if (href.endsWith(".html") || href.endsWith(".htm")) {
@@ -281,7 +279,7 @@ async function downloadResource(url, baseUrl, dyn = "") {
             ws.on('finish', () => {
               resourceMap.set(new URL(url, baseUrl).href, path.relative(OUTPUT_DIR, loc).replace(/\\/g,'/'));
               reportProgress();
-              setTimeout(() => log(`🌐${type}: ${url}`), 0);
+              log(`🌐${type}: ${url}`);
               resolve();
             });
             ws.on('error', msg => reject({ message: ` Error on writing file '${filename}': ${msg}` }));
@@ -306,7 +304,7 @@ function adjustLinks(html, baseUrl) {
     try {
       let full = stripSearch(new URL(link, baseUrl).href);
       const pathname = new URL(full).pathname;
-      if (!path.extname(pathname)) full += (pathname.endsWith("/") ? "index.html" : "/index.html");
+      if (USE_INDEX && !path.extname(pathname)) full += (pathname.endsWith("/") ? "index.html" : "/index.html");
       if (resourceMap.has(full)) {
         const toRel = resourceMap.get(full);
         const toPath = path.join(OUTPUT_DIR, toRel);
@@ -382,7 +380,7 @@ async function crawl(url, depth, browser, recursive = null) {
   log(`🌐 Site (Depth ${depth}): ${url}`);
   const parsedUrl = new URL(url);
   const stripped = stripSearch(url);
-  if (USE_INDEX && !path.extname(parsedUrl.pathname)) url = stripped + (stripped.endsWith("/") ? "index.html" : "/index.html") + parsedUrl.search || "";
+  if ((USE_INDEX && !path.extname(parsedUrl.pathname)) || new URL(url).pathname === new URL(TARGET_URL).pathname) url = stripped + (stripped.endsWith("/") ? "index.html" : "/index.html") + parsedUrl.search || "";
   // Remember the url of this HTML file
   visited.add(stripSearch(url));
   sitemap.add(stripSearch(url));
