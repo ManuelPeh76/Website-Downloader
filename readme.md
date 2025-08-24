@@ -73,7 +73,8 @@ node download https://example.com --depth=1 --recursive --zip --outdir=C:\Users\
 - All links in downloaded pages are adjusted to make the pages work offline.
 - When using the GUI, all settings (incl. the url) are saved via local storage. The next time you start the GUI your own settings will be restored.
 - If no file extension is found in a URL, it is assumed that an index.html file is being requested and '/index.html' is appended to the URL. This behavior can be enabled or disabled in the GUI. It is disabled by default via the CLI and can be enabled with '--use-index'.
-
+- To close the window: Right click on the electron icon => Close (working on that).
+- To drag the window click and hold the left mouse button on the electron icon.
 ## Build an App Package
 ```cmd
 npm run build
@@ -96,6 +97,7 @@ Wait until the installation is complete, even if the tool has already started du
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
 
