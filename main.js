@@ -27,14 +27,14 @@ let proc, pid;
 
 function createWindow() {
   const win = new BrowserWindow(options);
-  win.loadFile('gui.html');
+  win.loadFile(path.join(__dirname, 'gui.html'));
 }
 
 app.whenReady().then(() => {
 
   ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir, simultaneous, dwt, useIndex }) => {
     return new Promise(resolve => {
-      const args = ['download.js', url];
+      const args = [path.join(__dirname, 'download.js'), url];
       if (zip) args.push('--zip');
       if (clean) args.push('--clean');
       if (recursive) args.push('--recursive');
