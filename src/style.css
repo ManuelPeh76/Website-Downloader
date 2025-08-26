@@ -1,0 +1,384 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+:root {
+  color-scheme: light dark;
+  --bg: #f9fafb;
+  --fg: #111;
+  --accent: #2563eb;
+  --accent2: #5282e9;
+  --card: #ffffff;
+  --log-bg: #bdd1ff;
+  --border: #d1d5db;
+  --shadow: rgba(255, 255, 255, 0.3);
+  --error: #ff3535;
+}
+
+/* Only active if no data-theme found */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg: #1f2937;
+    --fg: #f9fafb;
+    --accent: #355599;
+    --accent2: #5282e9;
+    --card: #111827;
+    --log-bg: #32364b;
+    --border: #4b5563;
+    --shadow: rgba(200, 200, 200, 0.3);
+    --error: #c51111;
+  }
+}
+
+/* Light Theme */
+:root[data-theme="light"] {
+  --bg: #f9fafb;
+  --fg: #111;
+  --accent: #6699ff;
+  --accent2: #5282e9;
+  --card: #ffffff;
+  --log-bg: #bdd1ff;
+  --border: #d1d5db;
+  --shadow: rgba(32, 32, 32, 0.3);
+  --error: #ff3535;
+}
+
+/* Dark Theme */
+:root[data-theme="dark"] {
+  --bg: #1f2937;
+  --fg: #ddd;
+  --accent: #355599;
+  --accent2: #5282e9;
+  --card: #111827;
+  --log-bg: #32364b;
+  --border: #4b5563;
+  --shadow: rgba(200, 200, 200, 0.3);
+  --error: #c51111;
+}
+
+body, .body {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8em;
+  background: linear-gradient(180deg, var(--bg), var(--border));
+  color: var(--fg);
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+h1 {
+  display: inline-block;
+  font-size: 2em;
+  padding-left: 20px;
+  margin-bottom: 0.5em;
+}
+
+svg {
+  fill: var(--fg);
+  color: var(--card);
+}
+
+svg.electron {
+  margin: 0 0.5em;
+  width: 25px;
+  height: 25px;
+}
+
+svg.github {
+  top: 0;
+  border: 0;
+  right: 0;
+}
+
+.light {
+  position: relative;
+  top: 16px;
+  left: 0px;
+  z-index: 2;
+}
+
+.dark {
+  position: relative;
+  top: -12px;
+  left: 30px;
+  z-index: 2;
+}
+
+.light svg {
+  display: block;
+  width: 30px;
+  cursor: pointer;
+  transition: transform 0.4s ease;
+}
+
+.dark svg {
+  display: block;
+  width: 20px;
+  cursor: pointer;
+  transition: transform 0.4s ease;
+}
+
+.light svg:hover, .dark svg:hover {
+  transform: scale(1.2);
+}
+
+label {
+  display: block;
+  margin-top: 1.2em;
+  font-weight: 500;
+  padding-left: 10px;
+}
+
+input {
+  box-shadow: 2px 2px 4px var(--shadow);
+  margin: 0 2em;
+}
+
+input[type="text"],
+input[type="number"] {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--fg);
+  width: 96%;
+  box-sizing: border-box;
+  margin-top: 0.25em;
+  margin-left: 2%;
+  transition: opacity 0.4s ease;
+  width: 100%;
+}
+
+input[type="checkbox"] {
+  margin-right: 0.5em;
+}
+
+button {
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  padding: 0.6em 1.2em;
+  font-size: 16px;
+  border-radius: 6px;
+  margin: 1em;
+  cursor: pointer;
+  transition: background-color 0.4s ease, transform 0.2s ease;
+  box-shadow: 2px 2px 4px var(--shadow);
+}
+
+button:hover {
+  background-color: #1d4ed8;
+  transform: scale(1.05);
+}
+
+button:disabled, input:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.select-folder {
+  cursor: pointer;
+}
+
+#log {
+  height: 320px;
+  width: 100%;
+  overflow-y: auto;
+  background-color: var(--log-bg);
+  padding: 1em;
+  font-family: Consolas, monospace;
+  border-radius: 6px;
+  margin: 1em;
+  white-space: pre-wrap;
+}
+
+progress {
+  width: 100%;
+  margin-top: 0.5em;
+}
+
+#progress-container {
+  margin: 0.5em;
+  font-family: Fira Code, Roboto, monospace;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+#progress-time {
+  margin-top: 0.5em;
+  padding-right: 20px;
+}
+
+#progress-text {
+  margin-top: 0.5em;
+}
+
+.head {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  background: var(--accent);
+  border-top: var(--accent2) 2px solid;
+  border-left: var(--accent2) 2px solid;
+  border-right: var(--accent2) 2px solid;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  z-index: 1;
+}
+
+.titlebar {
+  display: grid;
+  grid-template-columns: 1fr 40px 40px 40px 5px;
+  grid-template-rows: 1fr;
+  gap: 0px 5px;
+}
+
+.title {
+  display: grid;
+  justify-content: start;
+  align-items: center;
+  grid-area: 1 / 1 / 2 / 2;
+  grid-auto-flow: column;
+  height: 100%;
+  width: 100%;
+  padding-left: 20px;
+  font-size: 16px;
+  z-index: 1;
+  app-region: drag;
+}
+
+.closer, .maximizer, .minimizer {
+  justify-self: center;
+  align-self: center;
+  width: 16px;
+  height: 16px;
+  padding: 6px;
+  cursor: pointer;
+  border: transparent 1px solid;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  z-index: 1;
+}
+
+.maximizer:hover, .minimizer:hover {
+  background: var(--accent2);
+  border: var(--border) 1px solid;
+}
+
+.closer:hover {
+  background: var(--error);
+  border: var(--border) 1px solid;
+}
+
+.wrapper {
+  display: grid;
+  grid-template-columns: 1fr 90px;
+  grid-template-rows: 1fr;
+  gap: 0px 0px;
+  grid-template-areas:
+  "content github";
+  padding-top: 80px;
+}
+
+.theme-github {
+  position: fixed;
+  top: 33px;
+  right: 0;
+}
+
+.theme-github-inner {
+  position: relative;
+}
+
+.github-corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.theme {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.content {
+  justify-self: center;
+  align-self: center;
+  grid-area: 2 / 1 / 4 / 5;
+  width: 90%;
+  height: 100%;
+  grid-area: content;
+  margin-bottom: 20px;
+}
+
+.footer {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  background: var(--bg);
+  border-bottom: var(--border) 2px solid;
+  border-left: var(--border) 2px solid;
+  border-right: var(--border) 2px solid;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  z-index: 1;
+}
+
+/**********************************/
+
+/* Tooltips (modern) */
+[data-tooltip] {
+  position: relative;
+  cursor: help;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  right: 60%;
+  bottom: 75%;
+  background-color: var(--fg);
+  color: var(--bg);
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  white-space: pre-line;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  z-index: 10;
+  width: max-content;
+  max-width: 300px;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.github-corner:hover .octo-arm {
+  animation: octocat-wave 700ms ease-in-out;
+}
+
+@keyframes octocat-wave {
+  0%, 100% {
+    transform: rotate(0)
+  }
+
+  20%, 60% {
+    transform: rotate(-25deg)
+  }
+
+  40%, 80% {
+    transform: rotate(10deg)
+  }
+}
