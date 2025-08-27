@@ -51,16 +51,20 @@ Thist creates a windows installer package from the app. When you start the exe f
 #### GUI
 <img src="src/img/app.png" width="400">
 
-  1. Start the GUI with `npm start`.
-  2. Enter the URL of the website you want to download.
-  3. Select the desired options.
-  4. Choose the target folder, in which the website folder will be created.
-  5. Start the download with the `Start` button.
+  1. Start the GUI with
+  2. ```cmd
+     cd dist/Website-Downloader-win32-x64
+     Website-Downloader.exe
+     ```
+  3. Enter the URL of the website you want to download.
+  4. Select the desired options.
+  5. Choose the target folder, in which the website folder will be created.
+  6. Start the download with the `Start` button.
 
 #### CLI
  Start the tool from the command line with
- ```bash
- node downloader.js <url> [options]
+ ```cmd
+ node download <url> [options]
  ```
 
 #### Options
@@ -77,8 +81,8 @@ Thist creates a windows installer package from the app. When you start the exe f
 
 ## Example
 To download a web page with a link depth of 1, recursion and ZIP export, use the following command:
-```bash
-node downloader.js https://example.com --depth=1 --recursive --zip --outdir=C:\Users\<username>\documents
+```cmd
+node download https://example.com --depth=1 --recursive --zip --outdir=C:\Users\<username>\documents
 ```
 
 ## Some Infos about this Tool
@@ -93,6 +97,7 @@ node downloader.js https://example.com --depth=1 --recursive --zip --outdir=C:\U
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
 
