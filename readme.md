@@ -24,47 +24,48 @@ I assume you have node.js, npm and git already installed.
 
 2. Clone this repository:
 ```cmd
-git clone https://github.com/ManuelPeh76/website-downloader.git
+>git clone https://github.com/ManuelPeh76/website-downloader.git
 ```
 
 3. Switch into the newly created folder with `cd website-downloader`.
 
 4. Install the dependencies:
 ```cmd
-npm install
+>npm install
 ```
 
 5. Build the App
 ```cmd
-npm run build
+>npm run build
 ```
 A 'dist' folder will be created, containing the tool inside the 'Website-Downloader-win32-x64' folder.
 Just step inside and start Website-Downloader.exe.
 
 6. Build a Windows Installer (optional)
 ```cmd
-npm run setup
+>npm run setup
 ```
 Thist creates a windows installer package from the app. When you start the exe file inside the dist/installers folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you already download anything ;) ).
+The setup should place a shortcut to start the Website Downloader inside of the start menu.
 
 ## Usage
 #### GUI
 <img src="src/img/app.png" width="400">
 
   1. Start the GUI with
-  2. ```cmd
-     cd dist/Website-Downloader-win32-x64
-     Website-Downloader.exe
-     ```
-  3. Enter the URL of the website you want to download.
-  4. Select the desired options.
-  5. Choose the target folder, in which the website folder will be created.
-  6. Start the download with the `Start` button.
+  ```cmd
+  >cd dist/Website-Downloader-win32-x64
+  >Website-Downloader.exe
+  ```
+  2. Enter the URL of the website you want to download.
+  3. Select the desired options.
+  4. Choose the target folder, in which the website folder will be created.
+  5. Start the download with the `Start` button.
 
 #### CLI
  Start the tool from the command line with
  ```cmd
- node download <url> [options]
+ >node download <url> [options]
  ```
 
 #### Options
@@ -97,6 +98,7 @@ node download https://example.com --depth=1 --recursive --zip --outdir=C:\Users\
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
 
