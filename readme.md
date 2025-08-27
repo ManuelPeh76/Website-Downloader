@@ -16,19 +16,36 @@ A fast and universal downloader for dynamic websites, created with electron.
 - 🌓 Supports Light Mode and Dark Mode
 
 ## Installation
+Since I am pure windows user, I can describe the steps only for windows machines. But I am sure, for Linux and MacOS it will also be possible, to do it in a simmilar way.
+
 I assume you have node.js, npm and git already installed.
-1. Open a command window (`cmd` on windows machines).
+
+1. Open cmd.
 
 2. Clone this repository:
-```
+```cmd
 git clone https://github.com/ManuelPeh76/website-downloader.git
 ```
-3. Switch into the newly created folder with `cd website-downloader`
+
+3. Switch into the newly created folder with `cd website-downloader`.
 
 4. Install the dependencies:
-```
+```cmd
 npm install
 ```
+
+5. Build the App
+```cmd
+npm run build
+```
+A 'dist' folder will be created, containing the tool inside the 'Website-Downloader-win32-x64' folder.
+Just step inside and start Website-Downloader.exe.
+
+6. Build a Windows Installer (optional)
+```cmd
+npm run setup
+```
+Thist creates a windows installer package from the app. When you start the exe file inside the dist/installers folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you already download anything ;) ).
 
 ## Usage
 #### GUI
@@ -72,24 +89,10 @@ node downloader.js https://example.com --depth=1 --recursive --zip --outdir=C:\U
 - When a file has been downloaded, the tool checks, if the containing links are absolute or relative, in order to adapt them if necessary. If absolute links are found, and they point to the same origin, they are changed to relative links. Thus the functionality of that site remains intact (works offline, except for files that are loaded from other sources).
 - When using the GUI, all settings you change (incl. the url) are saved via local storage. The next time you start the GUI your own settings will be restored.
 
-## Build the App
-You can build this tool using electron, so you can run an .exe file to start it:
-```bash
-npm run build
-```
-A 'dist' folder will be created, containing the tool.
-Unfortunately, to make it run propperly, you have to put a copy of the download.js directly into the dist/website-downloader-win32-x64 folder (where the website-downloader.exe file is located).
-
-## Build a Windows Installer
-```bash
-npm run build
-npm run setup
-```
-Thist creates a windows installer package from the app.
-
 ## License
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
