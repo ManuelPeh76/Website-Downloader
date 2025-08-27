@@ -15,5 +15,8 @@ contextBridge.exposeInMainWorld('api', {
   abortDownload: () => ipcRenderer.invoke('abort-download'),
   pauseDownload: () => ipcRenderer.invoke('pause-download'),
   resumeDownload: () => ipcRenderer.invoke('resume-download'),
-  saveProgress: args => ipcRenderer.invoke('save-progress', args)
+  saveProgress: args => ipcRenderer.invoke('save-progress', args),
+  minimize: () => ipcRenderer.invoke("minimize"),
+  maximize: () => ipcRenderer.invoke("maximize"),
+  quit: () => ipcRenderer.invoke("quit")
 });

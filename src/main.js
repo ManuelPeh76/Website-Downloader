@@ -11,6 +11,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 const ntsuspend = require('ntsuspend');
 
+const isWin = process.platform === 'win32';
 const options = {
   width: 900,
   height: 1000,
@@ -22,15 +23,12 @@ const options = {
   }
 };
 
-const isWin = process.platform === 'win32';
-let proc, pid;
-
-function createWindow() {
-  const win = new BrowserWindow(options);
-  win.loadFile(path.join(__dirname, './gui.html'));
-}
+let proc, pid, mainWindow;
 
 app.whenReady().then(() => {
+
+  mainWindow = new BrowserWindow(options);
+  mainWindow.loadFile(path.join(__dirname, './gui.html'));
 
   ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir, simultaneous, dwt, useIndex }) => {
     return new Promise(resolve => {
@@ -72,5 +70,21 @@ app.whenReady().then(() => {
     proc && !proc.killed && proc.stdin.write("save-progress:" + log);
   });
 
-  createWindow();
+  ipcMain.handle("minimize", ()  => {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.minimize();
+  });
+
+  ipcMain.handle("maximize", () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (mainWindow.isMaximized()) {
+        mainWindow.unmaximize();
+        return false;
+      }
+      mainWindow.maximize();
+      return true;
+    }
+  });
+
+  ipcMain.handle("quit", app.quit);
+
 });

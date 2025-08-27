@@ -4,6 +4,7 @@
   color-scheme: light dark;
   --bg: #f9fafb;
   --fg: #111;
+  --link: #0715d3;
   --accent: #2563eb;
   --accent2: #5282e9;
   --card: #ffffff;
@@ -18,6 +19,7 @@
   :root:not([data-theme]) {
     --bg: #1f2937;
     --fg: #f9fafb;
+    --link: #a19e28;
     --accent: #355599;
     --accent2: #5282e9;
     --card: #111827;
@@ -32,6 +34,7 @@
 :root[data-theme="light"] {
   --bg: #f9fafb;
   --fg: #111;
+  --link: #0715d3;
   --accent: #6699ff;
   --accent2: #5282e9;
   --card: #ffffff;
@@ -45,6 +48,7 @@
 :root[data-theme="dark"] {
   --bg: #1f2937;
   --fg: #ddd;
+  --link: #a19e28;
   --accent: #355599;
   --accent2: #5282e9;
   --card: #111827;
@@ -56,7 +60,8 @@
 
 body, .body {
   font-family: 'Inter', sans-serif;
-  font-size: 0.8em;
+  font-size: 0.9em;
+  font-variant: small-caps;
   background: linear-gradient(180deg, var(--bg), var(--border));
   color: var(--fg);
   margin: 0;
@@ -68,22 +73,22 @@ body, .body {
   display: none;
 }
 
-h1 {
-  display: inline-block;
-  font-size: 2em;
-  padding-left: 20px;
-  margin-bottom: 0.5em;
+a {
+  color: var(--link);
+  text-decoration: none;
+  font-weight: bold;
 }
 
 svg {
   fill: var(--fg);
+  stroke: var(--fg);
   color: var(--card);
 }
 
 svg.electron {
   margin: 0 0.5em;
-  width: 25px;
-  height: 25px;
+  width: 20px;
+  height: 20px;
 }
 
 svg.github {
@@ -138,6 +143,7 @@ input {
 
 input[type="text"],
 input[type="number"] {
+  font-size: 12px;
   padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid var(--border);
@@ -156,11 +162,12 @@ input[type="checkbox"] {
 }
 
 button {
+  font-variant: small-caps;
   background-color: var(--accent);
   color: white;
   border: none;
   padding: 0.6em 1.2em;
-  font-size: 16px;
+  font-size: 14px;
   border-radius: 6px;
   margin: 1em;
   cursor: pointer;
@@ -183,12 +190,13 @@ button:disabled, input:disabled {
 }
 
 #log {
-  height: 320px;
+  height: 300px;
   width: 100%;
   overflow-y: auto;
   background-color: var(--log-bg);
   padding: 1em;
   font-family: Consolas, monospace;
+  font-variant: normal;
   border-radius: 6px;
   margin: 1em;
   white-space: pre-wrap;
@@ -201,7 +209,8 @@ progress {
 
 #progress-container {
   margin: 0.5em;
-  font-family: Fira Code, Roboto, monospace;
+  font-family: Consolas, monospace;
+  font-variant: normal;
   font-size: 16px;
   font-weight: 500;
 }
@@ -246,9 +255,10 @@ progress {
   height: 100%;
   width: 100%;
   padding-left: 20px;
-  font-size: 16px;
+  font-size: 18px;
   z-index: 1;
   app-region: drag;
+  font-variant: small-caps;
 }
 
 .closer, .maximizer, .minimizer {
@@ -317,6 +327,13 @@ progress {
 }
 
 .footer {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  grid-auto-flow: column;
+  column-gap: 5px;
+  font-size: 12px;
+  font-variant: small-caps;
   width: 100%;
   position: fixed;
   bottom: 0;
@@ -324,9 +341,9 @@ progress {
   width: 100%;
   height: 30px;
   background: var(--bg);
-  border-bottom: var(--border) 2px solid;
-  border-left: var(--border) 2px solid;
-  border-right: var(--border) 2px solid;
+  border-bottom: var(--border) 1px solid;
+  border-left: var(--border) 1px solid;
+  border-right: var(--border) 1px solid;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   z-index: 1;
@@ -344,7 +361,7 @@ progress {
   content: attr(data-tooltip);
   position: absolute;
   right: 60%;
-  bottom: 75%;
+  bottom: 50%;
   background-color: var(--fg);
   color: var(--bg);
   padding: 6px 10px;
