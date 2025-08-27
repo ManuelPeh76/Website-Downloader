@@ -76,9 +76,9 @@ The setup should place a shortcut to start the Website Downloader inside of the 
 | `-u`, `--use-index` | If there's no file ending in the path, the filename 'index.html' is assumed. (default: true) |
 
 ## Example
-To download a web page with a link depth of 1, recursion and ZIP export, use the following command:
+To download a web page with a link depth of 4, recursion, clean mode, a dynamic wait time of 500ms, using index.html option and with output on the desktop use the following command:
 ```cmd
-node src/download https://example.com --depth=1 --recursive --zip --outdir=C:\Users\<username>\documents
+node src/download https://example.org -r -c -u -d=4 -dwt=500 outdir=C:\Users\Manuel\Desktop
 ```
 
 ## Some Infos about this Tool
@@ -93,6 +93,7 @@ node src/download https://example.com --depth=1 --recursive --zip --outdir=C:\Us
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
 
