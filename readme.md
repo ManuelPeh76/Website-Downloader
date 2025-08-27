@@ -1,8 +1,8 @@
 # <img src="src/img/electron.svg" width="50" height="50"> Website-Downloader
-A fast and universal downloader for dynamic websites, created with electron.
+A fast and universal downloader for dynamic websites, created with Puppeteer and Electron.
 
 ## Features
-- 🔎 Dynamic Loading: Catches files that are dynamically loaded (e.g. from a script).
+- 🔎 Dynamic Loading: Catches files that are dynamically loaded during runtime.
 - 🚀 Fast Loading: Up to 25 files are downloaded simultaneously.
 - 🔁 Recursive Download: Searches linked pages and downloads files found there.
 - 📏 Limit Depth: Specifies how deep links should be traced.
@@ -19,31 +19,30 @@ A fast and universal downloader for dynamic websites, created with electron.
 Since I am pure windows user, I can describe the steps only for windows machines. But I am sure, for Linux and MacOS it will also be possible, to do it in a simmilar way.
 
 I assume you have node.js, npm and git already installed.
-
-1. Open cmd.
-
-2. Clone this repository:
+I only show you what you have to type into the console. Of course there will be output from some steps that is not shown here.
 ```cmd
->git clone https://github.com/ManuelPeh76/website-downloader.git
-```
+git clone https://github.com/ManuelPeh76/website-downloader.git
 
-3. Switch into the newly created folder with `cd website-downloader`.
+cd website-downloader
 
-4. Install the dependencies:
-```cmd
->npm install
-```
+npm install
 
-5. Build the App
-```cmd
->npm run build
+npm run build
 ```
 A 'dist' folder will be created, containing the tool inside the 'Website-Downloader-win32-x64' folder.
 Just step inside and start Website-Downloader.exe.
+```cmd
+cd dist\Website-Downloader-win32-x64
 
+Website-Downloader.exe
+```
 6. Build a Windows Installer (optional)
 ```cmd
->npm run setup
+cd..
+
+cd..
+
+npm run setup
 ```
 Thist creates a windows installer package from the app. When you start the exe file inside the dist/installers folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you already download anything ;) ).
 The setup should place a shortcut to start the Website Downloader inside of the start menu.
@@ -52,20 +51,16 @@ The setup should place a shortcut to start the Website Downloader inside of the 
 #### GUI
 <img src="src/img/app.png" width="400">
 
-  1. Start the GUI with
-  ```cmd
-  >cd dist/Website-Downloader-win32-x64
-  >Website-Downloader.exe
-  ```
+  1. Start the GUI with the shortcut from the startmenu or go to C:\Users\<username>\AppData\Local\Website_Downloader and start the Website-Downloader.exe
   2. Enter the URL of the website you want to download.
   3. Select the desired options.
   4. Choose the target folder, in which the website folder will be created.
   5. Start the download with the `Start` button.
 
 #### CLI
- Start the tool from the command line with
+ Open a command line inside the repo folder and start the tool with
  ```cmd
- >node download <url> [options]
+ >node src/download <url> [options]
  ```
 
 #### Options
@@ -83,21 +78,22 @@ The setup should place a shortcut to start the Website Downloader inside of the 
 ## Example
 To download a web page with a link depth of 1, recursion and ZIP export, use the following command:
 ```cmd
-node download https://example.com --depth=1 --recursive --zip --outdir=C:\Users\<username>\documents
+node src/download https://example.com --depth=1 --recursive --zip --outdir=C:\Users\<username>\documents
 ```
 
 ## Some Infos about this Tool
 
-- Files that are dynamically loaded during the website's runtime are only recorded if the request occurs within the dynamical wait time (3000ms by default) after opening the page. Understandably, the downloader cannot wait forever for such a request to occur, as this would block the corresponding download channel.
+- Files that are dynamically loaded during the website's runtime are only recorded if the request occurs within the dynamical wait time (3000ms by default) after opening the page.
 - CSS files (whether linked or dynamically loaded) are searched for 'url(...)' to include fonts and images that are loaded by the CSS.
 - Only files whose storage location matches that of the website are saved.
-- When a file has been downloaded, the tool checks, if the containing links are absolute or relative, in order to adapt them if necessary. If absolute links are found, and they point to the same origin, they are changed to relative links. Thus the functionality of that site remains intact (works offline, except for files that are loaded from other sources).
+- When an HTML file has been downloaded, the tool adapts all links to make sure, the webpage works offline.
 - When using the GUI, all settings you change (incl. the url) are saved via local storage. The next time you start the GUI your own settings will be restored.
 
 ## License
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
 
