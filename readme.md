@@ -54,8 +54,9 @@ npm install
 | `-r`, `--recursive` | Enables recursive downloading of linked pages (default: true). |
 | `-z`, `--zip` | Creates a ZIP archive after downloads are complete (default: false). |
 | `-c`, `--clean` | Empties the destination folder before saving downloads (default: false). |
-| `-o=<path>`, `--outdir=<path>` | The full path to the folder the website is saved to (default: repo folder).
-| `-s=<number>`, `--simultaneous=<number>` | The amount of simultaneously active downloads (default: 8).
+| `-o=<path>`, `--outdir=<path>` | The full path to the folder the website is saved to (default: repo folder). |
+| `-s=<number>`, `--simultaneous=<number>` | The amount of simultaneously active downloads (default: 8). |
+| `-u`, `--use-index` | If there's no file ending in the path, the filename 'index.html' is assumed. (default: true) |
 
 ## Example
 To download a web page with a link depth of 1, recursion and ZIP export, use the following command:
@@ -90,4 +91,5 @@ Thist creates a windows installer package from the app.
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
