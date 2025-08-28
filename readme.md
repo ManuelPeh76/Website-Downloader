@@ -16,7 +16,7 @@ A fast and universal downloader for dynamic websites, created with Puppeteer and
 - 🌓 Supports Light Mode and Dark Mode
 
 ## Installation
-Since I am pure windows user, I can describe the steps only for windows machines. But I am sure, for Linux and MacOS it will also be possible, to do it in a simmilar way.
+Since I am pure windows user, I can describe the steps only for windows machines. The steps are the same for users of other systems. At least up to `npm install`. From there you can run the Downloader with `npm start` and it will work. The steps after that are windows specific (they result in an .exe file to run the tool and an installer is created). But I am sure, for Linux and MacOS it will also be possible, to do it in a simmilar way.
 
 I assume you have node.js, npm and git already installed.
 I only show you what you have to type into the console. Of course there will be output from some steps that is not shown here.
