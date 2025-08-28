@@ -16,36 +16,33 @@ A fast and universal downloader for dynamic websites, created with Puppeteer and
 - 🌓 Supports Light Mode and Dark Mode
 
 ## Installation
-Since I am pure windows user, I can describe the steps only for windows machines. The steps are the same for users of other systems. At least up to `npm install`. From there you can run the Downloader with `npm start` and it will work. The steps after that are windows specific (they result in an .exe file to run the tool and an installer is created). But I am sure, for Linux and MacOS it will also be possible, to do it in a simmilar way.
+Since I am pure windows user, I can describe the steps only for windows machines. The steps are the same for users of other systems. At least up to `npm install`. From there you can run the Downloader with `npm start` and it will work.
+The steps after that are windows specific: A package is created (which runs the tool as .exe file) and a windows installer (to... guess what... install it on a windows machine). 
+But I am sure, for Linux and MacOS it will also be possible, to do it in a simmilar way.
 
 I assume you have node.js, npm and git already installed.
-I only show you what you have to type into the console. Of course there will be output from some steps that is not shown here.
+First, clone the repository and install the dependencies:
 ```cmd
 git clone https://github.com/ManuelPeh76/website-downloader.git
 
 cd website-downloader
 
 npm install
-
+```
+Now you can run the app with `npm start`. 
+This opens a cmd window, which will launch the app. To make the app really standalone (without the need to run a second window beside it), you can create an app package:
+```cmd
 npm run build
 ```
-A 'dist' folder will be created, containing the tool inside the 'Website-Downloader-win32-x64' folder.
+This creates a 'dist\Website-Downloader-win32-x64' folder, containing the app as an .exe file.
 Just step inside and start Website-Downloader.exe.
+
+## Build a Windows Installer (optional)
 ```cmd
-cd dist\Website-Downloader-win32-x64
-
-Website-Downloader.exe
-```
-6. Build a Windows Installer (optional)
-```cmd
-cd..
-
-cd..
-
 npm run setup
 ```
 Thist creates a windows installer package from the app. When you start the exe file inside the dist/installers folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you already download anything ;) ).
-The setup should place a shortcut to start the Website Downloader inside of the start menu.
+The setup should place a shortcut to start the Website Downloader inside of the start menu. The app will be installed to `C:\Users\<username>\AppData\Local\Website_Downloader`.
 
 ## Usage
 #### GUI
@@ -93,6 +90,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 outdir=C:\Users\<us
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
 
