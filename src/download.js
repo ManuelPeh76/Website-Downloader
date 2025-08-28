@@ -139,7 +139,7 @@ async function getFolderSize(dirPath) {
   return `${total.toFixed(2)} ${b}`;
 }
 
-// ========== SCROLL ==========
+// Webpage scroll function to trigger onscroll file requests
 async function autoScroll(page) {
   await page.evaluate(async () => {
     await new Promise(resolve => {
@@ -158,7 +158,7 @@ async function autoScroll(page) {
   });
 }
 
-// A limit function, to not run more than SIMULTANEOUS download tasks
+// A limit function, to not run more than CONCURRENCY download tasks
 function pLimit(concurrency) {
   const queue = [];
   let active = 0;
