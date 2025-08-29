@@ -29,7 +29,7 @@ cd website-downloader
 
 npm install
 ```
-Now you can run the app with `npm start`. But it still needs the cmd window to be opened. To make the app really standalone (without the need to run a second window beside it), you can create an app package:
+Now you can run the app with `npm start`. But it still needs the cmd window to be open. To make the app really standalone (without the need to run a second window beside it), you can create an app package:
 ```cmd
 npm run build
 ```
