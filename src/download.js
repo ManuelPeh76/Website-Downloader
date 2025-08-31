@@ -363,7 +363,7 @@ async function crawl(url, depth, browser, recursive = null) {
   log(`🌐 Site (Depth ${depth}): ${url}`);
   const parsedUrl = new URL(url);
   const stripped = stripSearch(url);
-  if ((USE_INDEX && !path.extname(parsedUrl.pathname)) || new URL(url).pathname === new URL(TARGET_URL).pathname) url = stripped + (stripped.endsWith("/") ? "index.html" : "/index.html") + parsedUrl.search || "";
+  if (USE_INDEX && !path.extname(parsedUrl.pathname) && new URL(url).pathname === new URL(TARGET_URL).pathname) url = stripped + (stripped.endsWith("/") ? "index.html" : "/index.html") + parsedUrl.search || "";
   // Remember the url of this HTML file
   visited.add(stripSearch(url));
   sitemap.add(stripSearch(url));
