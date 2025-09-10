@@ -74,7 +74,7 @@ The setup should place a shortcut to start the Website Downloader inside of the 
 ## Example
 To download a web page with a link depth of 4, recursion, clean mode, a dynamic wait time of 500ms, using index.html option and with output on the desktop use the following command:
 ```cmd
-node src/download https://example.org -r -c -u -d=4 -dwt=500 outdir=C:\Users\<username>\Desktop
+node src/download https://example.org -r -c -u -d=4 -dwt=500 -o=C:\Users\<username>\Desktop
 ```
 
 ## Some Infos about this Tool
@@ -89,6 +89,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 outdir=C:\Users\<us
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
 
