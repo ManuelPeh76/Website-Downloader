@@ -33,21 +33,21 @@ Now you can run the app with `npm start`. But it still needs the cmd window to b
 ```cmd
 npm run build
 ```
-This creates a 'dist\Website-Downloader-win32-x64' folder, containing the app as an .exe file.
-Just step inside and start Website-Downloader.exe.
+This creates a 'dist\website-downloader-win32-x64' folder, containing the app as an .exe file.
+Just step inside and start website-downloader.exe.
 
 ## Build a Windows Installer (optional)
 ```cmd
 npm run setup
 ```
 Thist creates a windows installer package from the app. When you start the exe file inside the dist/installers folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you'd already download anything ;) ).
-The setup should place a shortcut to start the Website Downloader inside of the start menu. The app will be installed to `C:\Users\<username>\AppData\Local\Website_Downloader`.
+The setup should place a shortcut to start the Website Downloader inside of the start menu. The app will be installed to `C:\Users\<username>\AppData\Local\website_downloader`.
 
 ## Usage
 #### GUI
 <img src="src/img/app.png" width="400">
 
-  1. Start the GUI with the shortcut from the startmenu or go to C:\Users\<username>\AppData\Local\Website_Downloader and start the Website-Downloader.exe
+  1. Start the GUI with the shortcut from the startmenu or go to C:\Users\<username>\AppData\Local\website_downloader and start the Website-Downloader.exe
   2. Enter the URL of the website you want to download.
   3. Select the desired options.
   4. Choose the target folder, in which the website folder will be created.
@@ -89,6 +89,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 -o=C:\Users\<userna
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
 
