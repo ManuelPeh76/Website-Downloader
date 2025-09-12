@@ -2,6 +2,7 @@
   "name": "website-downloader",
   "version": "0.0.1",
   "main": "./src/main.js",
+  "description": "A universal downloader for dynamic websites, built with Puppeteer. Saves HTML, CSS, JS, Fonts, Images, Audio, Video and more — including recursive crawling, offline support, and ZIP export.",
   "scripts": {
     "start": "electron .",
     "build": "electron-packager . website-downloader --platform win32 --arch x64 --out dist/",
@@ -19,7 +20,6 @@
     "ntsuspend": "^1.0.2",
     "puppeteer": "^24.14.0"
   },
-  "description": "A universal downloader for dynamic websites, built with Puppeteer. Saves HTML, CSS, JS, Fonts, Images, Audio, Video and more — including recursive crawling, offline support, and ZIP export.",
   "devDependencies": {
     "electron": "^37.2.3",
     "electron-installer-windows": "*",
