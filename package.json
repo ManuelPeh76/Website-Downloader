@@ -1,11 +1,11 @@
 {
-  "name": "Website-Downloader",
+  "name": "website-downloader",
   "version": "0.0.1",
   "main": "./src/main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-packager . Website-Downloader --platform win32 --arch x64 --out dist/",
-    "setup": "electron-installer-windows --src dist/Website-Downloader-win32-x64/ --dest dist/installers/"
+    "build": "electron-packager . website-downloader --platform win32 --arch x64 --out dist/",
+    "setup": "electron-installer-windows --src dist/website-downloader-win32-x64/ --dest dist/installers/"
   },
   "keywords": [
     "crawler",
