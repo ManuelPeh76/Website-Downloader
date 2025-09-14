@@ -15,7 +15,7 @@ const isWin = process.platform === 'win32';
 const options = {
   width: 900,
   height: 1000,
-  //frame: false,
+  frame: false,
   webPreferences: {
     preload: path.join(__dirname, './preload.js'),
     contextIsolation: true,
@@ -93,3 +93,4 @@ app.whenReady().then(() => {
   ipcMain.handle("quit", app.quit);
 
 });
+
