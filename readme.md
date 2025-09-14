@@ -47,8 +47,7 @@ The setup should place a shortcut to start the Website Downloader inside of the 
 #### GUI
 <img src="src/img/app.png" width="400">
 
-  1. Start the GUI with the shortcut from the startmenu or go to 
-  C:\Users\<username>\AppData\Local\website_downloader and start the Website-Downloader.exe
+  1. Start the GUI with the shortcut from the startmenu or go to `C:\Users\<username>\AppData\Local\website_downloader` and start the `website-downloader.exe`.
   2. Enter the URL of the website you want to download.
   3. Select the desired options.
   4. Choose the target folder, in which the website folder will be created.
@@ -90,6 +89,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 -o=C:\Users\<userna
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
 
