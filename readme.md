@@ -80,7 +80,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 -o=C:\Users\<userna
 ## Some Infos about this Tool
 
 - Files that are dynamically loaded during the website's runtime are only recorded if the request occurs within the dynamical wait time (3000ms by default) after opening the page.
-- CSS files (whether linked or dynamically loaded) are searched for 'url(...)' to include fonts and images that are loaded by the CSS.
+- CSS files (whether linked or dynamically loaded) and inline CSS are searched for fonts and images to download these as well.
 - Only files whose storage location matches that of the website are saved.
 - When an HTML file has been downloaded, the tool adapts all links to make sure, the webpage works offline.
 - When using the GUI, all settings you change (incl. the url) are saved via local storage. The next time you start the GUI your own settings will be restored.
@@ -89,6 +89,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 -o=C:\Users\<userna
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
 
