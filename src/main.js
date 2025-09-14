@@ -15,7 +15,7 @@ const isWin = process.platform === 'win32';
 const options = {
   width: 900,
   height: 1000,
-  frame: false,
+  //frame: false,
   webPreferences: {
     preload: path.join(__dirname, './preload.js'),
     contextIsolation: true,
@@ -30,7 +30,7 @@ app.whenReady().then(() => {
   mainWindow = new BrowserWindow(options);
   mainWindow.loadFile(path.join(__dirname, './gui.html'));
 
-  ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir, simultaneous, dwt, useIndex }) => {
+  ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir, concurrency, dwt, useIndex }) => {
     return new Promise(resolve => {
       const args = [path.join(__dirname, './download.js'), url];
       if (zip) args.push('--zip');
@@ -38,7 +38,7 @@ app.whenReady().then(() => {
       if (recursive) args.push('--recursive');
       if (depth) args.push(`--depth=${depth}`);
       if (outdir) args.push(`--outdir=${outdir}`);
-      if (simultaneous) args.push(`--simultaneous=${simultaneous}`);
+      if (concurrency) args.push(`--concurrency=${concurrency}`);
       if (dwt) args.push(`--dyn_wait_time=${dwt}`);
       if (useIndex) args.push('--use-index');
       proc = spawn('node', args);
@@ -84,6 +84,11 @@ app.whenReady().then(() => {
       return true;
     }
   });
+
+  ipcMain.handle("unmaximize", () => {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.unmaximize();
+  });
+
 
   ipcMain.handle("quit", app.quit);
 
