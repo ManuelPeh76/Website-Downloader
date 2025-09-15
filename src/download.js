@@ -40,13 +40,12 @@ const OUTPUT_DIR        = outArg ? path.join(outArg.split('=')[1].replace(/^["']
 const START_TIME        = Date.now();
 const HTTP_STATUS_CODES = { 100: "Continue", 101: "Switching Protocols", 102: "Processing", 103: "Early Hints", 200: "OK", 201: "Created", 202: "Accepted", 203: "Non-Authoritative Information", 204: "No Content", 205: "Reset Content", 206: "Partial Content", 207: "Multi-Status", 208: "Already Reported", 226: "IM Used", 300: "Multiple Choices", 301: "Moved Permanently", 302: "Found", 303: "See Other", 304: "Not Modified", 305: "Use Proxy", 307: "Temporary Redirect", 308: "Permanent Redirect", 400: "Bad Request", 401: "Unauthorized", 402: "Payment Required", 403: "Forbidden", 404: "Not Found", 405: "Method Not Allowed", 406: "Not Acceptable", 407: "Proxy Authentication Required", 408: "Request Timeout", 409: "Conflict", 410: "Gone", 411: "Length Required", 412: "Precondition Failed", 413: "Payload Too Large", 414: "URI Too Long", 415: "Unsupported Media Type", 416: "Range Not Satisfiable", 417: "Expectation Failed", 418: "I'm a Teapot", 421: "Misdirected Request", 422: "Unprocessable Content", 423: "Locked", 424: "Failed Dependency", 425: "Too Early", 426: "Upgrade Required", 428: "Precondition Required", 429: "Too Many Requests", 431: "Request Header Fields Too Large", 451: "Unavailable For Legal Reasons", 500: "Internal Server Error", 501: "Not Implemented", 502: "Bad Gateway", 503: "Service Unavailable", 504: "Gateway Timeout", 505: "HTTP Version Not Supported", 506: "Variant Also Negotiates", 507: "Insufficient Storage", 508: "Loop Detected", 510: "Not Extended", 511: "Network Authentication Required" };
 
-const stringUrlRegex = /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)/g; // Extract URL from a string
 const limit = pLimit(CONCURRENCY); // Set the number of download concurrency
-const resourceMap = new Map(); // Contains all resource urls together with the corresponding local addresses
-const visited = new Set(); // Contains all html file urls, to check if an html file has already been downloaded
+const resourceMap = new Map(); // Contains all resource URLs together with the corresponding local addresses
+const visited = new Set(); // List of the URLs of all saved HTML files
 const sitemap = new Set(); // List of the local addresses of all downloaded files
-const failed = new Set(); // Remember broken urls
-const tasks = []; // Stack for downloads
+const failed = new Set(); // Remember broken URLs
+const tasks = []; // List of download tasks
 const logs = []; // List of all errors occured in the process
 
 let resourceMapSize = 0;
@@ -57,9 +56,9 @@ const stripHash = url => url.split("#")[0];
 const stripSearch = url => url.split("?")[0];
 const sanitize = p => p.replace(/[^@a-z0-9/\-_.%\[\]()]/gi, '_').replace(/_+/g, '_');
 const log = msg => console.log(msg);
-const isLocalFile = (url, baseUrl = TARGET_URL) => existsSync(getLocalPath(url, baseUrl)) ? true : false;
+const isLocalFile = (url, baseUrl = TARGET_URL) => existsSync(getLocalPath(url, baseUrl));
 
-// Reacts on requests from the renderer process (renderer.js)
+// Handle incoming messages from the renderer process (renderer.js)
 process.stdin.on('data', async data => {
   const command = data.toString().trim();
   if (command.startsWith('abort')) {
@@ -117,10 +116,7 @@ function reportProgress() {
 }
 
 /**
- * Logs the total number of requests made.
- * The prefix 'TLF' tells the log listener in renderer.js where to print out the number.
- *
- * @function
+ * Logs the total number of links found
  */
 function reportTotal() {
   log(`TLF${totalRequests}`);
@@ -204,7 +200,7 @@ async function autoScroll(page) {
 }
 
 /**
- * Creates a function that limits the number of concurrently executing asynchronous functions.
+ * Creates a function that limits the number of concurrently executing asynchronous functions (the downloads in this case).
  *
  * @param {number} concurrency - The maximum number of concurrent executions allowed.
  * @returns {(fn: () => Promise<any>) => Promise<any>} A function that schedules the provided async function for execution, respecting the concurrency limit.
@@ -288,7 +284,6 @@ async function dynamicPageRequest(request) {
     let resourcePath = sanitize(parsedUrl.pathname);
     if (USE_INDEX && !path.extname(resourcePath)) resourcePath += resourcePath.endsWith("/") ? "index.html" : "/index.html";
     const localPath = path.join(OUTPUT_DIR, resourcePath);
-    const relativePath = path.relative(OUTPUT_DIR, localPath).replace(/\\/g, '/');
     if (href.endsWith(".html") || href.endsWith(".htm")) {
       if (visited.has(href)) sitemap.add(href);
       else tasks.push(limit(() => crawl(href, depth + 1, browser, 1)));

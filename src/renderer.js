@@ -49,6 +49,7 @@ const zip = document.getElementById("zip");
 const clean = document.getElementById("clean");
 const useIndex = document.getElementById("use-index");
 const totalLinks = document.getElementById("total-links");
+const cycles = [...document.querySelectorAll(".cycle")];
 
 const httpRegex = /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/;
 
@@ -115,140 +116,25 @@ api.unmaximize();
 // Event Listeners
 //
 
+document.addEventListener("keydown", keyDown);
+
 //Store values in the local storage if they change
-inputs.forEach((el) => {
-  el.addEventListener("change", function () {
-    const name = this.id;
-    const value = this.type === "checkbox" ? this.checked : this.value;
-    obj[name] = value;
-    localStorage.downloader_obj = JSON.stringify(obj);
-  });
-});
+inputs.forEach(el => el.addEventListener("change", function () {
+  const name = this.id;
+  const value = this.type === "checkbox" ? this.checked : this.value;
+  obj[name] = value;
+  localStorage.downloader_obj = JSON.stringify(obj);
+}));
 
 // Toggle Theme
-themeToggler.forEach((el) =>
-  el.addEventListener("click", function () {
-    setTheme(this.id);
-  })
-);
+themeToggler.forEach(el => el.addEventListener("click", function () {
+  setTheme(this.id);
+}));
 
-github.addEventListener("click", () =>
-  open("https://github.com/ManuelPeh76/Website-Downloader")
-);
-
-// Prepare to start downloading
-start.addEventListener("click", async () => {
-  const query = {
-    url: url.value,
-    depth: depth.value,
-    zip: zip.checked,
-    clean: clean.checked,
-    useIndex: useIndex.checked,
-    recursive:recursive.checked,
-    outdir: outdir.value.trim(),
-    concurrency: parseInt(concurrency.value, 10),
-    dwt: parseInt(dwt.value, 10)
-  };
-
-  if (query.dwt < 500) dwt.value = query.dwt = 500;
-  if (query.dwt > 30000) dwt.value = query.dwt = 30000;
-
-  if (query.concurrency < 2) concurrency.value = query.concurrency = 2;
-  if (query.concurrency > 25) concurrency.value = query.concurrency = 25;
-
-  if (!query.url.startsWith("http")) {
-    if (httpRegex.test("https://" + query.url)) {
-      let response;
-      response = await fetch("https://" + query.url, { method: 'HEAD' });
-      if (response.ok) {
-        query.url = url.value = obj.url =  "https://" + query.url;
-        localStorage.downloader_obj = JSON.stringify(obj);
-      } else {
-        response = await fetch("http://" + query.url, { method: 'HEAD' });
-        if (response.ok) {
-          query.url = url.value = obj.url = "http://" + query.url;
-          localStorage.downloader_obj = JSON.stringify(obj);
-        } else return (logMessage("<br>❌ Please enter a valid URL!"), url.focus());
-      }
-    } else return (logMessage("<br>❌ Please enter a valid URL!"), url.focus());
-  }
-
-  log.innerHTML = "";
-  progress.innerHTML = "";
-
-  setButtons();
-  startTime = Date.now();
-  progressTime.innerHTML = "00:00:00";
-  interval = setInterval(printTime, 1000);
-  logMessage("*** STARTING DOWNLOAD ***<br>");
-  canLog = 1;
-  api.startDownload(query);
-  if (isStarted) return;
-  isStarted = 1;
-  if (isInit) return;
-
-  // Redirection of console.log
-  api.onLog((msg) => {
-    if (!msg || !canLog) return;
-    // If console.log() is called multiple times within a short period of time,
-    // all strings are automatically chained into a single string and sent at once.
-    // Therefore, it is necessary to separate them again to display them correctly.
-    // This is the purpose of the following lines of code.
-    msg = msg
-      .replace(/🌐/g, "!!🌐")
-      .replace(/🏠/g, "!!🏠")
-      .replace(/❌/g, "!!❌")
-      .replace(/\*\*\* /g, "!!*** ")
-      .replace(/TLF/g, "!!TLF")
-      .split("!!")
-      .filter((e) => e);
-    // Walk through all messages and display them.
-    for (let m of msg) m.startsWith("🏠") ? logProgress(m) : m.startsWith("TLF") ? logTotal(m) : logMessage(m);
-
-    // If '🕧' (Finished icon) is found, reset the GUI and save the content of the Log DIV element.
-    if (msg.join("").includes("🕧")) {
-      isStarted = 0;
-      canLog = 0;
-      resetButtons();
-      clearInterval(interval);
-      api.saveProgress(
-        log.innerHTML.replace(/<br>/g, "\n").replace(/<.*?>/g, "")
-      );
-    }
-  });
-  isInit = 1;
-});
-
-// Handle user initiated abort of download
-abort.addEventListener("click", async () => {
-  if (!isStarted) return;
-  clearInterval(interval);
-  document.getElementById("paused")?.remove();
-  log.innerHTML += '<font size="3"><b>*** ABORTED BY USER ***</b></font><br>';
-  resetButtons();
-  isStarted = 0;
-  api.abortDownload();
-  setTimeout(() => (canLog = 0), 1000);
-});
-
-// Handle user initiated pause
-// TODO: Still problematic, since the browser instances could be dead when resuming.
-pause.addEventListener("click", () => {
-  if (!isStarted) return;
-  if (pause.textContent === "Pause") {
-    log.innerHTML +=
-      "<span id='paused'>⏸️<b> Downloading paused...</b><br></span>";
-    pause.textContent = "Resume";
-    clearInterval(interval);
-    tempTime = Date.now();
-    return api.pauseDownload();
-  }
-  startTime += Date.now() - tempTime;
-  interval = setInterval(printTime, 1000);
-  document.getElementById("paused").remove();
-  pause.innerText = "Pause";
-  api.resumeDownload();
-});
+github.addEventListener("click", () => open("https://github.com/ManuelPeh76/Website-Downloader"));
+start.addEventListener("click", startDownload);
+abort.addEventListener("click", abortDownload);
+pause.addEventListener("click", pauseDownload);
 
 // Target folder selection
 outdir.addEventListener("click", async () => {
@@ -276,6 +162,60 @@ maximizer.addEventListener("click", async () => {
 
 closer.addEventListener("click", api.quit);
 
+/**
+ * Handles keyboard events for custom navigation and download controls.
+ *
+ * - "Tab": Cycles focus through input elements.
+ * - "Enter": Starts the download process.
+ * - "Escape": Aborts the download process.
+ * - "p": Pauses the download if it has started.
+ *
+ * @param {KeyboardEvent} e - The keyboard event object.
+ */
+function keyDown(e) {
+  if (e.key === "Tab" && !isStarted) {
+    e.preventDefault();
+    if (!cycles.includes(document.activeElement)) return cycles[0].focus();
+    if (-~cycles.indexOf(document.activeElement) === cycles.length) return cycles[0].focus();
+    cycles[-~cycles.indexOf(document.activeElement)].focus();
+  } else if (e.key === "Enter" && !isStarted) {
+    e.preventDefault();
+    startDownload();
+  } else if (e.key === "Escape" && isStarted) {
+    abortDownload();
+  } else if (e.key === "p" && isStarted) {
+    e.preventDefault();
+    pauseDownload();
+  }
+}
+
+function abortDownload() {
+  if (!isStarted) return;
+  clearInterval(interval);
+  document.getElementById("paused")?.remove();
+  log.innerHTML += '<font size="3"><b>*** ABORTED BY USER ***</b></font><br>';
+  resetButtons();
+  isStarted = 0;
+  api.abortDownload();
+  setTimeout(() => (canLog = 0), 1000);
+}
+
+function pauseDownload() {
+  if (!isStarted) return;
+  if (pause.textContent === "Pause") {
+    log.innerHTML += "<span id='paused'>⏸️<b> Downloading paused...</b><br></span>";
+    pause.textContent = "Resume";
+    clearInterval(interval);
+    tempTime = Date.now();
+    return api.pauseDownload();
+  }
+  startTime += Date.now() - tempTime;
+  interval = setInterval(printTime, 1000);
+  document.getElementById("paused").remove();
+  pause.innerText = "Pause";
+  api.resumeDownload();
+}
+
 function setTheme(mode) {
   root.setAttribute("data-theme", mode);
   localStorage.theme = mode;
@@ -299,6 +239,91 @@ function setButtons() {
   abort.disabled = false;
   outdir.disabled = true;
   pause.textContent = "Pause";
+}
+
+async function userInputIsOk() {
+  const corrected = {};
+  if (dwt.value < 500) dwt.value = corrected.dwt = 500;
+  if (dwt.value > 30000) dwt.value = corrected.dwt = 30000;
+
+  if (concurrency.value < 2) concurrency.value = corrected.concurrency = 2;
+  if (concurrency.value > 25) concurrency.value = corrected.concurrency = 25;
+
+  if (!url.value.startsWith("http")) {
+    if (httpRegex.test("https://" + url.value)) {
+      let response;
+      response = await fetch("https://" + url.value, { method: "HEAD" });
+      if (response.ok) url.value = corrected.url = "https://" + url.value;
+      else {
+        response = await fetch("http://" + url.value, { method: "HEAD" });
+        if (response.ok) url.value = corrected.url = "http://" + query.url;
+        else return (logMessage("<br>❌ Please enter a valid URL!"), url.focus(), false);
+      }
+    } else return (logMessage("<br>❌ Please enter a valid URL!"), url.focus(), false);
+  }
+  if (Object.keys(corrected).length) {
+    for (val in corrected) obj[val] = corrected[val];
+    localStorage.downloader_obj = JSON.stringify(obj);
+  }
+  return true;
+}
+
+async function startDownload() {
+  if (!await userInputIsOk()) return;
+  const query = {
+    url: url.value,
+    depth: depth.value,
+    zip: zip.checked,
+    clean: clean.checked,
+    useIndex: useIndex.checked,
+    recursive:recursive.checked,
+    outdir: outdir.value.trim(),
+    concurrency: parseInt(concurrency.value, 10),
+    dwt: parseInt(dwt.value, 10)
+  };
+  log.innerHTML = "";
+  progress.innerHTML = "";
+  setButtons();
+  startTime = Date.now();
+  progressTime.innerHTML = "00:00:00";
+  interval = setInterval(printTime, 1000);
+  logMessage("*** STARTING DOWNLOAD ***<br>");
+  canLog = 1;
+  api.startDownload(query);
+  if (isStarted) return;
+  isStarted = 1;
+  if (isInit) return;
+  // Redirection of console.log
+  api.onLog((msg) => {
+    if (!msg || !canLog) return;
+    // If console.log() is called multiple times within a short period of time,
+    // all strings are joined together and sent at once.
+    // Thus it is necessary to separate them again to display them correctly.
+    // This is the purpose of the following lines of code.
+
+    msg = msg // Insert markers (!!)
+      .replace(/🌐/g, "!!🌐")
+      .replace(/🏠/g, "!!🏠")
+      .replace(/❌/g, "!!❌")
+      .replace(/\*\*\* /g, "!!*** ")
+      .replace(/TLF/g, "!!TLF")
+      .split("!!") // Split the messages at marker positions
+      .filter((e) => e); // No empty entries
+    // Walk through all messages and display them.
+    for (let m of msg) m.startsWith("🏠") ? logProgress(m) : m.startsWith("TLF") ? logTotal(m) : logMessage(m);
+
+    // If '🕧' (Finished icon) is found, reset the GUI and save the content of the Log DIV element.
+    if (msg.join("").includes("🕧")) {
+      isStarted = 0;
+      canLog = 0;
+      resetButtons();
+      clearInterval(interval);
+      api.saveProgress(
+        log.innerHTML.replace(/<br>/g, "\n").replace(/<.*?>/g, "")
+      );
+    }
+  });
+  isInit = 1;
 }
 
 /**

@@ -69,16 +69,16 @@
 
     <div class="wrapper">
       <div class="content">
-        <label id="url-label">URL</label><input class="input" type="text" id="url" size="50" placeholder="https://example.com"/>
-        <label id="depth-label">Depth</label><input class="input" type="number" id="depth" min="0" placeholder="Infinity" />
-        <label id="dwt-label">Dynamic Wait Time</label><input class="input" type="number" id="dwt" min="500" max="30000" placeholder="3000" />
-        <label id="concurrency-label">Concurrent Downloads</label><input class="input" type="number" id="concurrency" min="1" max="25" placeholder="8"/>
-        <label id="outdir-label">Target Folder</label><input type="text" id="outdir" class="select-folder" placeholder="Select Folder">
+        <label id="url-label">URL</label><input class="input cycle" type="text" id="url" size="50" placeholder="https://example.com"/>
+        <label id="depth-label">Depth</label><input class="input cycle" type="number" id="depth" min="0" placeholder="Infinity" />
+        <label id="dwt-label">Dynamic Wait Time</label><input class="input cycle" type="number" id="dwt" min="500" max="30000" placeholder="3000" />
+        <label id="concurrency-label">Concurrent Downloads</label><input class="input cycle" type="number" id="concurrency" min="1" max="25" placeholder="8"/>
+        <label id="outdir-label">Target Folder</label><input type="text" id="outdir" class="select-folder cycle" placeholder="Select Folder">
 
-        <label class="checkbox" id="recursive-label"><input class="input" type="checkbox" id="recursive" checked /> Recursive</label>
-        <label class="checkbox" id="zip-label"><input class="input" type="checkbox" id="zip" /> Export ZIP</label>
-        <label class="checkbox" id="clean-label"><input class="input" type="checkbox" id="clean" /> Clean Mode</label>
-        <label class="checkbox" id="use-index-label"><input class="input" type="checkbox" id="use-index" checked /> Add index.html</label>
+        <label class="checkbox" id="recursive-label"><input class="input cycle" type="checkbox" id="recursive" checked /> Recursive</label>
+        <label class="checkbox" id="zip-label"><input class="input cycle" type="checkbox" id="zip" /> Export ZIP</label>
+        <label class="checkbox" id="clean-label"><input class="input cycle" type="checkbox" id="clean" /> Clean Mode</label>
+        <label class="checkbox" id="use-index-label"><input class="input cycle" type="checkbox" id="use-index" checked /> Add index.html</label>
 
         <button id="start">Start</button>
         <button id="abort" disabled>Cancel</button>
