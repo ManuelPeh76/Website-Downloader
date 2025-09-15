@@ -43,7 +43,8 @@ Thist creates a windows installer package from the app. When you start the exe f
 The setup should place a shortcut to start the Website Downloader inside of the start menu. The app will be installed to `C:\Users\<username>\AppData\Local\website_downloader`.
 
 ## Usage
-#### GUI
+
+### GUI
 <img src="src/img/app.png" width="400">
 
   1. Start the GUI with the shortcut from the startmenu or go to C:\Users\<username>\AppData\Local\website_downloader and start the website-downloader.exe
@@ -52,7 +53,15 @@ The setup should place a shortcut to start the Website Downloader inside of the 
   4. Choose the target folder, in which the website folder will be created.
   5. Start the download with the `Start` button.
 
-#### CLI
+#### Keyboard Shortcuts
+| Key | Action | Availability |
+| --- | --- | --- |
+| Tab | Cycle through the input elements | Idle |
+| Enter | Start Download | Idle |
+| Esc | Abort Download | Downloading |
+| p | Pause / Resume Download | Downloading |
+
+### CLI
  Open a command line inside the repo folder and start the tool with
  ```cmd
  node src/download <url> [options]
