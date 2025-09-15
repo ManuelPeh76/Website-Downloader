@@ -16,10 +16,6 @@ A fast and universal downloader for dynamic websites, created with Puppeteer and
 - 🌓 Supports Light Mode and Dark Mode
 
 ## Installation
-Since I am pure windows user, I can describe the steps only for windows machines. The steps are the same for users of other systems. At least up to `npm install`. From there you can run the Downloader with `npm start` and it will work.
-The steps after that are windows specific: A package is created (which runs the tool as .exe file) and a windows installer (to... guess what... install it on a windows machine). 
-But I am sure, for Linux and MacOS it will also be possible, to do it in a simmilar way.
-
 I assume you have node.js, npm and git already installed.
 First, clone the repository and install the dependencies:
 ```cmd
@@ -29,7 +25,10 @@ cd website-downloader
 
 npm install
 ```
-Now you can run the app with `npm start`. But it still needs the cmd window to be open. To make the app really standalone (without the need to run a second window beside it), you can create an app package:
+Now you can run the app with `npm start`. 
+
+This opens a cmd window, which will launch the app. 
+Windows users can create an app package, to make it a standalone app (without the need to run a second window beside it):
 ```cmd
 npm run build
 ```
@@ -40,14 +39,14 @@ Just step inside and start website-downloader.exe.
 ```cmd
 npm run setup
 ```
-Thist creates a windows installer package from the app. When you start the exe file inside the dist/installers folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you'd already download anything ;) ).
+Thist creates a windows installer package from the app. When you start the exe file inside the dist/installers folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you already download anything ;) ).
 The setup should place a shortcut to start the Website Downloader inside of the start menu. The app will be installed to `C:\Users\<username>\AppData\Local\website_downloader`.
 
 ## Usage
 #### GUI
 <img src="src/img/app.png" width="400">
 
-  1. Start the GUI with the shortcut from the startmenu or go to `C:\Users\<username>\AppData\Local\website_downloader` and start the `website-downloader.exe`.
+  1. Start the GUI with the shortcut from the startmenu or go to C:\Users\<username>\AppData\Local\website_downloader and start the website-downloader.exe
   2. Enter the URL of the website you want to download.
   3. Select the desired options.
   4. Choose the target folder, in which the website folder will be created.
@@ -74,13 +73,13 @@ The setup should place a shortcut to start the Website Downloader inside of the 
 ## Example
 To download a web page with a link depth of 4, recursion, clean mode, a dynamic wait time of 500ms, using index.html option and with output on the desktop use the following command:
 ```cmd
-node src/download https://example.org -r -c -u -d=4 -dwt=500 -o=C:\Users\<username>\Desktop
+node src/download https://example.org -r -c -u -d=4 -dwt=500 outdir=C:\Users\<username>\Desktop
 ```
 
 ## Some Infos about this Tool
 
 - Files that are dynamically loaded during the website's runtime are only recorded if the request occurs within the dynamical wait time (3000ms by default) after opening the page.
-- CSS files (whether linked or dynamically loaded) and inline CSS are searched for fonts and images to download these as well.
+- CSS files (whether linked or dynamically loaded) are searched for 'url(...)' to include fonts and images that are loaded by the CSS.
 - Only files whose storage location matches that of the website are saved.
 - When an HTML file has been downloaded, the tool adapts all links to make sure, the webpage works offline.
 - When using the GUI, all settings you change (incl. the url) are saved via local storage. The next time you start the GUI your own settings will be restored.
@@ -89,11 +88,6 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 -o=C:\Users\<userna
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
-
-
-
-
-
 
 
 
