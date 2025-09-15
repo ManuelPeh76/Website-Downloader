@@ -163,12 +163,12 @@ start.addEventListener("click", async () => {
       if (response.ok) {
         query.url = url.value = obj.url =  "https://" + query.url;
         localStorage.downloader_obj = JSON.stringify(obj);
-      }else {
+      } else {
         response = await fetch("http://" + query.url, { method: 'HEAD' });
         if (response.ok) {
           query.url = url.value = obj.url = "http://" + query.url;
           localStorage.downloader_obj = JSON.stringify(obj);
-        }else return (logMessage("<br>❌ Please enter a valid URL!"), url.focus());
+        } else return (logMessage("<br>❌ Please enter a valid URL!"), url.focus());
       }
     } else return (logMessage("<br>❌ Please enter a valid URL!"), url.focus());
   }
