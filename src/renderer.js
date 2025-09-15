@@ -160,11 +160,15 @@ start.addEventListener("click", async () => {
     if (httpRegex.test("https://" + query.url)) {
       let response;
       response = await fetch("https://" + query.url, { method: 'HEAD' });
-      if (response.ok) { query.url = url.value = "https://" + query.url; }
-      else {
+      if (response.ok) {
+        query.url = url.value = obj.url =  "https://" + query.url;
+        localStorage.downloader_obj = JSON.stringify(obj);
+      }else {
         response = await fetch("http://" + query.url, { method: 'HEAD' });
-        if (response.ok) { query.url = url.value = "http://" + query.url; }
-        else return (logMessage("<br>❌ Please enter a valid URL!"), url.focus());
+        if (response.ok) {
+          query.url = url.value = obj.url = "http://" + query.url;
+          localStorage.downloader_obj = JSON.stringify(obj);
+        }else return (logMessage("<br>❌ Please enter a valid URL!"), url.focus());
       }
     } else return (logMessage("<br>❌ Please enter a valid URL!"), url.focus());
   }
