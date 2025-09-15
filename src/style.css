@@ -85,10 +85,8 @@ body, .body {
   background: linear-gradient(180deg, var(--bg), var(--border));
   color: var(--fg);
   margin: 0;
-  padding: 0;
-  /*
-  user-select: none;
-  */
+  padding: 0;
+  user-select: none;
 }
 
 ::-webkit-scrollbar {
