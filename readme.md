@@ -56,8 +56,7 @@ The setup should place a shortcut to start the Website Downloader inside of the 
 #### Keyboard Shortcuts
 | Key | Action | Availability |
 | --- | --- | --- |
-| Tab | Cycle down through the input elements | Idle |
-| Shift + Tab | Cycle up through the input elements | Idle |
+| Tab | Cycle through the input elements | Idle |
 | Enter | Start Download | Idle |
 | Esc | Abort Download | Downloading |
 | p | Pause / Resume Download | Downloading |
@@ -77,7 +76,7 @@ The setup should place a shortcut to start the Website Downloader inside of the 
 | `-z`, `--zip` | Creates a ZIP archive after downloads are complete (default: false). |
 | `-c`, `--clean` | Empties the destination folder before saving downloads (default: false). |
 | `-o=<path>`, `--outdir=<path>` | The full path to the folder the website is saved to (default: repo folder). |
-| `-s=<number>`, `--simultaneous=<number>` | The amount of simultaneously active downloads (default: 8). |
+| `-cc=<number>`, `--concurrency=<number>` | The amount of concurrent active downloads (default: 8). |
 | `-u`, `--use-index` | If there's no file ending in the path, the filename 'index.html' is assumed. (default: true) |
 
 ## Example
@@ -98,7 +97,6 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 outdir=C:\Users\<us
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
-
 
 
 
