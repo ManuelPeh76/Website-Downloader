@@ -5,6 +5,8 @@
     MIT License
  */
 
+"use strict";
+
 /* Load dependencies */
 const fs = require('fs/promises');
 const path = require('path');
@@ -112,7 +114,7 @@ function reportProgress() {
   const total = visited.size + resourceMap.size + logs.length;
   const err = logs.length;
   const percent = (100 / total * err).toFixed(2);
-  log(`🏠 Pages: ${visited.size} | 📄 Assets: ${resourceMap.size} | Errors: ${logs.length} (${percent}%)`);
+  log(`🏠 Pages: ${visited.size} | 📃 Assets: ${resourceMap.size} | ❌ Errors: ${logs.length} (${percent}%)`);
 }
 
 /**
@@ -302,7 +304,7 @@ async function dynamicPageRequest(request) {
       }
     }
   } catch (err) {
-    log(`❌ Error fetching dynamic resource ${url.split("/").pop()}: ${err.message}`);
+    logs.push({ url, error: `Error fetching dynamic resource ${url.split("/").pop()}: ${err.message}` });
   }
 }
 
@@ -335,19 +337,18 @@ async function downloadResource(url, baseUrl, dyn = "") {
               log(`🌐${type}: ${url}`);
               resolve();
             });
-            ws.on('error', msg => reject({ message: ` Error on writing '${filename}': ${msg}` }));
+            ws.on('error', msg => reject({ message: `Error on writing '${filename}': ${msg}` }));
           });
         } else {
           failed.add(url);
           reject({ message: `${type} '${filename}': ${r.statusCode} (${HTTP_STATUS_CODES[r.statusCode]})` });
         }
       });
-      req.on('error', msg => reject({ message:` Error while retrieving '${filename}': ${msg}` }));
+      req.on('error', msg => reject({ message: `Error while retrieving '${filename}': ${msg}` }));
     });
   } catch (e) {
     failed.add(url);
     logs.push({ url, error: e.message || e.toString() });
-    log("❌" + e.message || e.toString());
   }
 }
 
@@ -454,7 +455,7 @@ async function crawl(url, depth, browser, recursive = null) {
   const stripped = stripSearch(url);
   if (USE_INDEX && !path.extname(parsedUrl.pathname) && new URL(url).origin === new URL(TARGET_URL).origin) url = stripped + (stripped.endsWith("/") ? "index.html" : "/index.html") + parsedUrl.search || "";
   if (shouldIgnoreUrl(url)) return;
-  log(`🌐 Site (Depth ${depth}): ${url}`);
+  log(`📄 Site (Depth ${depth}): ${url}`);
   // Remember the url of this HTML file
   visited.add(stripSearch(url));
   sitemap.add(stripSearch(url));
@@ -481,10 +482,9 @@ async function crawl(url, depth, browser, recursive = null) {
       res = stripSearch(res);
       const extname = path.extname(new URL(raw, url).pathname);
       if (USE_INDEX && !extname && new URL(res).origin === new URL(TARGET_URL).origin) res += (res.endsWith("/") ? "index.html" : "/index.html");
-      if (shouldIgnoreUrl(res)) {
-        totalRequests += 1;
-        continue;
-      } else {
+      totalRequests += 1;
+      if (shouldIgnoreUrl(res)) continue;
+      else {
         if (res.endsWith('.html') || res.endsWith('.htm') || !extname) {
           tasks.push(limit(() => crawl(res, depth + 1, browser, 1)));
         } else {
@@ -498,8 +498,7 @@ async function crawl(url, depth, browser, recursive = null) {
               }));
             } else tasks.push(limit(async () => await downloadResource(res, url, "Asset")));
           } catch(e) {
-            log(`❌ Error fetching resource ${res}: ${e.message || e.toString()}`);
-            logs.push({ url: res, error: e.message || e.toString() });
+            logs.push({ url: res, error: `Error fetching resource ${res}: ${e.message || e.toString()}` });
           }
         }
       }
@@ -513,13 +512,20 @@ async function crawl(url, depth, browser, recursive = null) {
     await fs.writeFile(localPath, adjustedContent, 'utf8');
     try { await page.close(); } catch {}
   } catch (e) {
-    log(`❌ Error processing ${url}: ${e.message || e.toString()}`);
     logs.push({ url, error: e.message || e.toString() });
     try { await page.close(); } catch {}
   }
 }
 
-// Main
+/**
+ * The main function that initializes the crawling process.
+ * It handles cleaning the output directory, launching the Puppeteer browser,
+ * and managing the crawling tasks. It also ensures that dynamic content is fully loaded
+ * before finalizing the process, and creates a ZIP archive if specified.
+ *
+ * @async
+ * @returns {Promise<void>} Resolves when the entire crawling and downloading process is complete.
+ */
 (async () => {
   if (CLEAN_MODE && existsSync(OUTPUT_DIR)) {
     await fs.rm(OUTPUT_DIR, { recursive: true, force: true });
@@ -530,17 +536,17 @@ async function crawl(url, depth, browser, recursive = null) {
   const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   await crawl(TARGET_URL, 0, browser);
 
-  // Wait for more dynamic content to be added to the limit stack.
-  // This can still happen even if all the tasks on the limit stack have been processed.
+  // Wait for more dynamic content to be added to the limit array.
+  // This can still happen even if the current tasks of the limit array have been processed.
   while (visitedSize < visited.size || resourceMapSize < resourceMap.size) {
     await Promise.allSettled(tasks);
     visitedSize = visited.size;
     resourceMapSize = resourceMap.size;
-    await new Promise((r) => setTimeout(r, DYNAMIC_WAIT_TIME));
+    await new Promise(r => setTimeout(r, DYNAMIC_WAIT_TIME));
   }
+
   await browser.close();
   clearInterval(totalInterval);
   if (ZIP_EXPORT) await createZip();
-  // Write Sitemap, Failed  and log
   await finish();
 })();
