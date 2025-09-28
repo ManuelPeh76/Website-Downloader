@@ -56,7 +56,8 @@ The setup should place a shortcut to start the Website Downloader inside of the 
 #### Keyboard Shortcuts
 | Key | Action | Availability |
 | --- | --- | --- |
-| Tab | Cycle through the input elements | Idle |
+| Tab | Cycle down through the input elements | Idle |
+| Shift + Tab | Cycle up through the input elements | Idle |
 | Enter | Start Download | Idle |
 | Esc | Abort Download | Downloading |
 | p | Pause / Resume Download | Downloading |
@@ -97,6 +98,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 outdir=C:\Users\<us
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
+
 
 
 
