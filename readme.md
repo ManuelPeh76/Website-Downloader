@@ -70,14 +70,14 @@ The setup should place a shortcut to start the Website Downloader inside of the 
 #### Options
 | Option | Description |
 | --- | --- |
-| `-d=<number>`, `--depth=<number>` | The depth of links to consider (default: infinity). |
-| `-dwt=<ms>`, `--dyn_wait_time=<ms>` | The time in ms the tool waits for dynamic content to load after the page is loaded (default 3000). |
-| `-r`, `--recursive` | Enables recursive downloading of linked pages (default: true). |
-| `-z`, `--zip` | Creates a ZIP archive after downloads are complete (default: false). |
-| `-c`, `--clean` | Empties the destination folder before saving downloads (default: false). |
-| `-o=<path>`, `--outdir=<path>` | The full path to the folder the website is saved to (default: repo folder). |
-| `-cc=<number>`, `--concurrency=<number>` | The amount of concurrent active downloads (default: 8). |
-| `-u`, `--use-index` | If there's no file ending in the path, the filename 'index.html' is assumed. (default: true) |
+| `-d=<number>`<br>`--depth=<number>` | The depth of links to consider (default: infinity). |
+| `-dwt=<ms>`<br>`--dyn_wait_time=<ms>` | The time in ms the tool waits for dynamic content to load after the page is loaded (default 3000). |
+| `-r`<br>`--recursive` | Enables recursive downloading of linked pages (default: true). |
+| `-z`<br>`--zip` | Creates a ZIP archive after downloads are complete (default: false). |
+| `-c`<br>`--clean` | Empties the destination folder before saving downloads (default: false). |
+| `-o=<path>`<br>`--outdir=<path>` | The full path to the folder the website is saved to (default: repo folder). |
+| `-cc=<number>`<br>`--concurrency=<number>` | The amount of concurrent active downloads (default: 8). |
+| `-u`<br>`--use-index` | If there's no file ending in the path, the filename 'index.html' is assumed. (default: true) |
 
 ## Example
 To download a web page with a link depth of 4, recursion, clean mode, a dynamic wait time of 500ms, using index.html option and with output on the desktop use the following command:
