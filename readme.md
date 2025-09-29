@@ -47,7 +47,7 @@ The app will be installed to `C:\Users\<username>\AppData\Local\website_download
 ### GUI
 <img src="src/img/app.png" width="400">
 
-  1. Start the GUI with the shortcut from the startmenu or go to C:\Users\<username>\AppData\Local\website_downloader and start the website-downloader.exe
+  1. Go to C:\Users\<username>\AppData\Local\website_downloader and start the website-downloader.exe (or create a desktop shortcut to start it from the desktop).
   2. Enter the URL of the website you want to download.
   3. Select the desired options.
   4. Choose the target folder, in which the website folder will be created.
