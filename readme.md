@@ -39,7 +39,7 @@ Just step inside and start website-downloader.exe.
 ```cmd
 npm run setup
 ```
-Thist creates a windows installer package from the app. When you start the exe file inside the dist/installers folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you already download anything ;) ).<br>
+Thist creates a windows installer package from the app. When you start the exe file inside the dist/installers folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you'd already download anything ;) ).<br>
 The app will be installed to `C:\Users\<username>\AppData\Local\website_downloader`.
 
 ## Usage
