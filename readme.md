@@ -58,7 +58,8 @@ If you want to start it from the repo folder, go inside it and open a cmd window
 #### Keyboard Shortcuts
 | Key | Action | Availability |
 | --- | --- | --- |
-| Tab | Cycle through the input elements | Idle |
+| Tab | Cycle down through the input elements | Idle |
+| Shift + Tab | Cycle up through the input elements | Idle |
 | Enter | Start Download | Idle |
 | Esc | Abort Download | Downloading |
 | p | Pause / Resume Download | Downloading |
