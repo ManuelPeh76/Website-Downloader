@@ -47,7 +47,9 @@ The app will be installed to `C:\Users\<username>\AppData\Local\website_download
 ### GUI
 <img src="src/img/app.png" width="400">
 
-  1. Go to C:\Users\<username>\AppData\Local\website_downloader and start the website-downloader.exe (or create a desktop shortcut to start it from the desktop).
+  1. If you used the installer: 
+Go to C:\Users\<username>\AppData\Local\website_downloader and start the website-downloader.exe (or create a desktop shortcut to start it from the desktop).
+If you want to start it from the repo folder, go inside it and open a cmd window by typing `cmd` into the address bar. There you start it with `npm start`.
   2. Enter the URL of the website you want to download.
   3. Select the desired options.
   4. Choose the target folder, in which the website folder will be created.
