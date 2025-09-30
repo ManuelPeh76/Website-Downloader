@@ -81,6 +81,9 @@ If you want to start it from the repo folder, go inside it and open a cmd window
 | `-o=<path>`<br>`--outdir=<path>` | The full path to the folder the website is saved to (default: repo folder). |
 | `-cc=<number>`<br>`--concurrency=<number>` | The amount of concurrent active downloads (default: 8). |
 | `-u`<br>`--use-index` | If there's no file ending in the path, the filename 'index.html' is assumed. (default: true) |
+| `-l`<br>`--log` | This creates the file log.json containinh all errors occured while downloading |
+|`-s`<br>`--sitemap`|A sitemap (sitemap.json) will be created after downloads are complete|
+|`-p`<br>`--progress`|Saves the content of the progress area into a file (progress.log)|
 
 ## Example
 To download a web page with a link depth of 4, recursion, clean mode, a dynamic wait time of 500ms, using index.html option and with output on the desktop use the following command:
