@@ -48,7 +48,10 @@ const dwt = document.getElementById("dwt");
 const url = document.getElementById("url");
 const depth = document.getElementById("depth");
 const recursive = document.getElementById("recursive");
-const zip = document.getElementById("zip");
+const createZip = document.getElementById("create-zip");
+const createSitemap = document.getElementById("create-sitemap");
+const createLog = document.getElementById("create-log");
+const createProgresslog = document.getElementById("create-progresslog");
 const clean = document.getElementById("clean");
 const useIndex = document.getElementById("use-index");
 const totalLinks = document.getElementById("total-links");
@@ -58,7 +61,7 @@ const httpRegex = /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0
 
 const root = document.documentElement;
 const storedTheme = localStorage.theme;
-const obj = localStorage.downloader_obj ? JSON.parse(localStorage.downloader_obj) : {};
+const preferences = localStorage.dwnldr_preferences ? JSON.parse(localStorage.dwnldr_preferences) : {};
 const logProgress = msg => (progress.innerHTML = msg);
 const logTotal = msg => totalLinks.innerHTML = msg.replace(/TLF/, "");
 const logMessage = msg => {
@@ -71,7 +74,10 @@ const title = {
   url: "The web address of the site you want to download.\nMust start with 'http://' or 'https://'",
   depth: "The depth of links to consider.\nMin: 0, Default: Infinity",
   recursive: "If enabled, links on downloaded HTML pages will be searched and any files found there will also be downloaded.\nDefault: Enabled",
-  zip: "If enabled, a ZIP archive containing the entire website will be created after downloads are complete.\nDefault: Disabled",
+  "create-zip": "If enabled, a ZIP archive containing the entire website will be created after downloads are complete.\nDefault: Disabled",
+  "create-sitemap": "If enabled, a sitemap (sitemap.json) will be created after downloads are complete.\nDefault: Enabled",
+  "create-log": "If enabled, a log file (log.json) containing all error messages will be created after downloads are complete.\nDefault: Enabled",
+  "create-progresslog": "If enabled, a progress log file (progress.log) containing the progress list will be created after downloads are complete.\nDefault: Enabled",
   clean: "If enabled, the folder where the files are saved will be emptied before downloading.\nDefault: Disabled",
   "use-index": "If no file extension is found at the end of a path, the filename is assumed as 'index.html'.\nDefault: Enabled",
   concurrency: "Determines how many downloads run simultaneously.\nMin: 1, Max: 25, Default: 8",
@@ -90,16 +96,19 @@ minimizer.title = "Minimize";
 maximizer.title = "Maximize";
 closer.title = "Close";
 
-url.value = obj.url || "";
-depth.value = obj.depth || "";
-dwt.value = obj.dwt || "";
-concurrency.value = obj.concurrency || "";
-outdir.value = obj.outdir || "";
+url.value = preferences.url || "";
+depth.value = preferences.depth || "";
+dwt.value = preferences.dwt || "";
+concurrency.value = preferences.concurrency || "";
+outdir.value = preferences.outdir || "";
 
-recursive.checked = obj.recursive || false;
-zip.checked = obj.zip || false;
-clean.checked = obj.clean || false;
-useIndex.checked = obj["use-index"] || false
+typeof preferences.recursive === "boolean" && (recursive.checked = preferences.recursive);
+typeof preferences.zip === "boolean" && (createZip.checked = preferences.zip);
+typeof preferences.clean === "boolean" && (clean.checked = preferences.clean);
+typeof preferences["use-index"] === "boolean" && (useIndex.checked = preferences["use-index"]);
+typeof preferences["create-sitemap"] === "boolean" && (createSitemap.checked = preferences["create-sitemap"]);
+typeof preferences["create-log"] === "boolean" && (createLog.checked = preferences["create-log"]);
+typeof preferences["create-progresslog"] === "boolean" && (createProgresslog.checked = preferences["create-progresslog"]);
 
 // Theme Toggle Logic
 if (storedTheme) setTheme(storedTheme);
@@ -119,8 +128,8 @@ document.addEventListener("keydown", keyDown);
 inputs.forEach(el => el.addEventListener("change", function () {
   const name = this.id;
   const value = this.type === "checkbox" ? this.checked : this.value;
-  obj[name] = value;
-  localStorage.downloader_obj = JSON.stringify(obj);
+  preferences[name] = value;
+  localStorage.dwnldr_preferences = JSON.stringify(preferences);
 }));
 
 github.addEventListener("click", () => open("https://github.com/ManuelPeh76/Website-Downloader"));
@@ -134,8 +143,8 @@ outdir.addEventListener("click", async () => {
   const folder = await api.selectFolder();
   if (folder) {
     outdir.value = folder;
-    obj.outdir = folder;
-    localStorage.downloader_obj = JSON.stringify(obj);
+    preferences.outdir = folder;
+    localStorage.dwnldr_preferences = JSON.stringify(preferences);
   }
 });
 
@@ -183,13 +192,15 @@ async function startDownload() {
   const query = {
     url: url.value,
     depth: depth.value,
-    zip: zip.checked,
+    zip: createZip.checked,
     clean: clean.checked,
     useIndex: useIndex.checked,
     recursive: recursive.checked,
     outdir: outdir.value.trim(),
     concurrency: parseInt(concurrency.value, 10),
-    dwt: parseInt(dwt.value, 10)
+    dwt: parseInt(dwt.value, 10),
+    sitemap: createSitemap.checked,
+    log: createLog.checked
   };
   log.innerHTML = "";
   progress.innerHTML = "";
@@ -228,7 +239,7 @@ async function startDownload() {
       canLog = 0;
       resetButtons();
       clearInterval(interval);
-      api.saveProgress(log.innerHTML.replace(/<br>/g, "\n").replace(/<.*?>/g, ""));
+      if (createProgresslog.checked) api.saveProgress(log.innerHTML.replace(/<br>/g, "\n").replace(/<.*?>/g, ""));
     }
   });
   isInit = 1;
@@ -315,8 +326,8 @@ async function validateUserInput() {
     } else return (logMessage("<br>❌ Please enter a valid URL!"), url.focus(), false);
   }
   if (Object.keys(corrected).length) {
-    for (val in corrected) obj[val] = corrected[val];
-    localStorage.downloader_obj = JSON.stringify(obj);
+    for (let val in corrected) preferences[val] = corrected[val];
+    localStorage.dwnldr_preferences = JSON.stringify(preferences);
   }
   return true;
 }

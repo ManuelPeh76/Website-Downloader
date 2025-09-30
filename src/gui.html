@@ -74,12 +74,21 @@
         <label id="dwt-label">Dynamic Wait Time</label><input class="input cycle" type="number" id="dwt" min="500" max="30000" placeholder="3000" />
         <label id="concurrency-label">Concurrent Downloads</label><input class="input cycle" type="number" id="concurrency" min="1" max="25" placeholder="8"/>
         <label id="outdir-label">Target Folder</label><input type="text" id="outdir" class="select-folder cycle" placeholder="Select Folder">
-
-        <label class="checkbox" id="recursive-label"><input class="input cycle" type="checkbox" id="recursive" checked /> Recursive</label>
-        <label class="checkbox" id="zip-label"><input class="input cycle" type="checkbox" id="zip" /> Export ZIP</label>
-        <label class="checkbox" id="clean-label"><input class="input cycle" type="checkbox" id="clean" /> Clean Mode</label>
-        <label class="checkbox" id="use-index-label"><input class="input cycle" type="checkbox" id="use-index" checked /> Add index.html</label>
-
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td width="50%">
+              <label class="checkbox" id="recursive-label"><input class="input cycle" type="checkbox" id="recursive" checked /> Recursive</label>
+              <label class="checkbox" id="clean-label"><input class="input cycle" type="checkbox" id="clean" /> Clean Mode</label>
+              <label class="checkbox" id="use-index-label"><input class="input cycle" type="checkbox" id="use-index" checked /> Add index.html</label>
+              <label class="checkbox" id="create-zip-label"><input class="input cycle" type="checkbox" id="create-zip" /> Export ZIP</label>
+            </td>
+            <td width="*">    
+              <label class="checkbox" id="create-sitemap-label"><input class="input cycle" type="checkbox" id="create-sitemap" checked /> Create Sitemap</label>
+              <label class="checkbox" id="create-log-label"><input class="input cycle" type="checkbox" id="create-log" checked /> Create Error Log</label>
+              <label class="checkbox" id="create-progresslog-label"><input class="input cycle" type="checkbox" id="create-progresslog" checked /> Create Progress Log</label>
+            </td>
+          </tr>
+        </table>
         <button id="start">Start</button>
         <button id="abort" disabled>Cancel</button>
         <button id="pause" disabled>Pause</button>

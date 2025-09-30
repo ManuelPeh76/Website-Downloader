@@ -35,6 +35,8 @@ const ZIP_EXPORT        = args.includes('--zip') || args.includes('-z');
 const CLEAN_MODE        = args.includes('--clean') || args.includes('-c');
 const RECURSIVE         = args.includes('--recursive') || args.includes('-r');
 const USE_INDEX         = args.includes('--use-index') || args.includes('-u');
+const CREATE_LOG        = args.includes('--log') || args.includes('-l');
+const CREATE_SITEMAP    = args.includes('--sitemap') || args.includes('-s');
 const MAX_DEPTH         = depthArg ? parseInt(depthArg.split('=')[1], 10) : Infinity;
 const CONCURRENCY       = concArg ? parseInt(concArg.split('=')[1], 10) : 8;
 const DYNAMIC_WAIT_TIME = dynArg ? parseInt(dynArg.split('=')[1], 10) : 3000;
@@ -136,13 +138,17 @@ async function finish(aborted) {
   reportProgress();
   await new Promise(async resolve => {
     if (!aborted) log(`*** FINISHED ***`);
-    let map = [...sitemap, ...[...resourceMap].map(r => r[0])].sort(([a, b]) => a > b);
-    await fs.writeFile(path.join(OUTPUT_DIR, 'sitemap.json'), JSON.stringify(map, null, 2));
-    log(`🧭 Sitemap created (${map.length} File${map.length === 1 ? "" : "s"}: ${sitemap.size} HTML file${sitemap.size === 1 ? "" : "s"}, ${resourceMap.size} Asset${resourceMap.size === 1 ? "" : "s"}).`);
-    if (logs.length || failed.size) {
-      await fs.writeFile(path.join(OUTPUT_DIR, 'log.json'), JSON.stringify({ Errors: [...logs], Failed_Downloads: [...failed] }, null, 2));
-      log(`📝 ${logs.length} Error${logs.length === 1 ? "" : "s"}, Log created.`);
-    } else log('📝 No errors, log creation is skipped.');
+    if (CREATE_SITEMAP) {
+      let map = [...sitemap, ...[...resourceMap].map(r => r[0])].sort(([a, b]) => a > b);
+      await fs.writeFile(path.join(OUTPUT_DIR, 'sitemap.json'), JSON.stringify(map, null, 2));
+      log(`🧭 Sitemap created (${map.length} File${map.length === 1 ? "" : "s"}: ${sitemap.size} HTML file${sitemap.size === 1 ? "" : "s"}, ${resourceMap.size} Asset${resourceMap.size === 1 ? "" : "s"}).`);
+    }
+    if (CREATE_LOG) {
+      if (logs.length || failed.size) {
+        await fs.writeFile(path.join(OUTPUT_DIR, 'log.json'), JSON.stringify({ Errors: [...logs], Failed_Downloads: [...failed] }, null, 2));
+        log(`📝 ${logs.length} Error${logs.length === 1 ? "" : "s"}, Log created.`);
+      } else log('📝 No errors, log creation is skipped.');
+    }
     const size = await getFolderSize(OUTPUT_DIR);
     const date = Date.now();
     const time = parseInt((date - START_TIME) / 1000, 10);
