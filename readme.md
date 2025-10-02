@@ -53,7 +53,7 @@ If you want to start it from the repo folder, go inside it and open a cmd window
   2. Enter the URL of the website you want to download.
   3. Select the desired options.
   4. Choose the target folder, in which the website folder will be created.
-  5. Start the download with the `Start` button.
+  5. Start the download with the `Start` button or hit Enter.
 
 #### Keyboard Shortcuts
 | Key | Action | Availability |
