@@ -208,8 +208,8 @@ async function startDownload() {
   startTime = Date.now();
   progressTime.innerHTML = "00:00:00";
   interval = setInterval(printTime, 1000);
-  logMessage("*** STARTING DOWNLOAD ***<br>");
   canLog = 1;
+  logMessage("*** STARTING DOWNLOAD ***<br>");
   api.startDownload(query);
   if (isStarted) return;
   isStarted = 1;
