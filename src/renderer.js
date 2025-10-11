@@ -125,12 +125,7 @@ themeToggler.forEach(el => el.addEventListener("click", function () {
 document.addEventListener("keydown", keyDown);
 
 //Store values in the local storage if they change
-inputs.forEach(el => el.addEventListener("change", function () {
-  const name = this.id;
-  const value = this.type === "checkbox" ? this.checked : this.value;
-  preferences[name] = value;
-  localStorage.dwnldr_preferences = JSON.stringify(preferences);
-}));
+inputs.forEach(el => el.addEventListener("change", updatePreferences);
 
 github.addEventListener("click", () => open("https://github.com/ManuelPeh76/Website-Downloader"));
 start.addEventListener("click", startDownload);
@@ -192,6 +187,11 @@ function keyDown(e) {
   else if (e.key === "Enter" && !isStarted) startDownload();
   else if (e.key === "Escape" && isStarted) abortDownload();
   else if (e.key === "p" && isStarted) pauseDownload();
+}
+
+function updatePreferences() {
+  preferences[this.id] = this.type === "checkbox" ? this.checked : this.value;
+  localStorage.dwnldr_preferences = JSON.stringify(preferences);
 }
 
 async function startDownload() {
