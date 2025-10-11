@@ -33,16 +33,16 @@ app.whenReady().then(() => {
   ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir, concurrency, dwt, useIndex, log, sitemap }) => {
     return new Promise(resolve => {
       const args = [path.join(__dirname, './download.js'), url];
-      if (zip) args.push('--zip');
-      if (clean) args.push('--clean');
-      if (recursive) args.push('--recursive');
-      if (depth) args.push(`--depth=${depth}`);
-      if (outdir) args.push(`--outdir=${outdir}`);
-      if (concurrency) args.push(`--concurrency=${concurrency}`);
-      if (dwt) args.push(`--dyn_wait_time=${dwt}`);
-      if (useIndex) args.push('--use-index');
-      if (log) args.push("--log");
-      if (sitemap) args.push("--sitemap");
+      if (zip) args.push('-z');
+      if (clean) args.push('-c');
+      if (recursive) args.push('-r');
+      if (depth) args.push(`-d=${depth}`);
+      if (outdir) args.push(`-o=${outdir}`);
+      if (concurrency) args.push(`-cc=${concurrency}`);
+      if (dwt) args.push(`-dwt=${dwt}`);
+      if (useIndex) args.push('-u');
+      if (log) args.push("-l");
+      if (sitemap) args.push("-s");
       proc = spawn('node', args);
       pid = proc.pid;
       proc.stdout.on('data', data => event.sender.send('log', data.toString()));
