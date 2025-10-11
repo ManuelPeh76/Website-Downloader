@@ -219,11 +219,11 @@ async function startDownload() {
   isStarted = 1;
   if (isInit) return;
   // Redirection of console.log
-  api.onLog(log);
+  api.onLog(onLog);
   isInit = 1;
 }
 
-function log(msg) {
+function onLog(msg) {
   if (!msg || !canLog) return;
   // If console.log() is called multiple times within a short period of time,
   // all strings are joined together and sent at once.
