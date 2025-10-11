@@ -138,7 +138,14 @@ abort.addEventListener("click", abortDownload);
 pause.addEventListener("click", pauseDownload);
 
 // Target folder selection
-outdir.addEventListener("click", async () => {
+outdir.addEventListener("change", function() {
+  if (this.value) {
+    preferences.outdir = this.value;
+    localStorage.dwnldr_preferences = JSON.stringify(preferences);
+  }
+});
+
+outdir.addEventListener("dblclick", async () => {
   if (isStarted) return;
   const folder = await api.selectFolder();
   if (folder) {
