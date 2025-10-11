@@ -219,34 +219,36 @@ async function startDownload() {
   isStarted = 1;
   if (isInit) return;
   // Redirection of console.log
-  api.onLog((msg) => {
-    if (!msg || !canLog) return;
-    // If console.log() is called multiple times within a short period of time,
-    // all strings are joined together and sent at once.
-    // Thus it is necessary to separate them again to display them correctly.
-    // This is the purpose of the following lines of code.
-
-    msg = msg // Insert markers (!!)
-      .replace(/🌐/g, "!!🌐")
-      .replace(/📄/g, "!!📄")
-      .replace(/🏠/g, "!!🏠")
-      .replace(/\*\*\* /g, "!!*** ")
-      .replace(/TLF/g, "!!TLF")
-      .split("!!") // Split the messages at marker positions
-      .filter((e) => e); // No empty entries
-    // Walk through all messages and display them.
-    for (let m of msg) m.startsWith("🏠") ? logProgress(m) : m.startsWith("TLF") ? logTotal(m) : logMessage(m);
-
-    // If '🕧' (Finished icon) is found, reset the GUI and save the content of the Log DIV element.
-    if (msg.join("").includes("🕧")) {
-      isStarted = 0;
-      canLog = 0;
-      resetButtons();
-      clearInterval(interval);
-      if (createProgresslog.checked) api.saveProgress(log.innerHTML.replace(/<br>/g, "\n").replace(/<.*?>/g, ""));
-    }
-  });
+  api.onLog(log);
   isInit = 1;
+}
+
+function log(msg) {
+  if (!msg || !canLog) return;
+  // If console.log() is called multiple times within a short period of time,
+  // all strings are joined together and sent at once.
+  // Thus it is necessary to separate them again to display them correctly.
+  // This is the purpose of the following lines of code.
+
+  msg = msg // Insert markers (!!)
+    .replace(/🌐/g, "!!🌐")
+    .replace(/📄/g, "!!📄")
+    .replace(/🏠/g, "!!🏠")
+    .replace(/\*\*\* /g, "!!*** ")
+    .replace(/TLF/g, "!!TLF")
+    .split("!!") // Split the messages at marker positions
+    .filter((e) => e); // No empty entries
+  // Walk through all messages and display them.
+  for (let m of msg) m.startsWith("🏠") ? logProgress(m) : m.startsWith("TLF") ? logTotal(m) : logMessage(m);
+
+  // If '🕧' (Finished icon) is found, reset the GUI and save the content of the Log DIV element.
+  if (msg.join("").includes("🕧")) {
+    isStarted = 0;
+    canLog = 0;
+    resetButtons();
+    clearInterval(interval);
+    if (createProgresslog.checked) api.saveProgress(log.innerHTML.replace(/<br>/g, "\n").replace(/<.*?>/g, ""));
+  }
 }
 
 function abortDownload() {
