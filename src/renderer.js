@@ -284,21 +284,19 @@ function setTheme(mode) {
 
 // Enable inputs and buttons
 function resetButtons() {
-  inputs.forEach((input) => (input.disabled = false));
+  inputs.forEach(input => input.disabled = false);
   start.disabled = false;
   pause.disabled = true;
-  abort.disabled = true;
-  outdir.disabled = false;
+  abort.disabled = true;
   pause.textContent = "Pause";
 }
 
 // Disable inputs and buttons
 function setButtons() {
-  inputs.forEach((input) => (input.disabled = true));
+  inputs.forEach(input => input.disabled = true);
   start.disabled = true;
   pause.disabled = false;
-  abort.disabled = false;
-  outdir.disabled = true;
+  abort.disabled = false;
   pause.textContent = "Pause";
 }
 
