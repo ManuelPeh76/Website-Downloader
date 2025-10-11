@@ -216,7 +216,6 @@ async function startDownload() {
   canLog = 1;
   logMessage("*** STARTING DOWNLOAD ***<br>");
   api.startDownload(query);
-  if (isStarted) return;
   isStarted = 1;
   if (isInit) return;
   // Redirection of console.log
