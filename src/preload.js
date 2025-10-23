@@ -1,10 +1,11 @@
-
-/*  Website Downloader
-
-    File: preload.js
-    Copyright © 2025 By Manuel Pelzer
-    MIT License
-*/
+/**
+ * @name Website Downloader
+ * 
+ * @author Manuel Pelzer
+ * @file preload.js
+ * @copyright © 2025 By Manuel Pelzer
+ * @license MIT
+ */
 
 const { contextBridge, ipcRenderer } = require('electron');
 

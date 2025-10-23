@@ -1,10 +1,11 @@
-
-/*  Website Downloader
-
-    File: main.js
-    Copyright © 2025 By Manuel Pelzer
-    MIT License
-*/
+/**
+ * @name Website Downloader
+ * 
+ * @author Manuel Pelzer
+ * @file main.js
+ * @copyright © 2025 By Manuel Pelzer
+ * @license MIT
+ */
 
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
@@ -30,19 +31,19 @@ app.whenReady().then(() => {
   mainWindow = new BrowserWindow(options);
   mainWindow.loadFile(path.join(__dirname, './gui.html'));
 
-  ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, outdir, concurrency, dwt, useIndex, log, sitemap }) => {
+  ipcMain.handle('start-download', async (event, { url, zip, clean, depth, recursive, folder, concurrency, dwt, useIndex, log, sitemap }) => {
     return new Promise(resolve => {
       const args = [path.join(__dirname, './download.js'), url];
-      if (zip) args.push('-z');
-      if (clean) args.push('-c');
-      if (recursive) args.push('-r');
-      if (depth) args.push(`-d=${depth}`);
-      if (outdir) args.push(`-o=${outdir}`);
-      if (concurrency) args.push(`-cc=${concurrency}`);
-      if (dwt) args.push(`-dwt=${dwt}`);
-      if (useIndex) args.push('-u');
-      if (log) args.push("-l");
-      if (sitemap) args.push("-s");
+      if (zip) args.push('--zip');
+      if (clean) args.push('--clean');
+      if (recursive) args.push('--recursive');
+      if (depth) args.push(`--depth=${depth}`);
+      if (folder) args.push(`--folder=${folder}`);
+      if (concurrency) args.push(`--concurrency=${concurrency}`);
+      if (dwt) args.push(`--dyn_wait_time=${dwt}`);
+      if (useIndex) args.push('--use-index');
+      if (log) args.push("--log");
+      if (sitemap) args.push("--sitemap");
       proc = spawn('node', args);
       pid = proc.pid;
       proc.stdout.on('data', data => event.sender.send('log', data.toString()));

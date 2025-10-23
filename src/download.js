@@ -1,8 +1,10 @@
-/*  Website Downloader
-
-    File: download.js
-    Copyright © 2025 By Manuel Pelzer
-    MIT License
+/**
+ * @name Website Downloader
+ * 
+ * @author Manuel Pelzer
+ * @file download.js
+ * @copyright © 2025 By Manuel Pelzer
+ * @license MIT
  */
 
 "use strict";
@@ -25,10 +27,10 @@ if (!TARGET_URL.startsWith("http")) {
   process.exit(1);
 }
 
-/* Check given arguments and create constants */
+/* Check arguments */
 const concArg = args.find(arg => arg.startsWith('--concurrency=') || arg.startsWith('-cc='));
 const depthArg = args.find(arg => arg.startsWith('--depth=') || arg.startsWith('-d='));
-const outArg = args.find(arg => arg.startsWith('--outdir=') || arg.startsWith('-o='));
+const folderArg = args.find(arg => arg.startsWith('--folder=') || arg.startsWith('-f='));
 const dynArg = args.find(arg => arg.startsWith('--dyn_wait_time=') || arg.startsWith('-dwt='));
 
 const ZIP_EXPORT        = args.includes('--zip') || args.includes('-z');
@@ -40,7 +42,7 @@ const CREATE_SITEMAP    = args.includes('--sitemap') || args.includes('-s');
 const MAX_DEPTH         = depthArg ? parseInt(depthArg.split('=')[1], 10) : Infinity;
 const CONCURRENCY       = concArg ? parseInt(concArg.split('=')[1], 10) : 8;
 const DYNAMIC_WAIT_TIME = dynArg ? parseInt(dynArg.split('=')[1], 10) : 3000;
-const OUTPUT_DIR        = outArg ? path.join(outArg.split('=')[1].replace(/^["']|["']$/g, ''), new URL(TARGET_URL).hostname) : path.join(process.cwd(), new URL(TARGET_URL).hostname);
+const OUTPUT_DIR        = folderArg ? path.join(folderArg.split('=')[1].replace(/^["']|["']$/g, ''), new URL(TARGET_URL).hostname) : path.join(process.cwd(), new URL(TARGET_URL).hostname);
 const START_TIME        = Date.now();
 const HTTP_STATUS_CODES = { 100: "Continue", 101: "Switching Protocols", 102: "Processing", 103: "Early Hints", 200: "OK", 201: "Created", 202: "Accepted", 203: "Non-Authoritative Information", 204: "No Content", 205: "Reset Content", 206: "Partial Content", 207: "Multi-Status", 208: "Already Reported", 226: "IM Used", 300: "Multiple Choices", 301: "Moved Permanently", 302: "Found", 303: "See Other", 304: "Not Modified", 305: "Use Proxy", 307: "Temporary Redirect", 308: "Permanent Redirect", 400: "Bad Request", 401: "Unauthorized", 402: "Payment Required", 403: "Forbidden", 404: "Not Found", 405: "Method Not Allowed", 406: "Not Acceptable", 407: "Proxy Authentication Required", 408: "Request Timeout", 409: "Conflict", 410: "Gone", 411: "Length Required", 412: "Precondition Failed", 413: "Payload Too Large", 414: "URI Too Long", 415: "Unsupported Media Type", 416: "Range Not Satisfiable", 417: "Expectation Failed", 418: "I'm a Teapot", 421: "Misdirected Request", 422: "Unprocessable Content", 423: "Locked", 424: "Failed Dependency", 425: "Too Early", 426: "Upgrade Required", 428: "Precondition Required", 429: "Too Many Requests", 431: "Request Header Fields Too Large", 451: "Unavailable For Legal Reasons", 500: "Internal Server Error", 501: "Not Implemented", 502: "Bad Gateway", 503: "Service Unavailable", 504: "Gateway Timeout", 505: "HTTP Version Not Supported", 506: "Variant Also Negotiates", 507: "Insufficient Storage", 508: "Loop Detected", 510: "Not Extended", 511: "Network Authentication Required" };
 
@@ -78,6 +80,8 @@ process.stdin.on('data', async data => {
 /* Functions */
 
 /**
+ * @function shouldIgnoreUrl
+ * 
  * Determines whether a given URL should be ignored based on various criteria.
  *
  * @param {string} url - The URL to check.
@@ -94,7 +98,7 @@ function shouldIgnoreUrl(url) {
   if (isLocalFile(url)) return true;
   try {
      if (new URL(url, TARGET_URL).origin === "null") return true;
-     if (new URL(url, TARGET_URL).hostname !== new URL(TARGET_URL).hostname) return true;
+     if (!new URL(url, TARGET_URL).hostname.includes(new URL(TARGET_URL).hostname)) return true;
   } catch {
     return true;
   }
@@ -102,31 +106,42 @@ function shouldIgnoreUrl(url) {
 }
 
 /**
+ * @function reportProgress
+ * 
  * Reports the current progress of the website download process.
  * Logs the number of visited pages, downloaded assets, and errors,
  * along with the percentage of errors relative to the total processed items.
+ * When downloads are complete, it shows the downloaded files and errors on hover.
  *
- * Assumes the existence of the following global variables:
- * - visited: Set containing visited page URLs.
- * - resourceMap: Map containing downloaded asset URLs.
- * - logs: Array containing error logs.
- * - log: Function to output log messages.
+ * @param {boolean} finished - If true, the progress bar will show detailed information on hovering with the mouse.
  */
-function reportProgress() {
+function reportProgress(finished) {
+  const fin = ["", "", "", ""];
   const total = visited.size + resourceMap.size + logs.length;
   const err = logs.length;
   const percent = (100 / total * err).toFixed(2);
-  log(`🏠 Pages: ${visited.size} | 📃 Assets: ${resourceMap.size} | ❌ Errors: ${logs.length} (${percent}%)`);
+  if (finished) {
+      fin[0] = ` data-summary="${[...visited].join("\n")}"`;
+      fin[1] = ` data-summary="${[...resourceMap].map(r => r[0].trim()).join("\n")}"`;
+      fin[2] = ` data-summary="${[...logs].map(log => log.error.trim()).join("\n")}"`;
+  }
+  // log(`🏠 Pages: ${visited.size} | 📃 Assets: ${resourceMap.size} | ❌ Errors: ${logs.length} (${percent}%)`);
+    log(`🏠 <span${fin[0]}>Pages: ${visited.size}</span> | 📃 <span${fin[1]}>Assets: ${resourceMap.size}</span> | ❌ <span${fin[2]}>Errors: ${logs.length} (${percent}%)</span>`);
 }
 
 /**
- * Logs the total number of links found
+ * @function reportTotal 
+ * 
+ * Reports the total number of links and resources found
+ * 
  */
 function reportTotal() {
   log(`TLF${totalRequests}`);
 }
 
-/**
+/** 
+ * @function finish
+ * 
  * Finalizes the download process by reporting progress, generating sitemap and log files,
  * and displaying summary information. Writes the sitemap and error logs to disk.
  *
@@ -135,7 +150,7 @@ function reportTotal() {
  * @returns {Promise<void>} Resolves when all finalization tasks are complete.
  */
 async function finish(aborted) {
-  reportProgress();
+  reportProgress(1);
   await new Promise(async resolve => {
     if (!aborted) log(`*** FINISHED ***`);
     if (CREATE_SITEMAP) {
@@ -158,6 +173,8 @@ async function finish(aborted) {
 }
 
 /**
+ * @function getFolderSize
+ * 
  * Calculates the total size of all files within a directory (recursively) and returns a human-readable string.
  *
  * @async
@@ -182,6 +199,8 @@ async function getFolderSize(dirPath) {
 }
 
 /**
+ * @function autoScroll
+ * 
  * Automatically scrolls down the page to the bottom by incrementally scrolling.
  * Useful for loading dynamic content that appears as the user scrolls.
  *
@@ -279,17 +298,15 @@ async function createZip() {
  * @param {import('puppeteer').HTTPRequest} request - The Puppeteer HTTP request object.
  * @returns {Promise<void>} Resolves when the request has been processed.
  */
-async function dynamicPageRequest(request) {
+async function dynamicPageRequest(request, depth, browser) {
   const url = request.url();
   const type = request.resourceType();
   try {
     const parsedUrl = new URL(url);
     const href = parsedUrl.href;
-    if (shouldIgnoreUrl(href))  {
-      totalRequests += 1;
-      return;
-    }
+    if (shouldIgnoreUrl(href))  return totalRequests += 1;
     let resourcePath = sanitize(parsedUrl.pathname);
+    //if (USE_INDEX && !path.extname(href)) href += href.endsWith("/") ? "index.html" : "/index.html";
     if (USE_INDEX && !path.extname(resourcePath)) resourcePath += resourcePath.endsWith("/") ? "index.html" : "/index.html";
     const localPath = path.join(OUTPUT_DIR, resourcePath);
     if (href.endsWith(".html") || href.endsWith(".htm")) {
@@ -304,9 +321,7 @@ async function dynamicPageRequest(request) {
             const cssContent = await fs.readFile(cssPath, 'utf8');
             await extractCssResources(cssContent, href);
           }));
-        } else {
-          tasks.push(limit(async () => await downloadResource(href, localPath, "dyn")));
-        }
+        } else tasks.push(limit(async () => await downloadResource(href, localPath, "dyn")));
       }
     }
   } catch (err) {
@@ -318,6 +333,7 @@ async function dynamicPageRequest(request) {
  * Downloads a resource from the specified URL and saves it locally.
  *
  * @async
+ * @function downloadResource
  * @param {string} url - The URL of the resource to download.
  * @param {string} baseUrl - The base URL for resolving relative paths.
  * @param {string} [dyn=""] - The type of resource ("css" for CSS, "dyn" for dynamic, or empty for asset).
@@ -327,6 +343,7 @@ async function downloadResource(url, baseUrl, dyn = "") {
   totalRequests += 1;
   url = stripHash(url);
   url = stripSearch(url);
+  if (shouldIgnoreUrl(url)) return;
   const loc = getLocalPath(url, baseUrl);
   const type = dyn === "css" ? " CSS Resource" : dyn === "dyn" ? " Dynamic Resource" : " Asset Resource";
   const filename = url.split("/").pop();
@@ -395,13 +412,62 @@ async function extractCssResources(css, baseUrl) {
   let match;
   const urls = new Set();
   const add = url => url && !url.startsWith('data:') && !url.startsWith('blob:') && urls.add(url);
-  // 1. url(...) – deckt background, fonts, border-image, etc. ab
+  // 1. url(...) – Finds backgrounds, fonts, images, border-images
   const urlRegex = /url\((['"]?)([^'")]+)\1\)/gi;
   while ((match = urlRegex.exec(css))) try { add(new URL(match[2].trim(), baseUrl).href) }  catch {}
-  // 2. @import – CSS-Dateien können andere CSS-Dateien laden
+  // 2. @import – Finds CSS files loaded by a CSS file
   const importRegex = /@import\s+(['"]?)([^'"]+)\1;?/gi;
   while ((match = importRegex.exec(css))) try { add(new URL(match[2].trim(), baseUrl).href) }  catch {};
   for (const url of urls) !shouldIgnoreUrl(url) && tasks.push(limit(async () => await downloadResource(url, baseUrl, "css")));
+}
+
+
+/**
+ * Lädt eine manifest.json und extrahiert alle darin referenzierten Assets.
+ * @param {string} manifestUrl - Die URL zur manifest.json
+ * @param {string} baseUrl - Die Basis-URL zur Auflösung relativer Pfade
+ */
+async function handleManifest(manifestUrl, baseUrl) {
+  try {
+    const res = await fetch(manifestUrl);
+    if (!res.ok) throw new Error(`Manifest fetch failed: ${res.status}`);
+    const manifest = await res.json();
+
+    // Icons extrahieren
+    if (manifest.icons && Array.isArray(manifest.icons)) {
+      for (const icon of manifest.icons) {
+        if (icon.src) {
+          const iconUrl = new URL(icon.src, manifestUrl).href;
+          if (!shouldIgnoreUrl(iconUrl)) {
+            tasks.push(limit(async () => await downloadResource(iconUrl, baseUrl, "Asset")));
+          }
+        }
+      }
+    }
+    // Start-URL (optional als HTML-Seite laden)
+    if (manifest.start_url) {
+      const startUrl = new URL(manifest.start_url, manifestUrl).href;
+      if (!shouldIgnoreUrl(startUrl)) {
+        tasks.push(limit(() => crawl(startUrl, 1, browser, 1)));
+      }
+    }
+
+    // Splash Screens für PWAs
+    if (manifest.splash_pages && Array.isArray(manifest.splash_pages)) {
+      for (const page of manifest.splash_pages) {
+        if (page.src) {
+          const splashUrl = new URL(page.src, manifestUrl).href;
+          if (!shouldIgnoreUrl(splashUrl)) {
+            tasks.push(limit(async () => await downloadResource(splashUrl, baseUrl, "Asset")));
+          }
+        }
+      }
+    }
+    // Weitere Felder nach Bedarf ergänzen
+
+  } catch (e) {
+    logs.push({ url: manifestUrl, error: `Manifest error: ${e.message}` });
+  }
 }
 
 /**
@@ -422,17 +488,22 @@ function pageEvaluate() {
   const shouldIgnoreUrl = u => {
     if (!u || u.startsWith('data:') || u.startsWith('blob:') || u.startsWith('about:') || u.startsWith('chrome:') || u.startsWith('filesystem:')) return true;
     u = u.split("#")[0];
-    try { if (new URL(u, location.origin).origin === "null" || new URL(u, location.origin).hostname !== new URL(location.href).hostname) return true; } catch { return true; }
+    try { if (new URL(u, location.origin).origin === "null" || !new URL(u, location.origin).hostname.includes(new URL(location.href).hostname)) return true; } catch { return true; }
     return false;
   };
-  const els = [...document.querySelectorAll('[src], [href], [data-src], [data-href], [srcset], [poster]')];
+
   let link, parts, regex;
-  for (const el of els) {
+
+  // Links, Meta, Manifest, Favicon, Apple-Touch-Icon
+  [...document.querySelectorAll('link[rel~="icon"], link[rel~="apple-touch-icon"], link[rel="manifest"]')].forEach(link => add(link.href));
+  [...document.querySelectorAll('meta[property="og:image"], meta[name="twitter:image"]')].forEach(meta => add(meta.content));
+  [...document.querySelectorAll('[src], [href], [data-src], [data-href], [srcset], [poster]')].forEach(el => {
     try {
-      if (el.srcset) el.srcset.split(',').forEach(s => (parts = s.trim().split(' '))[0] && add(parts[0]));
+      if (el.srcset) (el.srcset.split(',').map(e => e.trim().split(' ')[0])).forEach(add);
       else (link = el.src || el.href || el.dataset.src || el.dataset.href || el.poster) && add(link);
     } catch {}
-  }
+  })
+
   // Collect URLs found in inline styles
   const style = [...document.querySelectorAll('style')];
   regex = /url\((['"]?)([^'")]+)\1\)/g;
@@ -444,6 +515,7 @@ function pageEvaluate() {
  * Recursively crawls a website starting from the given URL, downloading HTML pages and their resources.
  *
  * @async
+ * @function crawl
  * @param {string} url - The URL to crawl.
  * @param {number} depth - The current depth of the crawl.
  * @param {import('puppeteer').Browser} browser - The Puppeteer browser instance.
@@ -452,27 +524,41 @@ function pageEvaluate() {
  *
  * @throws Will log and record errors encountered during crawling or resource downloading.
  */
-async function crawl(url, depth, browser, recursive = null) {
+async function crawl(uri, depth, browser, recursive = null) {
+  
   totalRequests += 1;
+  
   // If this is not the entry HTML file, or if we overstep MAX_DEPTH → return
   if ((!RECURSIVE && recursive) || depth > MAX_DEPTH) return;
-  url = stripHash(url);
+
+  let url = stripHash(uri);
   const parsedUrl = new URL(url);
   const stripped = stripSearch(url);
-  if (USE_INDEX && !path.extname(parsedUrl.pathname) && new URL(url).origin === new URL(TARGET_URL).origin) url = stripped + (stripped.endsWith("/") ? "index.html" : "/index.html") + parsedUrl.search || "";
+
+  if (
+    USE_INDEX &&
+    !path.extname(parsedUrl.pathname) &&
+    new URL(url).pathname.includes(new URL(TARGET_URL).pathname)
+  ) url = stripped + (stripped.endsWith("/") ? "index.html" : "/index.html") + parsedUrl.search || "";
+
   if (shouldIgnoreUrl(url)) return;
+
   log(`📄 Site (Depth ${depth}): ${url}`);
+  
   // Remember the url of this HTML file
   visited.add(stripSearch(url));
   sitemap.add(stripSearch(url));
+  
   // Print the progress
   reportProgress();
+
   // Open a new page (puppeteer)
   const page = await browser.newPage();
-  page.on('request', dynamicPageRequest);
+  page.on('request', request => dynamicPageRequest(request, depth, browser));
+
   try {
     // Open the website in puppeteer
-    await page.goto(url, { waitUntil: 'networkidle2' });
+    await page.goto(uri, { waitUntil: 'networkidle2' });
     // Scroll down the page in order to catch requests which are initiated by an on-scroll trigger
     await autoScroll(page);
     // Wait for any other dynamically requested files
@@ -487,30 +573,32 @@ async function crawl(url, depth, browser, recursive = null) {
       res = stripHash(res);
       res = stripSearch(res);
       const extname = path.extname(new URL(raw, url).pathname);
-      if (USE_INDEX && !extname && new URL(res).origin === new URL(TARGET_URL).origin) res += (res.endsWith("/") ? "index.html" : "/index.html");
+      if (USE_INDEX && !extname && new URL(res).hostname.includes(new URL(TARGET_URL).hostname)) res += (res.endsWith("/") ? "index.html" : "/index.html");
       totalRequests += 1;
       if (shouldIgnoreUrl(res)) continue;
-      else {
-        if (res.endsWith('.html') || res.endsWith('.htm') || !extname) {
-          tasks.push(limit(() => crawl(res, depth + 1, browser, 1)));
-        } else {
-          try {
-            if (res.endsWith(".css")) {
-              tasks.push(limit(async () => {
-                await downloadResource(res, url, "css");
-                const cssPath = getLocalPath(res, url);
-                const cssContent = await fs.readFile(cssPath, 'utf8');
-                await extractCssResources(cssContent, res);
-              }));
-            } else tasks.push(limit(async () => await downloadResource(res, url, "Asset")));
-          } catch(e) {
-            logs.push({ url: res, error: `Error fetching resource ${res}: ${e.message || e.toString()}` });
-          }
+      if (res.endsWith('.html') || res.endsWith('.htm') || !extname) {
+        tasks.push(limit(() => crawl(res, depth + 1, browser, 1)));
+      } else {
+        try {
+          if (res.endsWith(".css")) {
+            tasks.push(limit(async () => {
+              await downloadResource(res, url, "css");
+              const cssPath = getLocalPath(res, url);
+              const cssContent = await fs.readFile(cssPath, 'utf8');
+              await extractCssResources(cssContent, res);
+            }));
+          } else tasks.push(limit(async () => await downloadResource(res, url, "Asset")));
+        } catch(e) {
+          logs.push({ url: res, error: `Error fetching resource ${res}: ${e.message || e.toString()}` });
         }
       }
     }
+    // Check all HTML files for manifests and send the links to the manifest handler 
+    const manifestLinks = await page.evaluate(() => [...document.querySelectorAll('link[rel="manifest"]')].map(link => link.href).filter(Boolean));
+    for (const manifestUrl of manifestLinks) await handleManifest(manifestUrl, url);
+    
     // Get the source code from the actual HTML file (not from the rendered DOM)
-    const response = await fetch(url);
+    const response = await fetch(uri);
     const html = await response.text();
     const adjustedContent = adjustLinks(html, url);
     const localPath = getLocalPath(url, TARGET_URL);
