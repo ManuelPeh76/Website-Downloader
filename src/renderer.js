@@ -230,8 +230,7 @@ const storedTheme = storage.theme;
 /* Activate history of the text input fields 'URL' and 'Target Folder' */
 const history = [
     new History("url"),
-    new History("folder"),
-    new History("depth")
+    new History("folder")
 ];
 
 /* Default values */
@@ -423,7 +422,7 @@ function changeFolder() {
 }
 
 /* Prepare the UI for starting the download process */
-function initiateDownloadStart() {
+function prepareDownloadStart() {
     log.innerHTML = "";
     progress.innerHTML = "";
     totalLinks.innerHTML = "0";
@@ -443,7 +442,7 @@ function initiateDownloadStart() {
 async function startDownload() {
   if (!await validateUserInput()) return;
   const query = createQuery();
-  initiateDownloadStart();
+  prepareDownloadStart();
   logMessage("*** STARTING DOWNLOAD ***<br>");
   loggingEnabled = true;
   api.startDownload(query);
