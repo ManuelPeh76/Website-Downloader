@@ -153,11 +153,14 @@ class History {
         return this;
     }
     destroy = () => {
-        this.element.onchange = this.oldOnChange;
-        document.onkeydown = this.oldOnKeyDown;
+        if (this.element) {
+            this.element.onchange = this.oldOnChange || null;
+            this.element.onkeydown = this.oldOnKeyDown || null;
+        }
         this.history = null;
         this.pointer = null;
-        return;
+        this.oldOnChange = null;
+        this.oldOnKeyDown = null;
     }
     #handleEvents() {
         this.oldOnChange = this.element.onchange;
@@ -570,4 +573,5 @@ async function validateUserInput() {
   }
   return true;
 }
+
 
