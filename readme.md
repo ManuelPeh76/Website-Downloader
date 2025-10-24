@@ -1,23 +1,30 @@
-# <img src="src/img/electron.svg" width="50" height="50"> Website-Downloader
-A fast and universal downloader for dynamic websites, created with Puppeteer and Electron.
+# <img src="src/img/electron.svg" width="50" height="50"> Website Downloader
 
-## Features
-- 🔎 Dynamic Loading: Catches files that are dynamically loaded during runtime.
-- 🚀 Fast Loading: Up to 25 files are downloaded simultaneously.
-- 🔁 Recursive Download: Searches linked pages and downloads files found there.
-- 📏 Limit Depth: Specifies how deep links should be traced.
-- 🧹 Cleanup Mode: Empties the destination folder before saving downloads.
-- 🗺️ Sitemap Export: Exports a sitemap of the downloaded website.
-- 🪵 Log Export: Exports a log with any error messages.
-- 📦 ZIP Export: Creates a ZIP archive containing the entire website after downloads are complete.
-- 🔧 Progress Status: Displays the current status of the download process.
-- 💻 GUI or CLI usage.
-- 🌐 Offline support: Adapts all links inside the HTML files, so the website can be used offline.
-- 🌓 Supports Light Mode and Dark Mode
+Website Downloader is a powerful tool for downloading entire websites, including all resources, for offline use. It supports modern web technologies and has been continuously enhanced to ensure that all relevant assets for a page are stored locally.
 
-## Installation
+## ⚙️ Features
+- **Complete Website Download:** Loads HTML pages and all resources referenced within them (images, CSS, JS, fonts, videos, etc.).
+- **Recursive Depth-First Search:** Optionally, pages can be linked to any depth and downloaded.
+- **Dynamic Content:** Detects and loads content that was dynamically loaded via JavaScript.
+- **Manifest.json Support:** Detects and processes web app manifest files (`manifest.json`) and loads icons, start URLs, and splash screens referenced from them.
+- **Intelligent Asset Detection:** Extracts resources from HTML, CSS (`url(...)` and `@import`), meta tags (e.g., OpenGraph, Twitter), link tags (icons, Apple Touch Icons, manifest), srcset, poster, etc.
+- **Index.html Support:** Optional automatic renaming of link targets without file extensions to `index.html` for better offline display.
+- **Error and Progress Logging:** Progress, errors, and download lists are logged; can optionally be saved as a file.
+- **ZIP Export:** Optionally, a ZIP archive of the entire site can be created upon completion.
+- **Sitemap Export:** Optionally, a sitemap.json file with all downloaded pages and assets is created.
+- **Folder Cleanup:** The target folder can be emptied before downloading.
+- **Concurrency:** Adjustable number of parallel downloads (2–50, default: 12).
+- **Adjustable wait time for dynamic content** (dwt): Time delay after HTML parsing to detect newly downloaded files.
+- **History function for input fields:**
+  - **What is it?** All text fields (such as "URL" and "Target Folder") remember previous entries.
+  - **How ​​does it work?** You can navigate through the history using the
+  `[Arrow Up]`/`[Arrow Down]` keys; `[Delete]` deletes an entry.
+  - The history is saved for each field in `localStorage` and automatically restored at startup.
+  - Implemented via a custom, robust `History` class in the GUI (`renderer.js`).
+
+## <img src="src/img/install.svg" width="25" height="25" /> Installation
 I assume you have node.js, npm and git already installed.
-First, clone the repository and install the dependencies:
+First, clone the repository (or download the ZIP file) and install the dependencies:
 ```cmd
 git clone https://github.com/ManuelPeh76/website-downloader.git
 
@@ -25,92 +32,56 @@ cd website-downloader
 
 npm install
 ```
-Now you can run the app with `npm start`. 
+Now you can run the app with `npm start`.
+If you want to make changes to its code, run `npm run dev` instead. Everything will work normally, but now the tool will be reloaded every time one of its files change.
 
-This opens a cmd window, which will launch the app. 
-Windows users can create an app package, to make it a standalone app (without the need to run a second window beside it):
+To use this tool as a real standalone app, you have to create an app package. This works for windows users only:
 ```cmd
 npm run build
 ```
-This creates a 'dist\website-downloader-win32-x64' folder, containing the app as an .exe file.
-Just step inside and start website-downloader.exe.
+This creates the app in `.\dist\website-downloader-win32-x64`, containing the app as an .exe file.
+Just step inside and start `website-downloader.exe`.
 
-## Build a Windows Installer (optional)
+## 🔧 Build a Windows Installer (optional)
 ```cmd
 npm run setup
 ```
-Thist creates a windows installer package from the app. When you start the exe file inside the dist/installers folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you'd already download anything ;) ).<br>
+Thist creates a windows installer package from the app. When you start the .exe (or .msi) file inside the `.\dist\installers` folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you'd already download anything ;) ).<br>
 The app will be installed to `C:\Users\<username>\AppData\Local\website_downloader`.
 
-## Usage
+## 💻 Usage
 
-### GUI
-<img src="src/img/app.png" width="400">
+1. **Specify URL and target folder**:<br>
+Specify the website address and the local target folder. These fields have a history for easy reuse.
+2. **Select options**:<br>
+Depth, recursive, ZIP, sitemap, logging, Index.html, clean folder, concurrency, dwt time...
+3. **Start download**:<br>
+One click downloads the entire page (including dynamically loaded content and all assets) to the target folder.
+4. **Monitor progress and errors**:<br>
+Progress is displayed and can be saved as a file.
+5. **Optional ZIP/Sitemap export:**<br>
+After downloading, the data can be saved as a ZIP archive and/or sitemap.
 
-  1. If you used the installer: 
-Go to C:\Users\<username>\AppData\Local\website_downloader and start the website-downloader.exe (or create a desktop shortcut to start it from the desktop).
-If you want to start it from the repo folder, go inside it and open a cmd window by typing `cmd` into the address bar. There you start it with `npm start`.
-  2. Enter the URL of the website you want to download.
-  3. Select the desired options.
-  4. Choose the target folder, in which the website folder will be created.
-  5. Start the download with the `Start` button or hit Enter.
+## 🚀 Enhancements since the first version
+- **Manifest.json support**:<br> Automatic detection and download of all icons, start URLs, and splash screens referenced in the manifest.
+- **History for input fields**:<br> Convenient, persistent history for the `URL` and `Target Folder` text fields, keyboard navigation.
+- **Better asset detection**:<br> Meta tags, srcset, link tags, etc. are now fully considered.
+- **Fine-grained logging options**: Progress, errors, and sitemap can be enabled/disabled.
+- **Multiplatform GUI:** Electron frontend with theme switcher, tooltips, automatic settings saving function, and history.
 
-#### Keyboard Shortcuts
-| Key | Action | Availability |
-| --- | --- | --- |
-| Tab | Cycle down through the input elements | Idle |
-| Shift + Tab | Cycle up through the input elements | Idle |
-| Enter | Start Download | Idle |
-| Esc | Abort Download | Downloading |
-| p | Pause / Resume Download | Downloading |
+## 🔎Technical Details
+- **Node.js** Backend
+- **Electron** Frontend
+- Uses **Puppeteer** for true browser rendering (dynamic content is also recognized)
+- **JSZip** for ZIP export
 
-### CLI
- Open a command line inside the repo folder and start the tool with
- ```cmd
- node src/download <url> [options]
- ```
+## 🗺️ Notes
+- Some very specific dynamic content (e.g., after clicks, mouseovers) may not be automatically recognized.
+- For very large pages, a high `concurrency` value and sufficient memory are recommended.
 
-#### Options
-| Option | Description |
-| --- | --- |
-| `-d=<number>`<br>`--depth=<number>` | The depth of links to consider (default: infinity). |
-| `-dwt=<ms>`<br>`--dyn_wait_time=<ms>` | The time in ms the tool waits for dynamic content to load after the page is loaded (default 3000). |
-| `-r`<br>`--recursive` | Enables recursive downloading of linked pages (default: true). |
-| `-z`<br>`--zip` | Creates a ZIP archive after downloads are complete (default: false). |
-| `-c`<br>`--clean` | Empties the destination folder before saving downloads (default: false). |
-| `-o=<path>`<br>`--outdir=<path>` | The full path to the folder the website is saved to (default: repo folder). |
-| `-cc=<number>`<br>`--concurrency=<number>` | The amount of concurrent active downloads (default: 8). |
-| `-u`<br>`--use-index` | If there's no file ending in the path, the filename 'index.html' is assumed. (default: true) |
-| `-l`<br>`--log` | This creates the file log.json containing all errors occured while downloading |
-|`-s`<br>`--sitemap`|A sitemap (sitemap.json) will be created after downloads are finished|
-
-## Example
-To download a web page with a link depth of 4, recursion, clean mode, a dynamic wait time of 500ms, using index.html option and with output on the desktop use the following command:
-```cmd
-node src/download https://example.org -r -c -u -d=4 -dwt=500 outdir=C:\Users\<username>\Desktop
-```
-
-## Some Infos about this Tool
-
-- Files that are dynamically loaded during the website's runtime are only recorded if the request occurs within the dynamical wait time (3000ms by default) after opening the page.
-- CSS files (whether linked or dynamically loaded) are searched for 'url(...)' to include fonts and images that are loaded by the CSS.
-- Only files whose storage location matches that of the website are saved.
-- When an HTML file has been downloaded, the tool adapts all links to make sure, the webpage works offline.
-- When using the GUI, all settings you change (incl. the url) are saved via local storage. The next time you start the GUI your own settings will be restored.
-
-## License
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+## <img src="src/img/license.svg" width="25" height="25" /> MIT License
+© 2025 Manuel Pelzer
 
 ---
-
-
-
-
-
-
-
-
-
-
-
-
+**Quellcode & weitere Infos:**
+[GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
