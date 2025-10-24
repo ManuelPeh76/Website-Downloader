@@ -22,7 +22,7 @@ Website Downloader is a powerful tool for downloading entire websites, including
   - The history is saved for each field in `localStorage` and automatically restored at startup.
   - Implemented via a custom, robust `History` class in the GUI (`renderer.js`).
 
-## <img src="src/img/install.svg" width="25" height="25" /> Installation
+## <img src="src/img/install.png" width="25" height="25" /> Installation
 I assume you have node.js, npm and git already installed.
 First, clone the repository (or download the ZIP file) and install the dependencies:
 ```cmd
@@ -85,3 +85,4 @@ After downloading, the data can be saved as a ZIP archive and/or sitemap.
 ---
 **Quellcode & weitere Infos:**
 [GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
+
