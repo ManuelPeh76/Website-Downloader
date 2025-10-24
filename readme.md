@@ -4,7 +4,7 @@ Website Downloader is a powerful tool for downloading entire websites, including
 
 ## ⚙️ Features
 - **Complete Website Download:** Loads HTML pages and all resources referenced within them (images, CSS, JS, fonts, videos, etc.).
-- **Recursive Depth-First Search:** Optionally, pages can be linked to any depth and downloaded.
+- **Recursive Depth-First Search:** Optionally, linked pages to any depth can be downloaded.
 - **Dynamic Content:** Detects and loads content that was dynamically loaded via JavaScript.
 - **Manifest.json Support:** Detects and processes web app manifest files (`manifest.json`) and loads icons, start URLs, and splash screens referenced from them.
 - **Intelligent Asset Detection:** Extracts resources from HTML, CSS (`url(...)` and `@import`), meta tags (e.g., OpenGraph, Twitter), link tags (icons, Apple Touch Icons, manifest), srcset, poster, etc.
@@ -85,4 +85,5 @@ After downloading, the data can be saved as a ZIP archive and/or sitemap.
 ---
 **Quellcode & weitere Infos:**
 [GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
+
 
