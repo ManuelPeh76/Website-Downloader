@@ -1,6 +1,6 @@
 {
   "name": "website-downloader",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "main": "./src/main.js",
   "description": "A universal downloader for dynamic websites, built with Puppeteer. Saves HTML, CSS, JS, Fonts, Images, Audio, Video and more — including recursive crawling, offline support, and ZIP export.",
   "scripts": {
