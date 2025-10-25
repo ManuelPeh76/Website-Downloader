@@ -86,8 +86,8 @@ After downloading, the data can be saved as a ZIP archive and/or sitemap (if the
 | Delete | Remove entry from history<br>(text input fields only) | Idle |
 | Esc | Abort Download | Downloading |
 | p | Pause / Resume Download | Downloading |
-| L | Light Mode | Always |
-| D | Dark Mode | Always |
+| CTRL + L | Light Mode | Always |
+| CTRL + D | Dark Mode | Always |
 ---
 ### CLI
  Open a command line inside the repo folder and start the tool with
@@ -146,3 +146,4 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 ---
 **Quellcode & weitere Infos:**
 [GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
+
