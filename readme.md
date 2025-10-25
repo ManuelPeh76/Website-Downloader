@@ -144,6 +144,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 © 2025 Manuel Pelzer
 
 ---
-**Quellcode & weitere Infos:**
+**Source code available at:**
 [GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
+
 
