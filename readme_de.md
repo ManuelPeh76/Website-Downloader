@@ -15,7 +15,7 @@ Diese App wurde entwickelt, um diese Schwachstelle statischer Website-Downloader
 **HINWEIS**: Websites und Web-Apps können sehr komplex sein, und diese App kann auch nicht zaubern. Einige sehr spezifische dynamische Inhalte (z. B. nach Klicks oder Mouseovers) werden möglicherweise nicht automatisch erkannt.
 
 <a name="features"></a>
-## Funktionen
+# ⚙️ Funktionen
 - **Kompletter Website-Download:** Lädt HTML-Seiten und alle darin referenzierten Ressourcen (Bilder, CSS, JS, Schriftarten, Videos usw.).
 - **Rekursive Tiefensuche:** Optional können verlinkte Seiten in beliebiger Tiefe heruntergeladen werden.
 - **Dynamische Inhalte:** Erkennt und lädt Inhalte, die dynamisch über XHR/Fetch-API geladen wurden.
@@ -35,7 +35,7 @@ Diese App wurde entwickelt, um diese Schwachstelle statischer Website-Downloader
   - Implementierung über eine benutzerdefinierte, robuste `History`-Klasse in der GUI (`renderer.js`).
 
 <a name="installation"></a>
-## Installation
+# 💻 Installation
 Ich gehe davon aus, dass node.js, npm und git bereits installiert sind.
 Klone zunächst das Repository (oder lade die ZIP-Datei herunter) und installiere die Dependencies:
 ```cmd
@@ -55,7 +55,7 @@ npm run build
 Dadurch wird die App in `.\dist\website-downloader-win32-x64` erstellt und kann über die `website-downloader.exe` gestartet werden.
 
 <a name="installer"></a>
-## ⚒️ Windows-Installer erstellen
+# ⚒️ Windows-Installer erstellen
 ```cmd
 npm run setup
 ```
@@ -131,7 +131,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Benutzer\
 - **Multiplattform-GUI:** Electron-Frontend mit Theme-Umschalter, Tooltips, automatischer Speicherfunktion für Einstellungen und Verlauf.
 
 <a name="details"></a>
-# 🔎Technische Details
+# 🔎 Technische Details
 - Verwendet **Node.js** als Backend und **Electron** als Frontend.
 - Verwendet **Puppeteer** für echtes Browser-Rendering (eine der Möglichkeiten, dynamische Inhalte zu erkennen).
 - Verwendet **JSZip** für den ZIP-Export.
@@ -158,4 +158,5 @@ MIT License © 2025 Manuel Pelzer
 ---
 **Quellcode & weitere Infos:**
 [GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
+
 
