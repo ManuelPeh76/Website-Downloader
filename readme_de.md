@@ -4,7 +4,7 @@
 [![Stars](https://img.shields.io/github/stars/ManuelPeh76/Website-Downloader?style=flat&logo=github)](https://github.com/ManuelPeh76/Website-Downloader/stargazers)
 [![License](https://img.shields.io/github/license/ManuelPeh76/Website-Downloader?style=flat)](https://github.com/ManuelPeh76/Website-Downloader/blob/master/LICENSE)
 # <img src="src/img/electron.svg" width="50" height="50"> Website Downloader
-[Features](#⚙️-features) | [Installation](#💻-installation) | [Usage](#🪛-usage) | [GUI](#gui) | [CLI](#cli) | [Example](#💭-example) | [Enhancements](#🚀-enhancements-since-the-first-version)
+| [Funktionen](#features) | [Installation](#installation) | [Windows-Installer](#installer) | [GUI](#gui) | [CLI](#cli) | [Verbesserungen](#enhancements) | [Technische Details](#details) | [Hinweise](#notes) |
 
 Website Downloader ist ein leistungsstarkes Tool, um komplette Webseiten inklusive aller Ressourcen für die Offline-Nutzung herunterzuladen. Es unterstützt moderne Web-Technologien und wurde laufend erweitert, damit wirklich alle für eine Seite relevanten Assets lokal gespeichert werden.
 
@@ -14,6 +14,7 @@ Diese App wurde entwickelt, um diese Schwachstelle statischer Website-Downloader
 
 **HINWEIS**: Websites und Web-Apps können sehr komplex sein, und diese App kann auch nicht zaubern. Einige sehr spezifische dynamische Inhalte (z. B. nach Klicks oder Mouseovers) werden möglicherweise nicht automatisch erkannt.
 
+<a name="features"></a>
 ## Funktionen
 - **Kompletter Website-Download:** Lädt HTML-Seiten und alle darin referenzierten Ressourcen (Bilder, CSS, JS, Schriftarten, Videos usw.).
 - **Rekursive Tiefensuche:** Optional können verlinkte Seiten in beliebiger Tiefe heruntergeladen werden.
@@ -33,6 +34,7 @@ Diese App wurde entwickelt, um diese Schwachstelle statischer Website-Downloader
   - Der Verlauf wird für jedes Feld im `localStorage` gespeichert und beim Start automatisch wiederhergestellt.
   - Implementierung über eine benutzerdefinierte, robuste `History`-Klasse in der GUI (`renderer.js`).
 
+<a name="installation"></a>
 ## Installation
 Ich gehe davon aus, dass node.js, npm und git bereits installiert sind.
 Klone zunächst das Repository (oder lade die ZIP-Datei herunter) und installiere die Dependencies:
@@ -52,6 +54,7 @@ npm run build
 ```
 Dadurch wird die App in `.\dist\website-downloader-win32-x64` erstellt und kann über die `website-downloader.exe` gestartet werden.
 
+<a name="installer"></a>
 ## ⚒️ Windows-Installer erstellen
 ```cmd
 npm run setup
@@ -62,7 +65,7 @@ Die App wird unter `C:\Benutzer\<Benutzername>\AppData\Local\website_downloader`
 # 🪛 Verwendung
 
 ## GUI
-<img style="margin-left:26px" src="src/img/app.png" width="400">
+<img src="src/img/app.png" width="400">
 
 1. **App starten**
   - **Wenn das Installationsprogramm verwendet wurde**:<br>&nbsp;&nbsp;Gehe zu `C:\Benutzer\<Benutzername>\AppData\Local\website_downloader`<br>&nbsp;&nbsp;und starte die Datei `website-downloader.exe` (oder erstelle eine Desktopverknüpfung, um sie vom Desktop aus zu starten).<br>
@@ -119,6 +122,7 @@ Um eine Webseite mit einer Linktiefe von 4, Rekursion, Clean-Modus, einer dynami
 node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Benutzer\<Benutzername>\Desktop
 ```
 
+<a name="enhancements"></a>
 # 🚀 Verbesserungen seit der ersten Version
 - **Manifest.json-Unterstützung**:<br> Automatische Erkennung und Download aller im Manifest referenzierten Grafiken, Start-URLs und Splash-Screens.
 - **Verlauf für Eingabefelder**:<br> Praktischer, dauerhafter Verlauf für die Textfelder "URL" und "Zielordner", Tastaturnavigation.
@@ -126,12 +130,14 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Benutzer\
 - **Detaillierte Protokollierungsoptionen**: Fortschritt-, Fehler- und Sitemap-Export können aktiviert/deaktiviert werden.
 - **Multiplattform-GUI:** Electron-Frontend mit Theme-Umschalter, Tooltips, automatischer Speicherfunktion für Einstellungen und Verlauf.
 
+<a name="details"></a>
 # 🔎Technische Details
 - Verwendet **Node.js** als Backend und **Electron** als Frontend.
 - Verwendet **Puppeteer** für echtes Browser-Rendering (eine der Möglichkeiten, dynamische Inhalte zu erkennen).
 - Verwendet **JSZip** für den ZIP-Export.
 - **NTSuspend** bietet eine einfache Möglichkeit, die Ausführung von Node-Skripten auf Windows-Rechnern zu pausieren/fortzusetzen.
 
+<a name="notes"></a>
 # 🗺️ Hinweise
 - Für sehr große Seiten werden ein hoher Parallelitätswert und ausreichend Arbeitsspeicher empfohlen.
 
@@ -147,9 +153,9 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Benutzer\
 
 # 📃 Lizenz
 
-MIT License<br>
-© 2025 Manuel Pelzer
+MIT License © 2025 Manuel Pelzer
 
 ---
 **Quellcode & weitere Infos:**
 [GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
+
