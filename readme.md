@@ -4,7 +4,7 @@
 [![Stars](https://img.shields.io/github/stars/ManuelPeh76/Website-Downloader?style=flat&logo=github)](https://github.com/ManuelPeh76/Website-Downloader/stargazers)
 [![License](https://img.shields.io/github/license/ManuelPeh76/Website-Downloader?style=flat)](https://github.com/ManuelPeh76/Website-Downloader/blob/master/LICENSE)
 # <img src="src/img/electron.svg" width="50" height="50"> Website Downloader
-| [Features](#features) | [Installation](#installation) | [Build Windows Installere](#build-installer) | [GUI](#gui) | [CLI](#cli) | [Enhancements](#enhancements) | [Technical Details](#details) | [Notes](#notes) |
+| [Features](#features) | [Installation](#installation) | [Build Windows Installer](#installer) | [GUI](#gui) | [CLI](#cli) | [Enhancements](#enhancements) | [Technical Details](#details) | [Notes](#notes) |
 
 Website Downloader is a powerful tool for downloading entire websites, including all resources, for offline use. It supports modern web technologies and has been continuously enhanced to ensure that all relevant assets for a page are stored locally.
 
@@ -55,7 +55,7 @@ npm run build
 This creates the app in `.\dist\website-downloader-win32-x64`, containing the app as an .exe file.
 Just step inside and start `website-downloader.exe`.
 
-<a name="build-installer"></a>
+<a name="installer"></a>
 ## ⚒️ Build a Windows Installer
 ```cmd
 npm run build
@@ -157,6 +157,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 ---
 **Quellcode & weitere Infos:**
 [GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
+
 
 
 
