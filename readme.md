@@ -4,7 +4,7 @@
 [![Stars](https://img.shields.io/github/stars/ManuelPeh76/Website-Downloader?style=flat&logo=github)](https://github.com/ManuelPeh76/Website-Downloader/stargazers)
 [![License](https://img.shields.io/github/license/ManuelPeh76/Website-Downloader?style=flat)](https://github.com/ManuelPeh76/Website-Downloader/blob/master/LICENSE)
 # <img src="src/img/electron.svg" width="50" height="50"> Website Downloader
-[Features](#⚙️-features) | [Installation](#💻-installation) | [Usage](#🪛-usage) | [GUI](#gui) | [CLI](#cli) | [Example](#💭-example) | [Enhancements](#🚀-enhancements-since-the-first-version)
+[Features](#features) | [Installation](#installation) | [Usage](#usage) | [GUI](#gui) | [CLI](#cli) | [Example](#example) | [Enhancements](#enhancements-since-the-first-version)
 
 Website Downloader is a powerful tool for downloading entire websites, including all resources, for offline use. It supports modern web technologies and has been continuously enhanced to ensure that all relevant assets for a page are stored locally.
 
@@ -14,6 +14,7 @@ This app was developed to address this weakness in static website downloaders: C
 
 **NOTE**: Websites and Web-Apps can be quite complex and this App is no magician. Some very specific dynamic content (e.g., after clicks, mouseovers) may not be automatically recognized.
 
+<a name="features"></a>
 # ⚙️ Features
 - **Complete Website Download:** Loads HTML pages and all resources referenced within them (images, CSS, JS, fonts, videos, etc.).
 - **Recursive Depth-First Search:** Optionally, pages linked at any depth can be downloaded.
@@ -33,6 +34,7 @@ This app was developed to address this weakness in static website downloaders: C
   - The history is saved for each field in `localStorage` and automatically restored at startup.
   - Implemented via a custom, robust `History` class in the GUI (`renderer.js`).
 
+<a name="installation"></a>
 # 💻 Installation
 I assume you have node.js, npm and git already installed.
 First, clone the repository (or download the ZIP file) and install the dependencies:
@@ -60,6 +62,7 @@ npm run setup
 Thist creates a windows installer package from the app. When you start the .exe (or .msi) file inside the `.\dist\installers` folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you'd already download anything ;) ).<br>
 The app will be installed to `C:\Users\<username>\AppData\Local\website_downloader`.
 
+<a name="usage"></a>
 # 🪛 Usage
 
 ## GUI
@@ -92,8 +95,9 @@ After downloading, the data can be saved as a ZIP archive and/or sitemap (if the
 | p | Pause / Resume Download | Downloading |
 | Ctrl + L | Light Mode | Always |
 | Ctrl + D | Dark Mode | Always |
----
+
 ## CLI
+
  Open a command line inside the repo folder and start the tool with
  ```cmd
  node src/download <url> [options]
@@ -116,7 +120,7 @@ To download a web page with a link depth of 4, recursion, clean mode, a dynamic 
 ```cmd
 node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<username>\Desktop
 ```
-
+<a name="enhancements-since-the-first-version"></a>
 # 🚀 Enhancements since the first version
 - **Manifest.json support**:<br> Automatic detection and download of all icons, start URLs, and splash screens referenced in the manifest.
 - **History for input fields**:<br> Convenient, persistent history for the `URL` and `Target Folder` text fields, keyboard navigation.
@@ -124,13 +128,14 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 - **Fine-grained logging options**: Progress, errors, and sitemap can be enabled/disabled.
 - **Multiplatform GUI:** Electron frontend with theme switcher, tooltips, automatic settings saving function, and history.
 
-# 🔎Technical Details
+<a name="technical-details"></a>
+# 🔎 Technical Details
 - Uses **Node.js** as backend and **Electron** as frontend
 - Uses **Puppeteer** for true browser rendering (which is also one way to recognize dynamic content)
 - **JSZip** for ZIP export
 - **NTSuspend** provides an easy way to pause/resume the execution of scripts on windows machines
 
-
+<a name="notes"></a>
 # 🗺️ Notes
 - For very large pages, a high `concurrency` value and sufficient memory are recommended.
 
@@ -150,3 +155,4 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 ---
 **Quellcode & weitere Infos:**
 [GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
+
