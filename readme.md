@@ -4,7 +4,7 @@
 [![Stars](https://img.shields.io/github/stars/ManuelPeh76/Website-Downloader?style=flat&logo=github)](https://github.com/ManuelPeh76/Website-Downloader/stargazers)
 [![License](https://img.shields.io/github/license/ManuelPeh76/Website-Downloader?style=flat)](https://github.com/ManuelPeh76/Website-Downloader/blob/master/LICENSE)
 # <img src="src/img/electron.svg" width="50" height="50"> Website Downloader
-| [Features](#features) | [Installation](#installation) | [Build Windows Installere](#build-installer) | [Usage](#usage) | [GUI](#gui) | [CLI](#cli) | [Enhancements](#enhancements) | [Technical Details](#details) | [Notes](#notes) |
+| [Features](#features) | [Installation](#installation) | [Build Windows Installere](#build-installer) | [GUI](#gui) | [CLI](#cli) | [Enhancements](#enhancements) | [Technical Details](#details) | [Notes](#notes) |
 
 Website Downloader is a powerful tool for downloading entire websites, including all resources, for offline use. It supports modern web technologies and has been continuously enhanced to ensure that all relevant assets for a page are stored locally.
 
@@ -65,7 +65,6 @@ npm run setup
 Thist creates a windows installer package from the app. When you start the .exe (or .msi) file inside the `.\dist\installers` folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you'd already download anything ;) ).<br>
 The app will be installed to `C:\Users\<username>\AppData\Local\website_downloader`.
 
-<a name="usage"></a>
 # 🪛 Usage
 
 ## GUI
@@ -158,5 +157,6 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 ---
 **Quellcode & weitere Infos:**
 [GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
+
 
 
