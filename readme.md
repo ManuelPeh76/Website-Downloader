@@ -4,7 +4,7 @@
 [![Stars](https://img.shields.io/github/stars/ManuelPeh76/Website-Downloader?style=flat&logo=github)](https://github.com/ManuelPeh76/Website-Downloader/stargazers)
 [![License](https://img.shields.io/github/license/ManuelPeh76/Website-Downloader?style=flat)](https://github.com/ManuelPeh76/Website-Downloader/blob/master/LICENSE)
 # <img src="src/img/electron.svg" width="50" height="50"> Website Downloader
-[Features](#features) | [Installation](#installation) | [Usage](#usage) | [GUI](#gui) | [CLI](#cli) | [Example](#example) | [Enhancements](#enhancements-since-the-first-version)
+| [Features](#features) | [Installation](#installation) | [Build Windows Installere](#build-installer) | [Usage](#usage) | [GUI](#gui) | [CLI](#cli) | [Enhancements](#enhancements) | [Technical Details](#details) | [Notes](#notes) |
 
 Website Downloader is a powerful tool for downloading entire websites, including all resources, for offline use. It supports modern web technologies and has been continuously enhanced to ensure that all relevant assets for a page are stored locally.
 
@@ -55,8 +55,11 @@ npm run build
 This creates the app in `.\dist\website-downloader-win32-x64`, containing the app as an .exe file.
 Just step inside and start `website-downloader.exe`.
 
+<a name="build-installer"></a>
 ## ⚒️ Build a Windows Installer
 ```cmd
+npm run build
+
 npm run setup
 ```
 Thist creates a windows installer package from the app. When you start the .exe (or .msi) file inside the `.\dist\installers` folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you'd already download anything ;) ).<br>
@@ -120,7 +123,7 @@ To download a web page with a link depth of 4, recursion, clean mode, a dynamic 
 ```cmd
 node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<username>\Desktop
 ```
-<a name="enhancements-since-the-first-version"></a>
+<a name="enhancements"></a>
 # 🚀 Enhancements since the first version
 - **Manifest.json support**:<br> Automatic detection and download of all icons, start URLs, and splash screens referenced in the manifest.
 - **History for input fields**:<br> Convenient, persistent history for the `URL` and `Target Folder` text fields, keyboard navigation.
@@ -128,7 +131,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 - **Fine-grained logging options**: Progress, errors, and sitemap can be enabled/disabled.
 - **Multiplatform GUI:** Electron frontend with theme switcher, tooltips, automatic settings saving function, and history.
 
-<a name="technical-details"></a>
+<a name="details"></a>
 # 🔎 Technical Details
 - Uses **Node.js** as backend and **Electron** as frontend
 - Uses **Puppeteer** for true browser rendering (which is also one way to recognize dynamic content)
@@ -155,4 +158,5 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 ---
 **Quellcode & weitere Infos:**
 [GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
+
 
