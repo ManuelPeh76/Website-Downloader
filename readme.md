@@ -70,8 +70,9 @@ The app will be installed to `C:\Users\<username>\AppData\Local\website_download
 ## GUI
 <img style="margin-left:26px" src="src/img/app.png" width="400">
 
-1. **If you used the installer**:<br>&nbsp;&nbsp;Go to `C:\Users\<username>\AppData\Local\website_downloader`<br>&nbsp;&nbsp;and start the `website-downloader.exe` (or create a desktop shortcut to start it from the desktop).<br>
-**If you want to start it from the repo folder**:<br>&nbsp;&nbsp;Go inside it and open a cmd window by typing `cmd` into the addressbar.<br>&nbsp;&nbsp;There you start it with `npm start` or `npm run dev`.
+1. **Start the App**
+- **If you used the installer**:<br>&nbsp;&nbsp;Go to `C:\Users\<username>\AppData\Local\website_downloader`<br>&nbsp;&nbsp;and start the `website-downloader.exe` (or create a desktop shortcut to start it from the desktop).
+- **If you want to start it from the repo folder**:<br>&nbsp;&nbsp;Go inside it and open a cmd window by typing `cmd` into the addressbar.<br>&nbsp;&nbsp;There you start it with `npm start` or `npm run dev`.
 2. **Specify URL and target folder**:<br>
 Specify the website address and the local target folder. These fields have a history for easy reuse. Type in the target folder manually, or double click into the text field to open a folder selection dialogue. <br>NOTE: You may omit the 'http://' or 'https://' in the URL. The app adds it by itself.
 3. **Select options**:<br>
@@ -127,15 +128,15 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 - **Manifest.json support**:<br> Automatic detection and download of all icons, start URLs, and splash screens referenced in the manifest.
 - **History for input fields**:<br> Convenient, persistent history for the `URL` and `Target Folder` text fields, keyboard navigation.
 - **Better asset detection**:<br> Meta tags, srcset, link tags, etc. are now fully considered.
-- **Fine-grained logging options**: Progress, errors, and sitemap can be enabled/disabled.
-- **Multiplatform GUI:** Electron frontend with theme switcher, tooltips, automatic settings saving function, and history.
+- **Fine-grained logging options**:<br> Progress, errors, and sitemap can be enabled/disabled.
+- **Multiplatform GUI**:<br> Electron frontend with theme switcher, tooltips, automatic saving function for settings and history.
 
 <a name="details"></a>
 # 🔎 Technical Details
 - Uses **Node.js** as backend and **Electron** as frontend
 - Uses **Puppeteer** for true browser rendering (which is also one way to recognize dynamic content)
 - **JSZip** for ZIP export
-- **NTSuspend** provides an easy way to pause/resume the execution of scripts on windows machines
+- **NTSuspend** provides an easy way to pause/resume the execution of node scripts on windows machines
 
 <a name="notes"></a>
 # 🗺️ Notes
@@ -157,6 +158,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 ---
 **Quellcode & weitere Infos:**
 [GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
+
 
 
 
