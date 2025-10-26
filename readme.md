@@ -156,8 +156,9 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 <span style="margin-left:25px">MIT license © 2025 Manuel Pelzer</span>
 
 ---
-**Quellcode & weitere Infos:**
+**Source code available at:**
 [GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
+
 
 
 
