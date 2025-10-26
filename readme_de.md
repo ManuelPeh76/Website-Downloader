@@ -40,9 +40,7 @@ Ich gehe davon aus, dass node.js, npm und git bereits installiert sind.
 Klone zunächst das Repository (oder lade die ZIP-Datei herunter) und installiere die Dependencies:
 ```cmd
 git clone https://github.com/ManuelPeh76/website-downloader.git
-
 cd website-downloader
-
 npm install
 ```
 Jetzt kannst du die App mit `npm start` oder mit `npm run dev` starten.
@@ -58,6 +56,7 @@ Dadurch wird die App in `.\dist\website-downloader-win32-x64` erstellt und kann 
 # ⚒️ Windows-Installer erstellen
 ```cmd
 npm run setup
+npm run build
 ```
 Dadurch wird ein Windows-Installer-Paket aus der App erstellt. Starte die EXE-Datei im Ordner `.\dist\installers` und warte, bis das Setup vollständig abgeschlossen ist (das Symbol in der Bildschirmmitte verschwindet), auch wenn die App bereits während des Installationsvorgangs startet. Nach Abschluss der Installation wird die App nämlich neu gestartet (wäre blöd, wenn bereits Downloads laufen würden ;)).<br>
 Die App wird unter `C:\Benutzer\<Benutzername>\AppData\Local\website_downloader` installiert.
@@ -158,5 +157,6 @@ MIT License © 2025 Manuel Pelzer
 ---
 **Quellcode & weitere Infos:**
 [GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
+
 
 
