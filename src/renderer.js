@@ -1,6 +1,6 @@
 /**
  * @name Website Downloader
- * 
+ *
  * @author Manuel Pelzer
  * @file renderer.js
  * @copyright © 2025 By Manuel Pelzer
@@ -101,6 +101,7 @@ if (!window.api) window.api = {
  */
 
 class History {
+    // prettier-ignore-start
     oldOnChange = null;
     oldOnKeyDown = null;
     constructor(id) {
@@ -140,7 +141,7 @@ class History {
         localStorage[`${this.id}-history`] = "";
         this.history = [];
         this.pointer = 0;
-        return this;      
+        return this;
     }
     remove = e => {
         if (!this.history.includes(this.element.value)) return this;
@@ -154,6 +155,7 @@ class History {
     }
     destroy = () => {
         if (this.element) {
+            // Setzt die Event-Handler auf die zuvor gespeicherten Original-Handler oder entfernt sie komplett
             this.element.onchange = this.oldOnChange || null;
             this.element.onkeydown = this.oldOnKeyDown || null;
         }
@@ -274,7 +276,7 @@ const tooltips = {
     "create-zip": "If enabled, a ZIP archive containing the entire website will be created after downloads are complete. (Disabled)",
     "create-sitemap": "If enabled, a sitemap (sitemap.json) will be created inside the target folder after downloads are complete. (Enabled)",
     "create-log": "If enabled, a log file (log.json) containing all error messages will be created inside the target folder after downloads are complete. (Enable)",
-    "create-progresslog": "If enabled, a progress log file (progress.log) containing the progress list will be created inside the target folder after downloads are complete. (Enabled)",
+    "create-progresslog": "If enabled, a progress log file (progress.log) containing the progress list will\nbe created inside the target folder after downloads are complete. (Disabled)",
     clean: "If enabled, the target folder will be cleared before downloading. (Disabled)",
     "use-index": "If no file extension is found at the end of a path, the filename is assumed as 'index.html'. (Enabled)",
     concurrency: "Determines how many downloads run simultaneously.\n\n2 - 50 (12)",
@@ -350,8 +352,8 @@ async function maximize(){
 function keyDown(e) {
 
     /* Navigating and setting up the tool via keys */
-    if ((["Tab", "Enter"].includes(e.key) && !downloadInProgress) || (["Escape", "p"].includes(e.key) && downloadInProgress)) e.preventDefault();
-    
+    if ((["Tab", "Enter"].includes(e.key) && !downloadInProgress) || (["Escape", "p"].includes(e.key) && downloadInProgress) || (e.ctrlKey && ("dl".includes(e.key)))) e.preventDefault();
+
     /* Navigate through the input fields using the Tab key (backwards with Shift+Tab). */
     if (e.key === "Tab" && !downloadInProgress) {
         if (!document.querySelector(".active")) return inputElements[0].focus();
@@ -367,6 +369,8 @@ function keyDown(e) {
         if (downloadInProgress) abortDownload();
         else document.querySelector(".active")?.blur();
     } else if (e.key === "p" && downloadInProgress) pauseDownload();
+    else if (e.key === "l" && e.ctrlKey) root.setAttribute("data-theme", (storage.theme = "light"));
+    else if (e.key === "d" && e.ctrlKey) root.setAttribute("data-theme", (storage.theme = "dark"));
 }
 
 /**
@@ -425,7 +429,7 @@ function changeFolder() {
 }
 
 /* Prepare the UI for starting the download process */
-function prepareDownloadStart() {
+function initiateDownloadStart() {
     log.innerHTML = "";
     progress.innerHTML = "";
     totalLinks.innerHTML = "0";
@@ -445,7 +449,7 @@ function prepareDownloadStart() {
 async function startDownload() {
   if (!await validateUserInput()) return;
   const query = createQuery();
-  prepareDownloadStart();
+  initiateDownloadStart();
   logMessage("*** STARTING DOWNLOAD ***<br>");
   loggingEnabled = true;
   api.startDownload(query);
@@ -573,5 +577,3 @@ async function validateUserInput() {
   }
   return true;
 }
-
-
