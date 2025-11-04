@@ -1,6 +1,6 @@
 /**
  * @name Website Downloader
- * 
+ *
  * @author Manuel Pelzer
  * @file preload.js
  * @copyright © 2025 By Manuel Pelzer
@@ -20,6 +20,7 @@ contextBridge.exposeInMainWorld('api', {
   minimize: () => ipcRenderer.invoke("minimize"),
   maximize: () => ipcRenderer.invoke("maximize"),
   unmaximize: () => ipcRenderer.invoke("unmaximize"),
+  getActiveHandles: () => ipcRenderer.invoke('get-active-handles'),
   quit: () => ipcRenderer.invoke("quit")
 });
 

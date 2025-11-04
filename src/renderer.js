@@ -9,18 +9,17 @@
 
 "use strict";
 
+import { History } from "./history.js";
+import { Modal } from "./modal.js";
+
 const root = document.documentElement;
 const storage = window.localStorage || {};
-
-const toStore = (item, value) => (storage[item] = JSON.stringify(value), value);
-const fromStore = item => { try { return JSON.parse(storage[item]); } catch { return false; }};
 
 let downloadInProgress = false;
 let startTime, tempTime;
 let loggingIsLinked = false;
 let loggingEnabled = false;
 let downloadTimer;
-let isMaximized;
 let previousFolder;
 
 /**
@@ -31,173 +30,18 @@ let previousFolder;
  * in order to test functionality inside the browser.
  */
 if (!window.api) window.api = {
-  maximize: () => logMessage("Maximize\n"),
-  minimize: () => logMessage("Minimize\n"),
-  unmaximize: () => logMessage("Unmaximize\n"),
-  startDownload: args => logMessage("Start Download\n"),
-  quit: () => logMessage("Quit\n"),
-  saveProgress: () => logMessage("Save Progress\n"),
-  resumeDownload: () => logMessage("Resume Download\n"),
-  pauseDownload: () => logMessage("Pause Download\n"),
-  abortDownload: () => logMessage("Abort Download\n"),
-  selectFolder: () => logMessage("Select Folder\n"),
-  onLog: () => logMessage("On Log\n")
+  maximize: () => (debug.checked ? logDev : logMessage)("Maximize\n"),
+  minimize: () => (debug.checked ? logDev : logMessage)("Minimize\n"),
+  unmaximize: () => (debug.checked ? logDev : logMessage)("Unmaximize\n"),
+  startDownload: args => (debug.checked ? logDev : logMessage)("Start Download\n"),
+  quit: () => (debug.checked ? logDev : logMessage)("Quit\n"),
+  saveProgress: () => (debug.checked ? logDev : logMessage)("Save Progress\n"),
+  resumeDownload: () => (debug.checked ? logDev : logMessage)("Resume Download\n"),
+  pauseDownload: () => (debug.checked ? logDev : logMessage)("Pause Download\n"),
+  abortDownload: () => (debug.checked ? logDev : logMessage)("Abort Download\n"),
+  selectFolder: () => (debug.checked ? logDev : logMessage)("Select Folder\n"),
+  onLog: () => (debug.checked ? logDev : logMessage)("On Log\n")
 };
-
-/**
- * History
- *
- * Manages a per-input history stack with keyboard navigation and persistence to localStorage.
- * Attaches to an input/textarea element by id, intercepts its onchange and onkeydown handlers
- * (preserving any previously assigned handlers), and stores entered values in a history array
- * saved in localStorage.
- *
- * Usage:
- *   const h = new History('myInputId');
- *
- * Behavior summary:
- * - Records the element's value when it changes and persists the history.
- * - Up/Down arrow keys navigate back and forward through recorded values.
- * - Delete (while focused on the element) removes the currently selected value from history.
- * - clear() empties stored history; remove(e) removes the currently selected entry.
- *
- * @class
- *
- * @param {string} id - The id of the input/textarea element to attach history handling to.
- *
- * @property {string} id - The id passed to the constructor.
- * @property {(HTMLInputElement|HTMLTextAreaElement|null)} element - The DOM element found by id; null if not found.
- * @property {string[]} history - Array of stored values for this element (loaded from localStorage).
- * @property {number} pointer - Index into `history` representing the current selection; may be history.length - 1
- *                              when the currently shown value is the most recent entry or point at an empty value.
- * @property {(function|null)} oldOnChange - Previously assigned onchange handler on the element (if any).
- * @property {(function|null)} oldOnKeyDown - Previously assigned onkeydown handler on the element (if any).
- *
- * Public instance methods:
- *
- * @method add
- * @returns {History} this - Adds the current element value to the end of the history (if different from last entry),
- *                          updates the pointer to the new last index, and persists the history.
- * @method forward
- * @returns {History} this - Moves the pointer forward by one. If the pointer moves past the last stored entry,
- *                          the element's value is cleared and the pointer is clamped to history.length.
- * @method back
- * @returns {History} this - Moves the pointer back by one (clamped to 0) and sets the element's value to the
- *                          history entry at the new pointer.
- * @method clear
- * @returns {History} this - Clears the persisted history for this id (removes the localStorage key and empties
- *                          the in-memory history array), and resets the pointer to 0.
- * @method remove
- * @returns {History} this - Removes the last occurrence of the element's current value from history (if present),
- *                          updates/persists the history and pointer, and sets the element value to the new selected entry.
- * @method destroy
- * @returns {void} - Restores the element's original onchange handler and the document's original onkeydown handler,
- *                   clears internal history/pointer references, and detaches behavior.
- *
- * Notes:
- * - If no DOM element is found for the supplied id, the constructor returns early and the instance will not manage history.
- * - The class preserves and calls any previously attached onchange and onkeydown handlers for the element.
- * - The implementation assumes the element exposes a 'value' property (e.g., input or textarea).
- */
-
-class History {
-    // prettier-ignore-start
-    oldOnChange = null;
-    oldOnKeyDown = null;
-    constructor(id) {
-        this.id = id;
-        this.element = document.getElementById(id);
-        if (!this.element) return;
-        this.history = this.#fromStore(`${id}-history`) || [];
-        this.pointer = (this.element.value && this.history.includes(this.element.value) ? this.history.indexOf(this.element.value) : this.history.length - 1);
-        this.#handleEvents();
-        return this;
-    }
-    add = () => {
-        if (this.history[this.history.length - 1] !== this.element.value) {
-            this.history.push(this.element.value);
-            this.pointer = this.history.length - 1;
-            this.#toStore(`${this.id}-history`, this.history);
-        }
-        return this;
-    }
-    forward = () => {
-        this.pointer += 1;
-        if (this.pointer >= this.history.length) {
-            this.pointer = this.history.length;
-            this.element.value = "";
-            return this;
-        }
-        this.element.value = this.history[this.pointer] || "";
-        return this;
-    }
-    back = () => {
-        this.pointer -= 1;
-        if (this.pointer < 0) this.pointer = 0;
-        this.element.value = this.history[this.pointer];
-        return this;
-    }
-    clear = () => {
-        localStorage[`${this.id}-history`] = "";
-        this.history = [];
-        this.pointer = 0;
-        return this;
-    }
-    remove = e => {
-        if (!this.history.includes(this.element.value)) return this;
-        e.preventDefault();
-        this.pointer = this.history.lastIndexOf(this.element.value);
-        this.history.splice(this.pointer, 1);
-        if (this.pointer >= this.history.length) this.pointer = this.history.length - 1;
-        this.#toStore(`${this.id}-history`, this.history.length ? this.history : "");
-        this.element.value = this.history[this.pointer] || "";
-        return this;
-    }
-    destroy = () => {
-        if (this.element) {
-            // Setzt die Event-Handler auf die zuvor gespeicherten Original-Handler oder entfernt sie komplett
-            this.element.onchange = this.oldOnChange || null;
-            this.element.onkeydown = this.oldOnKeyDown || null;
-        }
-        this.history = null;
-        this.pointer = null;
-        this.oldOnChange = null;
-        this.oldOnKeyDown = null;
-    }
-    #handleEvents() {
-        this.oldOnChange = this.element.onchange;
-        this.oldOnKeyDown = this.element.onkeydown;
-        this.element.onkeydown = e => {
-            this.#keyDown(e);
-            this.oldOnKeyDown && this.oldOnKeyDown(e);
-        }
-        this.element.onchange = e => {
-            this.add();
-            this.oldOnChange && this.oldOnChange(e);
-        }
-    }
-    #keyDown(e) {
-        const key = e.key;
-        const element = e.target;
-        if (element !== this.element) return;
-        if (["ArrowUp", "ArrowDown", "Delete"].includes(key)) e.preventDefault();
-        if (key === "ArrowUp") this.back();
-        else if (e.key === "ArrowDown") this.forward();
-        else if (e.key === "Delete") this.remove(e);
-    }
-    #storage = window.localStorage || {};
-    #toStore = (item, value) => {
-        this.#storage[item] = JSON.stringify(value);
-        return value;
-    }
-    #fromStore = item => {
-        try {
-            return JSON.parse(this.#storage[item]);
-        } catch {
-            return false;
-        }
-    }
-}
 
 /* DOM elements */
 const progress = document.getElementById("progress-text");
@@ -205,15 +49,13 @@ const start = document.getElementById("start");
 const log = document.getElementById("log");
 const abort = document.getElementById("abort");
 const pause = document.getElementById("pause");
-const inputs = [...document.getElementsByClassName("input")];
 const folder = document.getElementById("folder");
 const github = document.getElementById("github");
-const themeToggler = [...document.querySelectorAll(".theme-toggle")];
+const themeToggler = [...document.getElementsByClassName("theme-toggle")];
 const progressTime = document.getElementById("progress-time");
 const minimizer = document.querySelector(".minimizer");
 const maximizer = document.querySelector(".maximizer");
 const closer = document.querySelector(".closer");
-const body = document.querySelector(".body");
 const concurrency = document.getElementById("concurrency");
 const dwt = document.getElementById("dwt");
 const url = document.getElementById("url");
@@ -226,17 +68,9 @@ const createProgresslog = document.getElementById("create-progresslog");
 const clean = document.getElementById("clean");
 const useIndex = document.getElementById("use-index");
 const totalLinks = document.getElementById("total-links");
-const inputElements = [...document.querySelectorAll(".cycle")];
-
-const httpRegex = /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/;
-
-const storedTheme = storage.theme;
-
-/* Activate history of the text input fields 'URL' and 'Target Folder' */
-const history = [
-    new History("url"),
-    new History("folder")
-];
+const debug = document.getElementById("debug");
+const inputs = [...document.getElementsByClassName("input")];
+const inputElements = [...document.getElementsByClassName("cycle")];
 
 /* Default values */
 const preferences = {
@@ -255,19 +89,6 @@ const preferences = {
   ...fromStore("dwnldr_preferences")  ||  {}
 };
 
-const restoreSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><path d="M4,8H8V4H20V16H16V20H4V8M16,8V14H18V6H10V8H16M6,12V18H14V12H6Z" /></svg>`;
-const maximizeSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 550 550"><path d="M.3 89.5C.1 91.6 0 93.8 0 96L0 224 0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-192 0-128c0-35.3-28.7-64-64-64L64 32c-2.2 0-4.4 .1-6.5 .3c-9.2 .9-17.8 3.8-25.5 8.2C21.8 46.5 13.4 55.1 7.7 65.5c-3.9 7.3-6.5 15.4-7.4 24zM48 224l416 0 0 192c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-192z"/></svg>`;
-const noValidUrl = () => (logMessage("[CLS]❌ Please enter a valid URL!"), url.focus(), false);
-const createQuery = () => ({ url: url.value, depth: depth.value, zip: createZip.checked, clean: clean.checked, useIndex: useIndex.checked, recursive: recursive.checked, folder: folder.value.trim(), concurrency: parseInt(concurrency.value, 10), dwt: parseInt(dwt.value, 10), sitemap: createSitemap.checked, log: createLog.checked });
-const logProgress = msg => progress.innerHTML = msg;
-const logTotal = msg => totalLinks.innerHTML = msg.replace(/TLF/, "");
-const logMessage = msg => {
-  msg.startsWith("[CLS]") && (log.innerHTML = "", msg = msg.substring(5));
-  if (msg.startsWith("***")) msg = `<br><font size="3"><b>${msg}</b></font>`;
-  if (!msg.startsWith("🌐") || (msg.startsWith("🌐") && !log.innerHTML.includes(msg.replace(/\n/g, "")))) log.innerHTML += msg.replace(/\n/g, "<br>");
-  if (log.scrollHeight - log.scrollTop < 400) log.scrollTop = log.scrollHeight;
-}
-
 const tooltips = {
   tooltips: {
     url: "The web address of the site you want to download.\nHistory: Navigate with [ArrowUp]/[ArrowDown]\n         [Delete]: Remove entry from history.",
@@ -284,7 +105,8 @@ const tooltips = {
     folder: "Select a folder in which to save the downloaded web pages.\nClick - Enter the path manually.\nDoubleclick - Open 'Select folder' dialog.\n\nEach folder path you enter here, will be added to the history.\n\nArrowUp/ArrowDown - Navigate through history.\nDelete - Remove entry from history.",
     github: "View source on GitHub",
     light: "Set Light Mode",
-    dark: "Set Dark Mode"
+    dark: "Set Dark Mode",
+    debug: "Enable Debug Mode. An additional modal window opens while downloading. It shows more detailed information about what happens in the background."
   }, title: {
     minimizer: "Minimize",
     maximizer: "Maximize",
@@ -292,20 +114,31 @@ const tooltips = {
   }
 };
 
-api.unmaximize();
+const restoreSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><rect x="5" y="14" width="28" height="28" fill="none" stroke-width="5" /><g stroke-width="4"><line x1="14" y1="14" x2="14" y2="5" /><line x1="14" y1="5" x2="42" y2="5" /><line x1="42" y1="5" x2="42" y2="34" /><line x1="42" y1="34" x2="32" y2="34" /></g></svg>`;
+const maximizeSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><rect x="5" y="5" width="38" height="38" fill="none" stroke-width="5"/></svg>`;
 
-/* Theme Toggle Logic */
+const httpRegex = /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/;
+const storedTheme = storage.theme;
+
+/* Activate history of the text input fields 'URL' and 'Target Folder' */
+new History("url");
+new History("folder");
+
+const modal = new Modal({ isClosable: () => !downloadInProgress, title: "Debug Log", footer: "Website Downloader" });
+
+api.unmaximize();
+debug.parentElement.style.display = "none";
+
 setTheme(storedTheme || matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 
 /* Add tooltips and restore the previous state of the input elements */
 for (const [id, content] of Object.entries(tooltips.tooltips)) document.getElementById(`${id}-label`).dataset.tooltip = content;
 for (const [id, content] of Object.entries(tooltips.title)) document.getElementById(`${id}-label`).title = content;
-for (const [id, val] of Object.entries(preferences)) { const el = document.getElementById(id); el[el.type === "checkbox" ? "checked" : "value"] = val; }
-for (const el of [concurrency, depth, dwt]) updateValue(el);
+for (const [id, val] of Object.entries(preferences)) { const el = document.getElementById(id); el && (el[el.type === "checkbox" ? "checked" : "value"] = val); }
 
 /* Event Handling */
 for (const el of themeToggler) el.addEventListener("click", () => setTheme(el.id));
-for (const el of [concurrency, depth, dwt]) el.addEventListener('input', updateValue);
+for (const el of [concurrency, depth, dwt]) (updateValue(el), el.addEventListener('input', updateValue));
 for (const el of inputs) el.addEventListener("change", storeValues);
 for (const el of inputElements) {
     el.addEventListener("focus", function() {
@@ -328,13 +161,55 @@ folder.addEventListener("blur", changeFolder);
 folder.addEventListener("focus", () => previousFolder = folder.value);
 closer.addEventListener("click", api.quit);
 
-/* Minimizes the app */
+/* Functions */
+
+function toStore(item, value) {
+  storage[item] = JSON.stringify(value);
+  return value;
+}
+
+function fromStore(item) {
+    try {
+        return JSON.parse(storage[item]);
+    } catch {
+        return false;
+    }
+}
+
+function noValidUrl() {
+    logMessage("[CLS]❌ Please enter a valid URL!");
+    url.focus();
+    return false;
+}
+
+function createQuery() {
+  return { url: url.value, depth: depth.value, zip: createZip.checked, clean: clean.checked, useIndex: useIndex.checked, recursive: recursive.checked, folder: folder.value.trim(), concurrency: parseInt(concurrency.value, 10), dwt: parseInt(dwt.value, 10), debug: debug.checked, sitemap: createSitemap.checked, log: createLog.checked };
+}
+
+function logProgress(msg) {
+  progress.innerHTML = msg;
+}
+
+function logTotal(msg) {
+  totalLinks.innerHTML = msg.replace(/TLF/, "");
+}
+
+function logDev(msg) {
+  modal.add(msg);
+}
+
+function logMessage(msg) {
+  msg.startsWith("[CLS]") && (log.innerHTML = "", msg = msg.substring(5));
+  if (msg.startsWith("***")) msg = `<br><font size="3"><b>${msg}</b></font>`;
+  if (!msg.startsWith("🌐") || (msg.startsWith("🌐") && !log.innerHTML.includes(msg.replace(/\n/g, "")))) log.innerHTML += msg.replace(/\n/g, "<br>");
+  if (log.scrollHeight - log.scrollTop < 400) log.scrollTop = log.scrollHeight;
+}
+
 function minimize() {
     minimizer.blur();
     api.minimize();
 }
 
-/* Maximizes/restores the app */
 async function maximize(){
     await api.maximize() ? (
         maximizer.innerHTML = restoreSvg,
@@ -352,7 +227,11 @@ async function maximize(){
 function keyDown(e) {
 
     /* Navigating and setting up the tool via keys */
-    if ((["Tab", "Enter"].includes(e.key) && !downloadInProgress) || (["Escape", "p"].includes(e.key) && downloadInProgress) || (e.ctrlKey && ("dl".includes(e.key)))) e.preventDefault();
+    if (
+      (["Tab", "Enter"].includes(e.key) && !downloadInProgress) ||
+      (["Escape", "p"].includes(e.key) && downloadInProgress) ||
+      (e.ctrlKey && ("Ddl".includes(e.key)))
+    ) e.preventDefault();
 
     /* Navigate through the input fields using the Tab key (backwards with Shift+Tab). */
     if (e.key === "Tab" && !downloadInProgress) {
@@ -366,11 +245,18 @@ function keyDown(e) {
     /* Next are self explaining */
     else if (e.key === "Enter" && !downloadInProgress) startDownload();
     else if (e.key === "Escape") {
-        if (downloadInProgress) abortDownload();
-        else document.querySelector(".active")?.blur();
-    } else if (e.key === "p" && downloadInProgress) pauseDownload();
+        downloadInProgress ? abortDownload() : modal.isOpen() ? modal.hide() : document.querySelector(".active")?.blur();
+    }
+    else if (e.key === "a" && e.ctrlKey && downloadInProgress && debug.checked) api.getActiveHandles();
+    else if (e.key === "p" && downloadInProgress) pauseDownload();
     else if (e.key === "l" && e.ctrlKey) root.setAttribute("data-theme", (storage.theme = "light"));
     else if (e.key === "d" && e.ctrlKey) root.setAttribute("data-theme", (storage.theme = "dark"));
+
+    else if (e.key === "s" && e.ctrlKey && !downloadInProgress) selectFolder();
+    if (e.key === "D" && e.ctrlKey && !downloadInProgress) {
+      debug.parentElement.style.display = "";
+      debug.checked = !debug.checked;
+    }
 }
 
 /**
@@ -429,7 +315,8 @@ function changeFolder() {
 }
 
 /* Prepare the UI for starting the download process */
-function initiateDownloadStart() {
+function prepareDownloadStart() {
+    if (debug.checked) modal.clear().show();
     log.innerHTML = "";
     progress.innerHTML = "";
     totalLinks.innerHTML = "0";
@@ -449,7 +336,7 @@ function initiateDownloadStart() {
 async function startDownload() {
   if (!await validateUserInput()) return;
   const query = createQuery();
-  initiateDownloadStart();
+  prepareDownloadStart();
   logMessage("*** STARTING DOWNLOAD ***<br>");
   loggingEnabled = true;
   api.startDownload(query);
@@ -474,10 +361,12 @@ function onLog(msg) {
     .replace(/🏠/g, "!!🏠")
     .replace(/\*\*\* /g, "!!*** ")
     .replace(/TLF/g, "!!TLF")
+    .replace(/debug:/g, "!!debug:")
     .split("!!") // Split the messages at marker positions
-    .filter(e => e); // No empty entries
-  // Forward each segment to the appropriate logging function
-  for (let m of msg) m.startsWith("🏠") ? logProgress(m) : m.startsWith("TLF") ? logTotal(m) : logMessage(m);
+    .filter(Boolean); // No empty entries
+
+    // Forward each segment to the appropriate logging function
+  for (let m of msg) m.startsWith("🏠") ? logProgress(m) : m.startsWith("TLF") ? logTotal(m) : m.startsWith("debug:") ? logDev(m.slice(6)) : logMessage(m);
   if (msg.join("").includes("🕧")) {
     downloadInProgress = false;
     loggingEnabled = 0;

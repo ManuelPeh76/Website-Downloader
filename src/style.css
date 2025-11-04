@@ -11,21 +11,6 @@
 
 :root {
   color-scheme: light dark;
-  /*
-  --bg: #f9fafb;
-  --fg: #111;
-  --link: #0715d3;
-  --accent: #92cdff;
-  --accent2: #5282e9;
-  --card: #ffffff;
-  --log-bg: #bdd1ff;
-  --border: #d1d5db;
-  --shadow: rgba(255, 255, 255, 0.3);
-  --error: #ff3535;
-  --tooltip: #dddddd
-  --gradient1: #ffffff;
-  --gradient2: #aaaaaa;
-*/
 }
 
 /* Only active if no data-theme found */
@@ -108,6 +93,7 @@ svg {
   fill: var(--fg);
   stroke: var(--fg);
   color: var(--card);
+  transition: all 400ms ease;
 }
 
 svg.electron {
@@ -190,11 +176,15 @@ input[type="checkbox"] {
   margin-right: 0.5em;
 }
 
-input[type="checkbox"].active {
+input[type="checkbox"].active,
+input[type="checkbox"].cycle:hover {
   transform: scale(1.4);
 }
 
-input[type="range"].active, input[type="text"].active {
+input[type="range"].active,
+input[type="text"].active,
+input[type="range"].cycle:hover,
+input[type="text"].cycle:hover {
   transform: scale(1.02);
 }
 
@@ -288,13 +278,11 @@ progress {
   top: 0;
   left: 0;
   width: 100%;
-  height: 30px;
+  height: 36px;
   background: var(--accent);
   border-top: var(--accent2) 2px solid;
   border-left: var(--accent2) 2px solid;
   border-right: var(--accent2) 2px solid;
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
   z-index: 1;
 }
 
@@ -314,43 +302,35 @@ progress {
   height: 100%;
   width: 100%;
   padding-left: 20px;
-  font-size: 18px;
+  font-size: 14px;
   z-index: 1;
   app-region: drag;
   font-variant: small-caps;
 }
 
 .closer, .maximizer, .minimizer {
-  justify-self: center;
-  align-self: center;
-  width: 16px;
-  height: 16px;
-  padding: 6px;
-  cursor: pointer;
-  border: transparent 1px solid;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
-  z-index: 1;
+    width: 46px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-app-region: no-drag;
+    transition: background .2s ease;
 }
 
-.maximizer:hover, .minimizer:hover {
-  background: var(--accent2);
-  border: var(--border) 1px solid;
-}
-svg {
-  transition: all 400ms ease;
-}
-.minimizer svg:hover,
-.maximizer svg:hover,
-.closer svg:hover {
-  transform: scale(1.3);
+.minimizer:hover, .maximizer:hover {
+    background: rgba(255,255,255,.2);
 }
 
 .closer:hover {
-  background: var(--error);
-  border: var(--border) 1px solid;
+    background: #e81123;
 }
 
+.closer svg, .maximizer svg, .minimizer svg {
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
 .wrapper {
   display: grid;
   grid-template-columns: 1fr 90px;
@@ -363,8 +343,9 @@ svg {
 
 .theme-github {
   position: fixed;
-  top: 33px;
+  top: 39px;
   right: 0;
+  z-index: 10;
 }
 
 .theme-github-inner {
@@ -373,7 +354,7 @@ svg {
 
 .github-corner {
   position: absolute;
-  top: -1px;
+  top: 0;
   right: 0;
 }
 
@@ -394,11 +375,9 @@ svg {
 }
 
 .footer {
-  display: grid;
-  justify-content: center;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  grid-auto-flow: column;
-  column-gap: 5px;
   font-size: 12px;
   font-variant: small-caps;
   width: 100%;
@@ -414,6 +393,10 @@ svg {
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   z-index: 1;
+}
+
+.footer span {
+  margin: 0 20px;
 }
 
 .padding20 {
@@ -473,6 +456,14 @@ svg {
   width: max-content;
   max-width: 300px;
   animation: wait-tooltip-after 1s forwards ease;
+}
+
+[data-summary]:hover::after {
+  content: attr(data-summary);
+  top: 50%;
+  bottom: unset;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .tooltip:hover::after {
