@@ -5,6 +5,7 @@
   "description": "A universal downloader for dynamic websites, built with Puppeteer. Saves HTML, CSS, JS, Fonts, Images, Audio, Video and more — including recursive crawling, offline support, and ZIP export.",
   "scripts": {
     "start": "electron .",
+    "dev": "electronmon .",
     "build": "electron-packager . website-downloader --platform win32 --arch x64 --out dist/",
     "setup": "electron-installer-windows --src dist/website-downloader-win32-x64/ --dest dist/installers/"
   },
@@ -24,6 +25,7 @@
     "electron": "^37.2.3",
     "electron-installer-windows": "*",
     "electron-packager": "*",
-    "electron-prebuilt": "*"
+    "electron-prebuilt": "*",
+    "electronmon": "^2.0.3"
   }
 }
