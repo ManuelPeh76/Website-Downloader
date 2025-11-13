@@ -121,8 +121,8 @@ const httpRegex = /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0
 const storedTheme = storage.theme;
 
 /* Activate history of the text input fields 'URL' and 'Target Folder' */
-new History("url");
-new History("folder");
+const urlHistory = new History("url");
+const folderHistory = new History("folder");
 
 const modal = new Modal({ isClosable: () => !downloadInProgress, title: "Debug Log", footerText: "Website Downloader", logType: "div" });
 
@@ -300,6 +300,7 @@ async function selectFolder() {
         folder.value = dir;
         preferences.folder = dir;
         toStore("dwnldr_preferences", preferences);
+        folderHistory.toHistory(dir);
     }
 }
 

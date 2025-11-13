@@ -67,16 +67,16 @@ export class History {
   oldOnChange = null;
   oldOnKeyDown = null;
   constructor(id) {
-    this.id = id;
+    this.id = id instanceof Element ? id.id : id;
     this.element = id instanceof Element ? id : document.getElementById(id);
     if (!this.element) return;
     this.history = this.#fromStore(`${id}-history`) || [];
-    this.pointer = (this.element.value && this.history.includes(this.element.value) ? this.history.indexOf(this.element.value) : this.history.length - 1);
+    this.pointer = (this.element.value && this.history.includes(this.element.value) ? this.history.indexOf(this.element.value) : this.history.length ? this.history.length - 1 : 0);
     this.#handleEvents();
     return this;
   }
   add = () => {
-    if (this.history[this.history.length - 1] !== this.element.value) {
+    if (!this.history.length || this.history[this.history.length - 1] !== this.element.value) {
       this.history.push(this.element.value);
       this.pointer = this.history.length - 1;
       this.#toStore(`${this.id}-history`, this.history);
@@ -96,9 +96,13 @@ export class History {
   back = () => {
     this.pointer -= 1;
     if (this.pointer < 0) this.pointer = 0;
-    this.element.value = this.history[this.pointer];
+    this.element.value = this.history[this.pointer] || this.element.value;
     return this;
   };
+  toHistory = e => {
+    this.add(e);
+    return this;
+  }
   clear = () => {
     localStorage[`${this.id}-history`] = "";
     this.history = [];
