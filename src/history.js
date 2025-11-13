@@ -16,10 +16,12 @@
  * saved in localStorage.
  *
  * Usage:
- *   const h = new History('myInputId');
+ *   const history = new History('myInputId'); or
+ *   const history = new History(document.getElementById('myInputId')); 
  *
  * Behavior summary:
  * - Records the element's value when it changes and persists the history.
+ * - Adds a value to history when called like this: history.toHistory("newValue", writeToInputField);
  * - Up/Down arrow keys navigate back and forward through recorded values.
  * - Delete (while focused on the element) removes the currently selected value from history.
  * - clear() empties stored history; remove(e) removes the currently selected entry.
@@ -39,23 +41,26 @@
  * Public instance methods:
  *
  * @method add
- * @returns {History} this - Adds the current element value to the end of the history (if different from last entry),
- *                          updates the pointer to the new last index, and persists the history.
+ * @returns {History} this   - Adds the current element value to the end of the history (if different from last entry),
+ *                             updates the pointer to the new last index, and persists the history.
  * @method forward
- * @returns {History} this - Moves the pointer forward by one. If the pointer moves past the last stored entry,
- *                          the element's value is cleared and the pointer is clamped to history.length.
+ * @returns {History} this   - Moves the pointer forward by one. If the pointer moves past the last stored entry,
+ *                             the element's value is cleared and the pointer is clamped to history.length.
  * @method back
- * @returns {History} this - Moves the pointer back by one (clamped to 0) and sets the element's value to the
- *                          history entry at the new pointer.
+ * @returns {History} this   - Moves the pointer back by one (clamped to 0) and sets the element's value to the
+ *                             history entry at the new pointer.
+ * @method toHistory({string} url, {boolean} writeToField)
+ * @returns {History} this   - Adds 'url' to the end of the history (if different from last entry), updates the pointer to the new
+                               last index, and persists the history. If 'writeToField' is true, the given value is written to the input field.
  * @method clear
- * @returns {History} this - Clears the persisted history for this id (removes the localStorage key and empties
- *                          the in-memory history array), and resets the pointer to 0.
+ * @returns {History} this   - Clears the persisted history for this id (removes the localStorage key and empties
+ *                             the in-memory history array), and resets the pointer to 0.
  * @method remove
- * @returns {History} this - Removes the last occurrence of the element's current value from history (if present),
- *                          updates/persists the history and pointer, and sets the element value to the new selected entry.
+ * @returns {History} this   - Removes the last occurrence of the element's current value from history (if present),
+ *                             updates/persists the history and pointer, and sets the element value to the new selected entry.
  * @method destroy
- * @returns {void} - Restores the element's original onchange handler and the document's original onkeydown handler,
- *                   clears internal history/pointer references, and detaches behavior.
+ * @returns {void}           - Restores the element's original onchange handler and the document's original onkeydown handler,
+ *                             clears internal history/pointer references, and detaches behavior.
  *
  * Notes:
  * - If no DOM element is found for the supplied id, the constructor returns early and the instance will not manage history.
@@ -164,3 +169,4 @@ export class History {
     }
   };
 }
+
