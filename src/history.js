@@ -49,8 +49,8 @@
  * @method back
  * @returns {History} this   - Moves the pointer back by one (clamped to 0) and sets the element's value to the
  *                             history entry at the new pointer.
- * @method toHistory({string} url, {boolean} writeToField)
- * @returns {History} this   - Adds 'url' to the end of the history (if different from last entry), updates the pointer to the new
+ * @method toHistory({string} val, {boolean} writeToField)
+ * @returns {History} this   - Adds 'val' to the end of the history (if different from last entry), updates the pointer to the new
                                last index, and persists the history. If 'writeToField' is true, the given value is written to the input field.
  * @method clear
  * @returns {History} this   - Clears the persisted history for this id (removes the localStorage key and empties
@@ -80,9 +80,9 @@ export class History {
     this.#handleEvents();
     return this;
   }
-  add = () => {
-    if (!this.history.length || this.history[this.history.length - 1] !== this.element.value) {
-      this.history.push(this.element.value);
+  add = val => {
+    if (!this.history.length || this.history[this.history.length - 1] !== (val || this.element.value)) {
+      this.history.push(val || this.element.value);
       this.pointer = this.history.length - 1;
       this.#toStore(`${this.id}-history`, this.history);
     }
@@ -104,8 +104,9 @@ export class History {
     this.element.value = this.history[this.pointer] || this.element.value;
     return this;
   };
-  toHistory = e => {
-    this.add(e);
+  toHistory = (val, writeToField) => {
+    this.add(val);
+    if (writeToField) this.element.value = val;
     return this;
   }
   clear = () => {
@@ -169,4 +170,5 @@ export class History {
     }
   };
 }
+
 
