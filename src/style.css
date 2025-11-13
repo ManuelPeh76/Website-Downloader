@@ -376,7 +376,7 @@ progress {
 
 .footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   font-size: 12px;
   font-variant: small-caps;

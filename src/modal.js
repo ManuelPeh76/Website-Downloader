@@ -30,6 +30,13 @@ function loadAttributes(modal) {
     modal.modal.style.opacity = 1;
 }
 
+/**
+ * Toggle the "minimized" state of a modal element.
+ *
+ * @function minimize
+ * @this {Object}
+ * @returns {void}
+ */
 function minimize(e) {
     if (e.modal.dataset.status === "normal") {
         saveAttributes(e);
@@ -62,9 +69,6 @@ function minimize(e) {
  * @function maximize
  * @this {Object}
  * @returns {void}
- * @example
- * // Invoke on an object that provides the required properties and helper functions:
- * // maximize.call(myModalController);
  */
 function maximize(e) {
     e.modal.style.opacity = 1;
@@ -185,20 +189,20 @@ const icons = {
  *
  * @class
  * @example
- * const modal = new Modal({ isClosable:  () => !isActive, title:  "Title Text", footer:  "Footer Text" });
+ * const modal = new Modal({ isClosable:  () => !isActive, title:  "Title Text", footerText:  "Footer Text" });
  * modal.add("<b>This bold text is added to the modals body.</b>");
  * modal.show();
  */
 export class Modal {
     constructor({
-        isClosable = ()=>{},
+        isClosable = () => true,
         title = "Modal Window",
         footerText = `Modal Window &copy;${new Date().getFullYear()}`,
         logType = "div", css = null, html = null
     }) {
         if (css === null) css = this.templates.css;
         if (html === null) html = this.templates.html;
-        if (!["div", "textarea"].includes(logType)) logType = "textarea";
+        if (!["div", "textarea"].includes(logType)) logType = "div";
 
         const modals = document.querySelectorAll(".modal");
         this.id = "modal_" + modals.length;
@@ -220,9 +224,6 @@ export class Modal {
         this.temp = {};
 
         this.modal = document.getElementById(this.id);
-        this.modal.querySelector(".dev-title").innerHTML = title;
-        this.modal.dataset.status = "normal";
-
         this.titlebar = this.modal.querySelector(".dev-head");
         this.footer = this.modal.querySelector(".dev-footer");
         this.minimizer = this.modal.querySelector(".dev-minimizer");
@@ -230,6 +231,8 @@ export class Modal {
         this.closer = this.modal.querySelector(".dev-closer");
         this.log = this.modal.querySelector(".dev-content");
 
+        this.modal.querySelector(".dev-title").innerHTML = title;
+        this.modal.dataset.status = "normal";
         this.footer.innerHTML = footerText;
         this.minimizer.title = title.minimize;
         this.maximizer.title = title.maximize;
@@ -283,7 +286,8 @@ export class Modal {
     }
 
     close() {
-        return this.modal.remove();
+        this.modal.remove();
+        return this;
     }
 
     open() {

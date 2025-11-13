@@ -64,20 +64,7 @@ let resourceMapSize = 0;
 let visitedSize = 0;
 let totalRequests = 0;
 
-if(DEBUG_MODE) debug(`<style>td{line-height:0.6}</style><table border=0 cellpadding=6 cellspacing=0 style="font-size: 14px; font-weight: 100"><tr><th colspan=3 style="border-bottom: var(--border) 1px solid">Settings:</th></tr>
-  <tr><td align=right>Target URL:</td><td width=10></td><td>${TARGET_URL}</td></tr>
-  <tr><td align=right>Output Folder:</td><td></td><td>${OUTPUT_DIR}</td></tr>
-  <tr><td align=right>Concurrency:</td><td></td><td>${CONCURRENCY}</td></tr>
-  <tr><td align=right>Max Depth:</td><td></td><td>${MAX_DEPTH === Infinity ? "Unlimited" : MAX_DEPTH}</td></tr>
-  <tr><td align=right>Use index.html:</td><td></td><td>${USE_INDEX}</td></tr>
-  <tr><td align=right>Clean Start:</td><td></td><td>${!existsSync(OUTPUT_DIR) ? "Yes (folder will be created)" : CLEAN_MODE ? "Enabled" : "Disabled"}</td></tr>
-  <tr><td align=right>Recursive:</td><td></td><td>${RECURSIVE}</td></tr>
-  <tr><td align=right>DWT:</td><td></td><td>${DYNAMIC_WAIT_TIME}ms</td></tr>
-  <tr><td align=right>Debug Mode:</td><td></td><td>${DEBUG_MODE}</td></tr>
-  <tr><td align=right>Create Log:</td><td></td><td>${CREATE_LOG}</td></tr>
-  <tr><td align=right>Create Sitemap:</td><td></td><td>${CREATE_SITEMAP}</td></tr>
-  <tr><td align=right>ZIP Export:</td><td></td><td>${ZIP_EXPORT}</td></tr>
-  </table><br><b>Starting Website Downloader...</b><br><br>`);
+if(DEBUG_MODE) debugShowStartSettings();
 
 // Handle incoming messages from the renderer process (renderer.js)
 process.stdin.on('data', async data => {
@@ -128,7 +115,7 @@ function logActiveHandles() {
     requests.forEach((r, i) => rTxt += `  [${i}] ${r.constructor.name}<br>`);
     debug(`<div style="padding:10px;border:var(--border) 2px solid;color:green"><u>🔍 <b>Active Handles:</b></u><br>${hTxt || "None."}<br><br><u>📡 <b>Active Requests:</b></u><br>${rTxt || "None."}</div>`);
 } catch (err) {
-    debug(`<font color="red">Error detecting active handles: ${err}</font>`);
+    debug(`<font color="red">Error detecting active handles: ${err.message || err.toString()}</font>`);
   }
 }
 
@@ -170,6 +157,23 @@ function stripSearch(url) {
   } catch {
     return url;
   }
+}
+
+function debugShowStartSettings() {
+  debug(`<style>#settings td{line-height:0.6}</style><table id="settings" border=0 cellpadding=6 cellspacing=0 style="font-size: 14px; font-weight: 100"><tr><th colspan=3 style="border-bottom: var(--border) 1px solid">Settings:</th></tr>
+  <tr><td align=right>Target URL:</td><td width=10></td><td>${TARGET_URL}</td></tr>
+  <tr><td align=right>Output Folder:</td><td></td><td>${OUTPUT_DIR}</td></tr>
+  <tr><td align=right>Concurrency:</td><td></td><td>${CONCURRENCY}</td></tr>
+  <tr><td align=right>Max Depth:</td><td></td><td>${MAX_DEPTH === Infinity ? "Unlimited" : MAX_DEPTH}</td></tr>
+  <tr><td align=right>Use index.html:</td><td></td><td>${USE_INDEX}</td></tr>
+  <tr><td align=right>Clean Start:</td><td></td><td>${!existsSync(OUTPUT_DIR) ? "Yes (folder will be created)" : CLEAN_MODE ? "Enabled" : "Disabled"}</td></tr>
+  <tr><td align=right>Recursive:</td><td></td><td>${RECURSIVE}</td></tr>
+  <tr><td align=right>DWT:</td><td></td><td>${DYNAMIC_WAIT_TIME}ms</td></tr>
+  <tr><td align=right>Debug Mode:</td><td></td><td>${DEBUG_MODE}</td></tr>
+  <tr><td align=right>Create Log:</td><td></td><td>${CREATE_LOG}</td></tr>
+  <tr><td align=right>Create Sitemap:</td><td></td><td>${CREATE_SITEMAP}</td></tr>
+  <tr><td align=right>ZIP Export:</td><td></td><td>${ZIP_EXPORT}</td></tr>
+  </table><br><b>Starting Website Downloader...</b><br><br>`);
 }
 
 /**
@@ -657,7 +661,7 @@ function pageEvaluate() {
 async function crawl(uri, depth, browser, recursive = null) {
 
   totalRequests++;
-
+if (tasks.length) debug(`Tasks:<br>${tasks.map((t, i) => `  [${i}] ${t.toString().slice(0, 100)}...`).join("<br>")}`);
   // If this is not the entry HTML file, or if we overstep MAX_DEPTH → return
   if ((!RECURSIVE && recursive) || depth > MAX_DEPTH) return;
 
