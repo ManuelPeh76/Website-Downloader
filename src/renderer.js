@@ -124,7 +124,7 @@ const storedTheme = storage.theme;
 new History("url");
 new History("folder");
 
-const modal = new Modal({ isClosable: () => !downloadInProgress, title: "Debug Log", footer: "Website Downloader" });
+const modal = new Modal({ isClosable: () => !downloadInProgress, title: "Debug Log", footerText: "Website Downloader", logType: "div" });
 
 api.unmaximize();
 debug.parentElement.style.display = "none";
@@ -247,7 +247,10 @@ function keyDown(e) {
     else if (e.key === "Escape") {
         downloadInProgress ? abortDownload() : modal.isOpen() ? modal.hide() : document.querySelector(".active")?.blur();
     }
-    else if (e.key === "a" && e.ctrlKey && downloadInProgress && debug.checked) api.getActiveHandles();
+    else if (e.key === "a" && e.ctrlKey && downloadInProgress && debug.checked) {
+      e.preventDefault();
+      api.getActiveHandles();
+    }
     else if (e.key === "p" && downloadInProgress) pauseDownload();
     else if (e.key === "l" && e.ctrlKey) root.setAttribute("data-theme", (storage.theme = "light"));
     else if (e.key === "d" && e.ctrlKey) root.setAttribute("data-theme", (storage.theme = "dark"));
@@ -355,10 +358,13 @@ async function startDownload() {
  */
 function onLog(msg) {
   if (!msg || !loggingEnabled) return;
+  let finished = false;
   msg = msg // Insert markers (!!)
     .replace(/🌐/g, "!!🌐")
     .replace(/📄/g, "!!📄")
     .replace(/🏠/g, "!!🏠")
+    .replace(/🏁/g, "!!🏁")
+    .replace(/🕧/g, "!!🕧")
     .replace(/\*\*\* /g, "!!*** ")
     .replace(/TLF/g, "!!TLF")
     .replace(/debug:/g, "!!debug:")
@@ -366,13 +372,21 @@ function onLog(msg) {
     .filter(Boolean); // No empty entries
 
     // Forward each segment to the appropriate logging function
-  for (let m of msg) m.startsWith("🏠") ? logProgress(m) : m.startsWith("TLF") ? logTotal(m) : m.startsWith("debug:") ? logDev(m.slice(6)) : logMessage(m);
-  if (msg.join("").includes("🕧")) {
+  for (let m of msg) {
+    m.startsWith("🏠") ? logProgress(m) :
+    m.startsWith("TLF") ? logTotal(m) :
+    m.startsWith("debug:") ? logDev(m.slice(6)) :
+    logMessage(m);
+    m.startsWith("🕧") && (finished = true);
+  }
+
+  // If the download is finished, perform cleanup operations
+  if (finished) {
     downloadInProgress = false;
-    loggingEnabled = 0;
     resetButtons();
     clearInterval(downloadTimer);
     if (createProgresslog.checked) api.saveProgress(log.innerHTML.replace(/<br>/g, "\n").replace(/<.*?>/g, ""));
+    setTimeout(() => loggingEnabled = false, 1000);
   }
 }
 
