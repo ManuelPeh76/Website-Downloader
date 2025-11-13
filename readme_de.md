@@ -1,3 +1,6 @@
+
+
+
 [![JavaScript](https://img.shields.io/badge/--F7DF1E?logo=javascript&logoColor=000)](https://www.javascript.com/)
 ![Electron.js](https://img.shields.io/badge/Electron-191970?flat&logo=Electron&logoColor=white)
 ![Puppeteer](https://img.shields.io/badge/Puppeteer-grey.svg?flat&logo=Puppeteer&logoColor=white)
@@ -53,7 +56,7 @@ npm run build
 Dadurch wird die App in `.\dist\website-downloader-win32-x64` erstellt und kann über die `website-downloader.exe` gestartet werden.
 
 <a name="installer"></a>
-# ⚒️ Windows-Installer erstellen
+## ⚒️ Windows-Installer erstellen
 ```cmd
 npm run setup
 npm run build
@@ -67,18 +70,22 @@ Die App wird unter `C:\Benutzer\<Benutzername>\AppData\Local\website_downloader`
 <img src="src/img/app.png" width="400">
 
 1. **App starten**
-  - **Wenn das Installationsprogramm verwendet wurde**:<br>&nbsp;&nbsp;Gehe zu `C:\Benutzer\<Benutzername>\AppData\Local\website_downloader`<br>&nbsp;&nbsp;und starte die Datei `website-downloader.exe` (oder erstelle eine Desktopverknüpfung, um sie vom Desktop aus zu starten).<br>
-  - **Um das Tool im Repo-Ordner zu starten**:<br>&nbsp;&nbsp;Gehe in das Repository und öffne ein Eingabeaufforderungsfenster, indem du `cmd` in die Adressleiste eingibst.<br>&nbsp;&nbsp;Dort startest du das Tool mit `npm start` oder `npm run dev`.
-2. **URL und Zielordner angeben**:<br>
+   - **Wenn das Installationsprogramm verwendet wurde**, gehe zu<br> `C:\Benutzer\<Benutzername>\AppData\Local\website_downloader`<br>&nbsp;&nbsp;und starte die Datei `website-downloader.exe` (oder erstelle eine Desktopverknüpfung, um sie vom Desktop aus zu starten).<br>
+   - **Um das Tool im Repo-Ordner zu starten**:<br>&nbsp;&nbsp;Gehe in das Repository und öffne ein Eingabeaufforderungsfenster, indem du `cmd` in die Adressleiste eingibst.<br>&nbsp;&nbsp;Dort startest du das Tool mit `npm start` oder `npm run dev`.
+
+2. **URL und Zielordner angeben**<br>
 Gebe die Website-Adresse und den lokalen Zielordner an. Diese Felder verfügen über einen Verlauf/History zur einfachen Wiederverwendung. Gebe den Zielordner manuell ein oder doppelklicke in das Textfeld, um einen Ordnerauswahldialog zu öffnen. <br>HINWEIS: `http://` oder `https://` können in der URL weggelassen werden. Die App fügt das Protokoll automatisch hinzu.
-3. **Optionen auswählen**:<br>
+3. **Optionen auswählen**<br>
 Tiefe, Rekursion, ZIP, Sitemap, Fehlerprotokoll, index.html, Ordner bereinigen, Parallelität, DWT...
-4. **Download starten**:<br>
+4. **Download starten**<br>
 Ein Klick auf `Start` lädt die gesamte Seite (einschließlich dynamisch geladener Inhalte und aller Assets) in den Zielordner herunter.
-5. **Fortschritt und Fehler überwachen**:<br>
+5. **Fortschritt und Fehler überwachen**<br>
 Der Fortschritt wird angezeigt und kann als Datei gespeichert werden (sofern die entsprechende Checkbox aktiviert ist).
-6. **Optionaler ZIP-/Sitemap-Export:**<br>
+6. **Optionaler ZIP-/Sitemap-Export**<br>
 Nach dem Download kann ein ZIP-Archiv und/oder eine Sitemap erstelllt werden (sofern die entsprechende Checkbox aktiviert ist).
+
+Um zu sehen, was im Hintergrund passiert, wurde ein Debug-Mode integriert. Drücke Strg+Umschalt+D, um die Debug-Checkbox anzuzeigen.
+Wenn aktiviert, wird beim Start des Downloads ein kleines Zusatz-Fenster angezeigt mit vielen zusätzlichen Informationen.
 
 ### Tastaturkürzel
 
@@ -87,11 +94,13 @@ Nach dem Download kann ein ZIP-Archiv und/oder eine Sitemap erstelllt werden (so
 | Tab | Eingabeelemente nach unten durchgehen | Leerlauf |
 | Umschalt + Tab | Eingabeelemente nach oben durchgehen | Leerlauf |
 | Esc | Fokus von Eingabeelementen entfernen | Leerlauf |
+Strg + Umschalt + D | Debug-Modus umschalten | Leerlauf |
 | Pfeil hoch,<br>Pfeil runter | Verlauf durchsuchen<br>(nur Texteingabefelder) | Leerlauf
 | Entf | Eintrag aus Verlauf entfernen<br>(nur Texteingabefelder) | Leerlauf |
 | Eingabe | Download starten | Leerlauf |
 | Esc | Download abbrechen | Download |
-| p | Download pausieren/fortsetzen | Download |
+| P | Download pausieren/fortsetzen | Download |
+| Strg + A | Aktive Handles anzeigen | Download + Debug-Modus |
 | Strg + L | Heller Modus | Immer |
 | Strg + D | Dunkler Modus | Immer |
 
@@ -128,6 +137,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Benutzer\
 - **Bessere Asset-Erkennung**:<br> Meta-Tags, Srcset, Link-Tags usw. werden jetzt vollständig berücksichtigt.
 - **Detaillierte Protokollierungsoptionen**: Fortschritt-, Fehler- und Sitemap-Export können aktiviert/deaktiviert werden.
 - **Multiplattform-GUI:** Electron-Frontend mit Theme-Umschalter, Tooltips, automatischer Speicherfunktion für Einstellungen und Verlauf.
+- **Debug-Modus**:<br>Zeigt Informationen während des Downloads in einem separaten Fenster, das in Größe und Position frei veränderbar ist.
 
 <a name="details"></a>
 # 🔎 Technische Details
@@ -147,16 +157,10 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Benutzer\
   - Electron
   - ElectronInstallerWindows
   - ElectronPackager
-  - ElectronPrebuilt
   - Electronmon
 
 # 📃 Lizenz
-
-MIT License © 2025 Manuel Pelzer
+<span style="margin-left:25px">MIT license © 2025 Manuel Pelzer</span>
 
 ---
-**Quellcode & weitere Infos:**
-[GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
-
-
-
+**Quellcode auf** [GitHub](https://github.com/ManuelPeh76/Website-Downloader) verfügbar.

@@ -1,3 +1,6 @@
+
+
+
 [![JavaScript](https://img.shields.io/badge/--F7DF1E?logo=javascript&logoColor=000)](https://www.javascript.com/)
 ![Electron.js](https://img.shields.io/badge/Electron-191970?flat&logo=Electron&logoColor=white)
 ![Puppeteer](https://img.shields.io/badge/Puppeteer-grey.svg?flat&logo=Puppeteer&logoColor=white)
@@ -40,9 +43,7 @@ I assume you have node.js, npm and git already installed.
 First, clone the repository (or download the ZIP file) and install the dependencies:
 ```cmd
 git clone https://github.com/ManuelPeh76/website-downloader.git
-
 cd website-downloader
-
 npm install
 ```
 Now you can run the app with `npm start`.
@@ -52,8 +53,7 @@ To use this tool as a real standalone app, you have to create an app package. Th
 ```cmd
 npm run build
 ```
-This creates the app in `.\dist\website-downloader-win32-x64`, containing the app as an .exe file.
-Just step inside and start `website-downloader.exe`.
+This creates the app in `.\dist\website-downloader-win32-x64`, which can be started by running the `website-downloader.exe`.
 
 <a name="installer"></a>
 ## ⚒️ Build a Windows Installer
@@ -71,31 +71,37 @@ The app will be installed to `C:\Users\<username>\AppData\Local\website_download
 <img style="margin-left:26px" src="src/img/app.png" width="400">
 
 1. **Start the App**
-- **If you used the installer**:<br>&nbsp;&nbsp;Go to `C:\Users\<username>\AppData\Local\website_downloader`<br>&nbsp;&nbsp;and start the `website-downloader.exe` (or create a desktop shortcut to start it from the desktop).
-- **If you want to start it from the repo folder**:<br>&nbsp;&nbsp;Go inside it and open a cmd window by typing `cmd` into the addressbar.<br>&nbsp;&nbsp;There you start it with `npm start` or `npm run dev`.
-2. **Specify URL and target folder**:<br>
+   - **If you used the installer**, go to<br>`C:\Users\<username>\AppData\Local\website_downloader`<br>&nbsp;&nbsp;and start the `website-downloader.exe` (or create a desktop shortcut to start it from the desktop).
+   - **If you want to start it from the repo folder**:<br>&nbsp;&nbsp;Go inside it and open a cmd window by typing `cmd` into the addressbar.<br>&nbsp;&nbsp;There you start it with `npm start` or `npm run dev`.
+2. **Specify URL and target folder**<br>
 Specify the website address and the local target folder. These fields have a history for easy reuse. Type in the target folder manually, or double click into the text field to open a folder selection dialogue. <br>NOTE: You may omit the 'http://' or 'https://' in the URL. The app adds it by itself.
-3. **Select options**:<br>
+3. **Select options**<br>
 Depth, Recursive, ZIP, Sitemap, Error Log, index.html, Clean Folder, Concurrency, DWT...
-4. **Start download**:<br>
+4. **Start download**<br>
 One click downloads the entire page (including dynamically loaded content and all assets) to the target folder.
-5. **Monitor progress and errors**:<br>
+
+5. **Monitor progress and errors**<br>
 Progress is displayed and can be saved as a file (if the corresponding checkbox is checked).
-6. **Optional ZIP/Sitemap export:**<br>
+
+6. **Optional ZIP/Sitemap export**<br>
 After downloading, the data can be saved as a ZIP archive and/or sitemap (if the corresponding checkbox is checked).
 
+To show stuff about what is going on in the background, there is a debug mode included. Press Ctrl+Shift+D to show the debug checkbox.
+If checked, a modal window will be shown when starting the download, displaying many additional information.
 ### Keyboard Shortcuts
 
 | Key | Action | Condition |
 | --- | --- | --- |
 | Tab | Cycle down through the input elements | Idle |
 | Shift + Tab | Cycle up through the input elements | Idle |
-| Enter | Start Download | Idle |
 | Esc | Remove focus from input elements | Idle |
-| Arrow Up,<br>Arrow Down | Navigate through history<br>(text input fields only) | Idle
+| Ctrl + Shift + D | Toggle Debug Mode | Idle |
+| Arrow Up,<br>Arrow Down | Navigate through history<br>(text input fields only) | Idle |
 | Delete | Remove entry from history<br>(text input fields only) | Idle |
+| Enter | Start Download | Idle |
 | Esc | Abort Download | Downloading |
-| p | Pause / Resume Download | Downloading |
+| P | Pause / Resume Download | Downloading |
+| Ctrl + A | Show Active Handles | Downloading and<br>in Debug Mode |
 | Ctrl + L | Light Mode | Always |
 | Ctrl + D | Dark Mode | Always |
 
@@ -130,6 +136,8 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 - **Better asset detection**:<br> Meta tags, srcset, link tags, etc. are now fully considered.
 - **Fine-grained logging options**:<br> Progress, errors, and sitemap can be enabled/disabled.
 - **Multiplatform GUI**:<br> Electron frontend with theme switcher, tooltips, automatic saving function for settings and history.
+- **Debug-Mode**:<br>Displays information during the download in a separate window that can be freely resized and repositioned.
+
 
 <a name="details"></a>
 # 🔎 Technical Details
@@ -149,18 +157,12 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
   - Electron
   - ElectronInstallerWindows
   - ElectronPackager
-  - ElectronPrebuilt
   - Electronmon
 
 # 📃 License
 <span style="margin-left:25px">MIT license © 2025 Manuel Pelzer</span>
 
 ---
-**Source code available at:**
-[GitHub: ManuelPeh76/Website-Downloader](https://github.com/ManuelPeh76/Website-Downloader)
-
-
-
-
-
+**Source code available at** 
+[GitHub](https://github.com/ManuelPeh76/Website-Downloader)
 
