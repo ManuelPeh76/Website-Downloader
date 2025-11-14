@@ -17,6 +17,7 @@ const https = require('https');
 const http = require('http');
 const puppeteer = require('puppeteer');
 const JSZip = require('jszip');
+let browser;
 
 /* Get arguments */
 const args = process.argv.slice(2);
@@ -72,6 +73,7 @@ process.stdin.on('data', async data => {
   if (command.startsWith('abort')) {
     debug("<font color='red'>Execution aborted by renderer process.</font>");
     await finish(1);
+    await browser.close();
     process.exit(1);
   } else if (command.startsWith('save-progress:')) {
     debug("<font color='green'>Creating progress.log.</font>");
@@ -173,7 +175,7 @@ function debugShowStartSettings() {
   <tr><td align=right>Create Log:</td><td></td><td>${CREATE_LOG}</td></tr>
   <tr><td align=right>Create Sitemap:</td><td></td><td>${CREATE_SITEMAP}</td></tr>
   <tr><td align=right>ZIP Export:</td><td></td><td>${ZIP_EXPORT}</td></tr>
-  </table><br><b>Starting Website Downloader...</b><br><br>`);
+  </table><br><b>Starting Website Downloader...</b><br>`);
 }
 
 /**
@@ -360,19 +362,19 @@ async function createZip() {
  * Determines whether to ignore the URL, download resources, or schedule further crawling tasks.
  * Special handling is applied for HTML and CSS files, including extraction of CSS resources.
  */
-async function dynamicPageRequest(request, depth, browser) {
+async function dynamicPageRequest(request, depth) {
   const url = request.url();
   const type = request.resourceType();
   try {
     const parsedUrl = new URL(url);
     const href = parsedUrl.href;
-    if (shouldIgnoreUrl(href))  return totalRequests++;
+    if (shouldIgnoreUrl(href)) return totalRequests++;
     let resourcePath = sanitize(parsedUrl.pathname);
     if (USE_INDEX && !path.extname(resourcePath)) resourcePath += resourcePath.endsWith("/") ? "index.html" : "/index.html";
     const localPath = path.join(OUTPUT_DIR, resourcePath);
     if (href.endsWith(".html") || href.endsWith(".htm")) {
       sitemap.add(href);
-      tasks.push(limit(() => crawl(href, depth + 1, browser, 1)));
+      tasks.push(limit(() => crawl(href, depth + 1, 1)));
     } else if (href.endsWith(".css")) {
       tasks.push(limit(async () => {
         await downloadResource(href, localPath, "dyn");
@@ -590,7 +592,7 @@ async function handleManifest(manifestUrl, baseUrl) {
       const startUrl = new URL(manifest.start_url, manifestUrl).href;
       if (!shouldIgnoreUrl(startUrl)) {
         counter++;
-        tasks.push(limit(() => crawl(startUrl, 1, browser, 1)));
+        tasks.push(limit(() => crawl(startUrl, 1, 1)));
       }
     }
 
@@ -658,7 +660,7 @@ function pageEvaluate() {
  *
  * @throws Will log and record errors encountered during crawling or resource downloading.
  */
-async function crawl(uri, depth, browser, recursive = null) {
+async function crawl(uri, depth, recursive = null) {
 
   totalRequests++;
 if (tasks.length) debug(`Tasks:<br>${tasks.map((t, i) => `  [${i}] ${t.toString().slice(0, 100)}...`).join("<br>")}`);
@@ -685,7 +687,7 @@ if (tasks.length) debug(`Tasks:<br>${tasks.map((t, i) => `  [${i}] ${t.toString(
   debug(`Opening new browser page for ${url} at depth ${depth}.`);
   // Open a new page (puppeteer)
   const page = await browser.newPage();
-  page.on('request', request => dynamicPageRequest(request, depth, browser));
+  page.on('request', request => dynamicPageRequest(request, depth));
   try {
     // Open the website in puppeteer
     await page.goto(uri, { waitUntil: 'networkidle2' });
@@ -712,7 +714,7 @@ if (tasks.length) debug(`Tasks:<br>${tasks.map((t, i) => `  [${i}] ${t.toString(
       totalRequests += 1;
       if (shouldIgnoreUrl(res)) continue;
       if (res.endsWith('.html') || res.endsWith('.htm') || !extname) {
-        tasks.push(limit(() => crawl(res, depth + 1, browser, 1)));
+        tasks.push(limit(() => crawl(res, depth + 1, 1)));
       } else {
         try {
           if (res.endsWith(".css")) {
@@ -784,9 +786,9 @@ if (tasks.length) debug(`Tasks:<br>${tasks.map((t, i) => `  [${i}] ${t.toString(
   }
   const totalInterval = setInterval(reportTotal, 500);
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
-  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   debug(`Target folder has been created and browser is launched.`);
-  await crawl(TARGET_URL, 0, browser);
+  await crawl(TARGET_URL, 0);
 
   // Wait for more dynamic content to be added to the limit array.
   // This can still happen even if the current tasks of the limit array have been processed.
