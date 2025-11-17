@@ -11,55 +11,48 @@
 
 let globalZIndex = 10;
 
-function saveAttributes(modal) {
-    modal.temp = {
-        status: modal.modal.dataset.status,
-        left: modal.modal.style.left,
-        top: modal.modal.style.top,
-        width: modal.modal.style.width,
-        height: modal.modal.style.height,
-        transition: modal.modal.style.transition
+function saveAttributes(m) {
+    m.temp.style = {
+        status: m.modal.dataset.status,
+        left: m.modal.style.left,
+        top: m.modal.style.top,
+        width: m.modal.style.width,
+        height: m.modal.style.height,
+        transition: m.modal.style.transition
     };
 }
 
-function loadAttributes(modal) {
-    modal.modal.style.left = modal.temp.left;
-    modal.modal.style.top = modal.temp.top;
-    modal.modal.style.width = modal.temp.width;
-    modal.modal.style.height = modal.temp.height;
-    modal.modal.style.opacity = 1;
+function loadAttributes(m) {
+    m.modal.style.left = m.temp.style.left;
+    m.modal.style.top = m.temp.style.top;
+    m.modal.style.width = m.temp.style.width;
+    m.modal.style.height = m.temp.style.height;
+    m.modal.style.opacity = 1;
 }
 
-/**
- * Toggle the "minimized" state of a modal element.
- *
- * @function minimize
- * @this {Object}
- * @returns {void}
- */
-function minimize(e) {
-    if (e.modal.dataset.status === "normal") {
-        saveAttributes(e);
-        e.modal.style.transition = "all 0.4s ease";
-        e.modal.style.left = "30%";
-        e.modal.style.top = "calc(100vh - 30px)";
-        e.modal.style.width = "225px";
-        e.modal.style.opacity = 0.5;
-        e.modal.dataset.status = "minimized";
-        e.minimizer.innerHTML = icons.restore;
-        e.minimizer.title = title.restore;
+function minimize(m) {
+    if (m.modal.dataset.status === "normal") {
+        saveAttributes(m);
+        m.modal.style.transition = "all 0.4s ease";
+        m.modal.style.left = "30%";
+        m.modal.style.top = "calc(100vh - 30px)";
+        m.modal.style.width = "225px";
+        m.modal.style.opacity = 0.5;
+        m.modal.dataset.status = "minimized";
+        m.minimizer.innerHTML = icons.restore;
+        m.minimizer.title = title.restore;
     } else {
-        loadAttributes(e);
-        e.minimizer.innerHTML = icons.minimize;
-        e.minimizer.title = title.minimize;
+        loadAttributes(m);
+        m.minimizer.innerHTML = icons.minimize;
+        m.minimizer.title = title.minimize;
         setTimeout(() => {
-            e.modal.style.transition = e.temp.transition;
-            if (e.modal.dataset.status === "maximized") {
-                e.maximizer.innerHTML = icons.maximize;
-                e.maximizer.title = title.maximize;
-                setTimeout(() => e.minimizer.click(), 10);
+            m.modal.style.transition = m.temp.style.transition;
+            if (m.modal.dataset.status === "maximized") {
+                m.maximizer.innerHTML = icons.maximize;
+                m.maximizer.title = title.maximize;
+                setTimeout(() => m.minimizer.click(), 10);
             }
-            e.modal.dataset.status = "normal";
+            m.modal.dataset.status = "normal";
           }, 400);
     }
 }
@@ -69,105 +62,108 @@ function minimize(e) {
  * @function maximize
  * @this {Object}
  * @returns {void}
+ * @example
+ * // Invoke on an object that provides the required properties and helper functions:
+ * // maximize.call(myModalController);
  */
-function maximize(e) {
-    e.modal.style.opacity = 1;
-    if (e.modal.dataset.status === "normal") {
-        saveAttributes(e);
-        e.modal.style.transition = "all 0.4s ease";
-        e.modal.style.width = "100vw";
-        e.modal.style.height = "calc(100% - 30px)";
-        e.modal.style.left = "0";
-        e.modal.style.top = "36px";
-        e.modal.dataset.status = "maximized";
-        e.maximizer.innerHTML = icons.restore;
-        e.maximizer.title = title.restore;
+function maximize(m) {
+    m.modal.style.opacity = 1;
+    if (m.modal.dataset.status === "normal") {
+        saveAttributes(m);
+        m.modal.style.transition = "all 0.4s ease";
+        m.modal.style.width = "100vw";
+        m.modal.style.height = "calc(100% - 30px)";
+        m.modal.style.left = "0";
+        m.modal.style.top = "36px";
+        m.modal.dataset.status = "maximized";
+        m.maximizer.innerHTML = icons.restore;
+        m.maximizer.title = title.restore;
     } else {
-        loadAttributes(e);
-        e.maximizer.innerHTML = icons.maximize;
-        e.maximizer.title = title.maximize;
+        loadAttributes(m);
+        m.maximizer.innerHTML = icons.maximize;
+        m.maximizer.title = title.maximize;
         setTimeout(() => {
-            e.modal.style.transition = e.temp.transition;
-            if (e.modal.dataset.status === "minimized") {
-                e.minimizer.innerHTML = icons.minimize;
-                e.minimizer.title = title.minimize;
-                setTimeout(() => e.maximizer.click(), 10);
+            m.modal.style.transition = m.temp.style.transition;
+            if (m.modal.dataset.status === "minimized") {
+                m.minimizer.innerHTML = icons.minimize;
+                m.minimizer.title = title.minimize;
+                setTimeout(() => m.maximizer.click(), 10);
             }
-            e.modal.dataset.status = "normal";
+            m.modal.dataset.status = "normal";
         }, 400);
     }
 }
 
-function close(modal) {
-    if (!modal.isClosable()) return;
-    modal.hide();
+function close(m) {
+    if (!m.isClosable()) return;
+    m.hide();
 }
 
-function modalMouseDown(modal) {
-    if (modal.modal.style.zIndex && modal.modal.style.zIndex < globalZIndex) modal.modal.style.zIndex = ++globalZIndex;
+function modalMouseDown(m) {
+    if (m.modal.style.zIndex && m.modal.style.zIndex < globalZIndex) m.modal.style.zIndex = ++globalZIndex;
 }
 
-function titlebarMouseDown(modal, e) {
+function titlebarMouseDown(m, e) {
     if (e.button !== 0 ||
-        [modal.minimizer, modal.maximizer, modal.closer].includes(e.target) ||
-        modal.modal.dataset.status !== "normal"
+        [m.minimizer, m.maximizer, m.closer].includes(e.target) ||
+        m.modal.dataset.status !== "normal"
     ) return;
-    if (modal.modal.style.zIndex && modal.modal.style.zIndex < globalZIndex) modal.modal.style.zIndex = ++globalZIndex;
-    modal.isDragging = true;
-    const rect = modal.modal.getBoundingClientRect();
-    [modal.offset.x, modal.offset.y] = [e.clientX - rect.left, e.clientY - rect.top];
-    modal.modal.style.transition = "none";
+    if (m.modal.style.zIndex && m.modal.style.zIndex < globalZIndex) m.modal.style.zIndex = ++globalZIndex;
+    m.isDragging = true;
+    const rect = m.modal.getBoundingClientRect();
+    [m.offset.x, m.offset.y] = [e.clientX - rect.left, e.clientY - rect.top];
+    m.modal.style.transition = "none";
     document.body.style.userSelect = "none"; // Prevent text selection
 }
 
-function footerMouseDown(modal, e) {
-    if (e.button !== 0 || modal.modal.dataset.status !== "normal") return;
-    modal.isResizing = true;
-    const rect = modal.modal.getBoundingClientRect();
-    modal.offset = {
+function footerMouseDown(m, e) {
+    if (e.button !== 0 || m.modal.dataset.status !== "normal") return;
+    m.isResizing = true;
+    const rect = m.modal.getBoundingClientRect();
+    m.offset = {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
         w: e.clientX - rect.width,
         h: e.clientY - rect.height
     }
-    modal.modal.style.transition = "none";
+    m.modal.style.transition = "none";
     document.body.style.userSelect = "none"; // Prevent text selection
 }
 
-function mouseMove(modal, e) {
-    if (!modal.isDragging && !modal.isResizing) return;
-    if (!modal.dragTimer && !modal.modal.style.boxShadow) modal.dragTimer = setTimeout(() => modal.modal.style.boxShadow = "0 0", 200);
+function mouseMove(m, e) {
+    if (!m.isDragging && !m.isResizing) return;
+    if (!m.dragTimer && !m.modal.style.boxShadow) m.dragTimer = setTimeout(() => m.modal.style.boxShadow = "0 0", 200);
     // Calculate screen boundaries
     const vw = innerWidth;
     const vh = innerHeight;
-    const rect = modal.modal.getBoundingClientRect();
+    const rect = m.modal.getBoundingClientRect();
     const margin = -10;
-    if (modal.isDragging) {
-        let x = e.clientX - modal.offset.x;
-        let y = e.clientY - modal.offset.y;
+    if (m.isDragging) {
+        let x = e.clientX - m.offset.x;
+        let y = e.clientY - m.offset.y;
         x = x < margin ? margin :  x + rect.width > vw - margin ? vw - rect.width - margin :  x;
         y = y < margin ? margin :  y + rect.height > vh - margin ? vh - rect.height - margin :  y;
-        modal.modal.style.left = `${x}px`;
-        modal.modal.style.top = `${y}px`;
+        m.modal.style.left = `${x}px`;
+        m.modal.style.top = `${y}px`;
     } else { // Resizing
 
-        let x = e.clientX - modal.offset.w;
-        let y = e.clientY - modal.offset.h;
+        let x = e.clientX - m.offset.w;
+        let y = e.clientY - m.offset.h;
         x = x < margin ? margin :  x > vw - margin ? vw - margin :  x;
         y = y < margin ? margin :  y > vh - margin ? vh - margin :  y;
-        modal.modal.style.width = modal.temp.width = `${x}px`;
-        modal.modal.style.height = modal.temp.height = `${y}px`;
+        m.modal.style.width = m.temp.style.width = `${x}px`;
+        m.modal.style.height = m.temp.style.height = `${y}px`;
     }
 }
 
-function mouseUp(modal) {
-    if (!modal.isDragging && !modal.isResizing) return;
-    clearTimeout(modal.dragTimer);
-    modal.dragTimer = null;
-    modal.isDragging = false;
-    modal.isResizing = false;
-    modal.modal.style.transition = "all 0.4s ease";
-    modal.modal.style.boxShadow = "";
+function mouseUp(m) {
+    if (!m.isDragging && !m.isResizing) return;
+    clearTimeout(m.dragTimer);
+    m.dragTimer = null;
+    m.isDragging = false;
+    m.isResizing = false;
+    m.modal.style.transition = "all 0.4s ease";
+    m.modal.style.boxShadow = "";
     document.body.style.userSelect = "";
 }
 
@@ -189,20 +185,20 @@ const icons = {
  *
  * @class
  * @example
- * const modal = new Modal({ isClosable:  () => !isActive, title:  "Title Text", footerText:  "Footer Text" });
+ * const modal = new Modal({ isClosable: () => !isActive, title: "Title Text", footerText: "Footer Text" });
  * modal.add("<b>This bold text is added to the modals body.</b>");
  * modal.show();
  */
 export class Modal {
     constructor({
-        isClosable = () => true,
+        isClosable = ()=>{},
         title = "Modal Window",
         footerText = `Modal Window &copy;${new Date().getFullYear()}`,
         logType = "div", css = null, html = null
     }) {
         if (css === null) css = this.templates.css;
         if (html === null) html = this.templates.html;
-        if (!["div", "textarea"].includes(logType)) logType = "div";
+        if (!["div", "textarea"].includes(logType)) logType = "textarea";
 
         const modals = document.querySelectorAll(".modal");
         this.id = "modal_" + modals.length;
@@ -224,15 +220,17 @@ export class Modal {
         this.temp = {};
 
         this.modal = document.getElementById(this.id);
+        this.modal.querySelector(".dev-title").innerHTML = title;
+        this.modal.dataset.status = "normal";
+
         this.titlebar = this.modal.querySelector(".dev-head");
+        this.body = this.modal.querySelector(".dev-body");
         this.footer = this.modal.querySelector(".dev-footer");
         this.minimizer = this.modal.querySelector(".dev-minimizer");
         this.maximizer = this.modal.querySelector(".dev-maximizer");
         this.closer = this.modal.querySelector(".dev-closer");
         this.log = this.modal.querySelector(".dev-content");
 
-        this.modal.querySelector(".dev-title").innerHTML = title;
-        this.modal.dataset.status = "normal";
         this.footer.innerHTML = footerText;
         this.minimizer.title = title.minimize;
         this.maximizer.title = title.maximize;
@@ -245,14 +243,14 @@ export class Modal {
     }
 
     show() {
-        this.temp = this.getStyle();
+        this.temp.style = this.getStyle();
         const rect = this.modal.getBoundingClientRect();
         this.modal.style.left = `${rect.left}px`;
         this.modal.style.top = `${rect.top}px`;
         this.modal.style.transform = "none";
         this.modal.style.zIndex = ++globalZIndex;
         this.modal.style.display = "flex";
-        setTimeout(() => this.modal.style.opacity = 1, 0);
+        this.modal.style.opacity = 1;
         return this;
     }
 
@@ -281,7 +279,7 @@ export class Modal {
     }
 
     clear() {
-        this.log[this.logType === "div" ? "innerHTML" : "value"] = "";
+        this.log/*[this*/./*logType === "div" ? "*/innerHTML/*" : "value"]*/ = "";
         return this;
     }
 
@@ -300,25 +298,69 @@ export class Modal {
         return this.modal.style.display === "flex";
     }
 
+    /**
+     * Create, configure and append an input[type="button"] element according to the provided options.
+     *
+     * @param {Object} options - Configuration for the button.
+     * @param {string} [options.label] - Text label for the button. Default: "Button".
+     * @param {string} [options.title] - Tooltip/title attribute for the button.
+     * @param {((MouseEvent) => void)|null} [options.onClick] - Click handler to assign to element.onclick (may be null).
+     * @param {string} [options.style] - Inline CSS text to apply to the element.
+     * @param {'body'|'footer'} [options.parent] - "body" or "footer": Container name to append the button to. Defaults to "footer".
+     * @param {function(): boolean} [options.showOn] - Optional function that returns a boolean indicating whether the button should be shown.
+     *
+     * @returns {HTMLInputElement} The created input button element (already appended to the selected parent).
+     */
+    button(options) {
+        const btn = document.createElement("input");
+        btn.type = "button";
+        btn.className = "dev-btn";
+        btn.value = options.label || "Button";
+        btn.title = options.title || "";
+        btn.onclick = options.onClick || null;
+        btn.style = options.style || "";
+        btn.style.transition = "all 0.4s ease";
+        const parent = options.parent && ["body", "footer"].includes(options.parent) ? options.parent : "footer";
+        this[parent].appendChild(btn);
+        if (options.showOn && typeof options.showOn === "function") {
+            const observer = new MutationObserver(() => {
+                const show = options.showOn();
+                btn.style.opacity = show ? "1" : "0";
+                btn.style.pointerEvents = show ? "auto" : "none";
+            });
+            observer.observe(this.log, { childList: true, subtree: true, characterData: true });
+            // Initial state
+            const show = options.showOn();
+            btn.style.opacity = show ? "1" : "0";
+            btn.style.pointerEvents = show ? "auto" : "none";
+        }
+        return btn;
+    }
+
     add(msg) {
         let ok = 0;
         if (Math.abs(this.log.scrollHeight - this.log.clientHeight - this.log.scrollTop) < 50) ok = 1;
-        const log = this.logType === "div" ? "innerHTML" : "value";
-        log === "innerHTML" && (msg += "<br>");
-        this.log[log] += msg;
+        if (this.logType === "div") msg += "<br>";
+        else msg = msg.replace(/(<style.*?\/style>)|(<.*?>)/g, "");
+        this.log.innerHTML += msg;
         if (ok) this.log.scrollTop = this.log.scrollHeight;
         return this;
     }
 
+    isEmpty() {
+        return (this.logType === "div" ? this.log.textContent : this.log.value).trim() === "";
+    }
+
+    text() {
+        return this.logType === "div" ? this.log.innerHTML.replace(/(<style.*?\/style>)|(<.*?>)/g, "") : this.log.value;
+    }
+
+    html() {
+        return this.log.innerHTML;
+    }
+
     /**
-     * Initializes drag, minimize, maximize, and close event listeners for the modal.
-     * Changes 'Minimize' or 'Maximize' icon to 'Restore' depending on current state.
-     *
-     * - **Dragging: ** Allows repositioning the modal within viewport boundaries.
-     * - **Resizing: ** Allows resizing the modal
-     * - **Minimize: ** Slides modal to bottom and lowers opacity.
-     * - **Maximize: ** Expands modal to max size and toggles back.
-     * - **Close: ** Hides modal with fade-out if no download is active.
+     * Initializes drag, resize, minimize, maximize, and close event listeners for the modal.
      *
      * @returns {void}
      */
@@ -336,11 +378,11 @@ export class Modal {
     getStyle() {
         let style = getComputedStyle(this.modal);
         return {
-          width:  style.width,
-          height:  style.height,
-          top:  style.top,
-          left:  style.left,
-          transition:  style.transition
+          width: style.width,
+          height: style.height,
+          top: style.top,
+          left: style.left,
+          transition: style.transition
         }
     }
 
@@ -423,7 +465,7 @@ export class Modal {
             transition: all 400ms ease;
         }
         .draggable {
-            -webkit-app-region: drag;
+            -webkit-app-region: no-drag;
         }
         .dev-head {
             display: flex;
@@ -490,6 +532,9 @@ export class Modal {
         }
 
         .dev-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             background: linear-gradient(to top, var(--dev-accent), var(--dev-bg));
             padding: 6px 10px;
             color: var(--dev-fg);
@@ -497,6 +542,22 @@ export class Modal {
             bottom: 0;
             text-align: right;
             height: 30px;
+        }
+        .dev-btn {
+            font-family: inherit;
+            font-variant: inherit;
+            background: var(--dev-accent2);
+            border: none;
+            color: var(--dev-fg);
+            padding: 2px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all .4s ease;
+        }
+        .dev-btn:hover {
+            background: var(--dev-fg);
+            color: var(--dev-accent);
         }`
     };
 }

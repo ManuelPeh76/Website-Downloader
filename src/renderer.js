@@ -126,7 +126,29 @@ const folderHistory = new History("folder");
 
 const modal = new Modal({ isClosable: () => !downloadInProgress, title: "Debug Log", footerText: "Website Downloader", logType: "div" });
 
+modal.button({
+  label: "Save Log",
+  showOn: () => !modal.isEmpty() && !downloadInProgress,
+  onClick: () => {
+    const a = document.createElement("a");
+    const file = new Blob([modal.text()], { type: "text/plain" });
+    a.href = URL.createObjectURL(file);
+    a.download = "debug.log";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  },
+  parent: "footer"
+});
+
+modal.button({
+  label: "Clear Log",
+  showOn: () => !modal.isEmpty() && !downloadInProgress,
+  onClick: () => modal.clear(),
+  parent: "footer"
+});
+
 api.unmaximize();
+
 debug.parentElement.style.display = "none";
 
 setTheme(storedTheme || matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");

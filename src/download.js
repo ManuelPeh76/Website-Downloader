@@ -1,4 +1,4 @@
-/**
+ /**
  * @name Website Downloader
  *
  * @author Manuel Pelzer
@@ -17,7 +17,6 @@ const https = require('https');
 const http = require('http');
 const puppeteer = require('puppeteer');
 const JSZip = require('jszip');
-let browser;
 
 /* Get arguments */
 const args = process.argv.slice(2);
@@ -45,14 +44,13 @@ const DEBUG_MODE        = args.includes("--debug") || args.includes("-db");
 const MAX_DEPTH         = depthArg ? parseInt(depthArg.split('=')[1], 10) : Infinity;
 const CONCURRENCY       = concArg ? parseInt(concArg.split('=')[1], 10) : 8;
 const DYNAMIC_WAIT_TIME = dynArg ? parseInt(dynArg.split('=')[1], 10) : 3000;
-const OUTPUT_DIR        = folderArg ? path.join(folderArg.split('=')[1].replace(/^["']|["']$/g, ''), new URL(TARGET_URL).hostname) : path.join(process.cwd(), new URL(TARGET_URL).hostname);
+let   OUTPUT_DIR        = folderArg ? path.join(folderArg.split('=')[1].replace(/^["']|["']$/g, ''), new URL(TARGET_URL).hostname) : path.join(process.cwd(), new URL(TARGET_URL).hostname);
+
 const START_TIME        = Date.now();
 const HTTP_STATUS_CODES = { 100: "Continue", 101: "Switching Protocols", 102: "Processing", 103: "Early Hints", 200: "OK", 201: "Created", 202: "Accepted", 203: "Non-Authoritative Information", 204: "No Content", 205: "Reset Content", 206: "Partial Content", 207: "Multi-Status", 208: "Already Reported", 226: "IM Used", 300: "Multiple Choices", 301: "Moved Permanently", 302: "Found", 303: "See Other", 304: "Not Modified", 305: "Use Proxy", 307: "Temporary Redirect", 308: "Permanent Redirect", 400: "Bad Request", 401: "Unauthorized", 402: "Payment Required", 403: "Forbidden", 404: "Not Found", 405: "Method Not Allowed", 406: "Not Acceptable", 407: "Proxy Authentication Required", 408: "Request Timeout", 409: "Conflict", 410: "Gone", 411: "Length Required", 412: "Precondition Failed", 413: "Payload Too Large", 414: "URI Too Long", 415: "Unsupported Media Type", 416: "Range Not Satisfiable", 417: "Expectation Failed", 418: "I'm a Teapot", 421: "Misdirected Request", 422: "Unprocessable Content", 423: "Locked", 424: "Failed Dependency", 425: "Too Early", 426: "Upgrade Required", 428: "Precondition Required", 429: "Too Many Requests", 431: "Request Header Fields Too Large", 451: "Unavailable For Legal Reasons", 500: "Internal Server Error", 501: "Not Implemented", 502: "Bad Gateway", 503: "Service Unavailable", 504: "Gateway Timeout", 505: "HTTP Version Not Supported", 506: "Variant Also Negotiates", 507: "Insufficient Storage", 508: "Loop Detected", 510: "Not Extended", 511: "Network Authentication Required" };
+let   BROWSER = null;
 
-const debug = DEBUG_MODE && IS_ELECTRON // A debug mode can be switched on in the GUI.
-      ? msg => logAsync(`debug:${msg}`) // It shows more details on the processes in
-      : ()=>{};                         // the background while crawling a page.
-
+OUTPUT_DIR = OUTPUT_DIR.replace(/\\/g, '/').replace(/\/+$/,''); // Normalize output dir (change to posix format (forward slashes) and remove trailing slashes)
 const limit = pLimit(CONCURRENCY); // Set the number of download concurrency
 const resourceMap = new Map(); // Contains all resource URLs together with the corresponding local addresses
 const visited = new Set(); // List of the URLs of all saved HTML files
@@ -65,18 +63,28 @@ let resourceMapSize = 0;
 let visitedSize = 0;
 let totalRequests = 0;
 
+
+/* Debugging function */
+// A debug mode can be switched on in the GUI. It shows more
+// details on the processes in the background while crawling a page.
+const debug = DEBUG_MODE && IS_ELECTRON ? msg => {
+  msg = msg.startsWith("+") ? `<font color="green"><b>${msg.slice(1)}</b></font>`
+  : msg.startsWith("-") ? `<font color="red"><b>${msg.slice(1)}</b></font>` : msg;
+  logAsync(`debug:${msg}`);
+} : ()=>{};
+
 if(DEBUG_MODE) debugShowStartSettings();
 
 // Handle incoming messages from the renderer process (renderer.js)
 process.stdin.on('data', async data => {
   const command = data.toString().trim();
   if (command.startsWith('abort')) {
-    debug("<font color='red'>Execution aborted by renderer process.</font>");
+    debug("-Execution aborted by renderer process.");
     await finish(1);
-    await browser.close();
-    process.exit(1);
+    await BROWSER.close();
+    process.exit();
   } else if (command.startsWith('save-progress:')) {
-    debug("<font color='green'>Creating progress.log.</font>");
+    debug("+Creating progress.log.");
     const progressLog = command.slice(14);
     await fs.writeFile(path.join(OUTPUT_DIR, 'progress.log'), progressLog);
   } else if (command.startsWith('get-active-handles')) {
@@ -117,7 +125,7 @@ function logActiveHandles() {
     requests.forEach((r, i) => rTxt += `  [${i}] ${r.constructor.name}<br>`);
     debug(`<div style="padding:10px;border:var(--border) 2px solid;color:green"><u>🔍 <b>Active Handles:</b></u><br>${hTxt || "None."}<br><br><u>📡 <b>Active Requests:</b></u><br>${rTxt || "None."}</div>`);
 } catch (err) {
-    debug(`<font color="red">Error detecting active handles: ${err.message || err.toString()}</font>`);
+    debug(`-Error detecting active handles: ${err.message || err.toString()}`);
   }
 }
 
@@ -127,7 +135,7 @@ function logActiveHandles() {
  * @returns {string} The sanitized file path with invalid characters replaced by underscores
  */
 function sanitize(p) {
-  return p.replace(/[<>:"/\\|?*\x00-\x1F]/g, '_').replace(/_+/g, '_');
+  return p.replace(/[<>"/\\|?*\x00-\x1F]/g, '_').replace(/_+/g, '_');
 }
 
 /** Checks if a URL corresponds to a file that has already been downloaded locally. */
@@ -161,6 +169,42 @@ function stripSearch(url) {
   }
 }
 
+/**
+ * normalizeUrl
+ * - removes search & hash
+ * - collapses duplicated slashes
+ * - removes trailing slash (except for root '/')
+ * - returns normalized href string
+ */
+function normalizeUrl(raw, base = TARGET_URL) {
+  try {
+    const u = new URL(raw, base);
+    // clear search/hash
+    u.search = '';
+    u.hash = '';
+    // collapse duplicate slashes in pathname
+    u.pathname = u.pathname.replace(/\/{2,}/g, '/');
+    // remove trailing slash for non-root paths
+    if (u.pathname !== '/' ) u.pathname = u.pathname.replace(/\/+$/,'');
+    return u.href;
+  } catch {
+    return raw;
+  }
+}
+
+/**
+ * ensureDir
+ * - wrapper around fs.mkdir(..., { recursive:true })
+ * - swallows EEXIST races and rethrows other errors
+ */
+async function ensureDir(dir) {
+  try {
+    await fs.mkdir(dir, { recursive: true });
+  } catch (err) {
+    if (err && err.code !== 'EEXIST') throw err;
+  }
+}
+
 function debugShowStartSettings() {
   debug(`<style>#settings td{line-height:0.6}</style><table id="settings" border=0 cellpadding=6 cellspacing=0 style="font-size: 14px; font-weight: 100"><tr><th colspan=3 style="border-bottom: var(--border) 1px solid">Settings:</th></tr>
   <tr><td align=right>Target URL:</td><td width=10></td><td>${TARGET_URL}</td></tr>
@@ -186,20 +230,25 @@ function debugShowStartSettings() {
  * @param {string} url - The URL to check.
  * @returns {boolean} Returns true if the URL should be ignored; otherwise, false.
  */
+
 function shouldIgnoreUrl(url) {
   if (!url) return true;
-  url = stripSearch(url);
-  if (url.startsWith('data:') || url.startsWith('blob:') || url.startsWith('about:') || url.startsWith('chrome:') || url.startsWith('javascript:') || url.startsWith('filesystem:')) return true;
-  if (visited.has(url) || resourceMap.has(url) || failed.has(url)) return true;
-  if (isLocalFile(url)) return true;
-  if (!isSameDomain(url, TARGET_URL)) return true;
+  // Normalize for consistent comparisons
+  const norm = normalizeUrl(url, TARGET_URL);
+  if (!norm) return true;
+  if (norm.startsWith('data:') || norm.startsWith('blob:') || norm.startsWith('about:') || norm.startsWith('chrome:') || norm.startsWith('javascript:') || norm.startsWith('filesystem:')) return true;
+  // Use normalized comparisons — visited and resourceMap keys will be normalized too
+  if (visited.has(norm) || resourceMap.has(norm) || failed.has(norm)) return true;
+  if (isLocalFile(norm)) return true;
+  if (!isSameDomain(norm, TARGET_URL)) return true;
   try {
-     if (new URL(url, TARGET_URL).origin === "null") return true;
+     if (new URL(norm, TARGET_URL).origin === "null") return true;
   } catch {
     return true;
   }
   return false;
 }
+
 
 /**
  * @function reportProgress
@@ -212,22 +261,24 @@ function shouldIgnoreUrl(url) {
  * @param {boolean} finished - If true, the progress bar will show detailed information on hovering with the mouse.
  */
 function reportProgress(finished) {
-  const fin = ["", "", "", ""];
   const total = visited.size + resourceMap.size + logs.length;
   const err = logs.length;
   let percent = (100 / total * err).toFixed(2);
   if (percent.toString() === "NaN") percent = 0;
-  if (finished) {
-      fin[0] = ` data-summary="${[...visited].join("\n")}"`;
-      fin[1] = ` data-summary="${[...resourceMap].map(r => r[0].trim()).join("\n")}"`;
-      fin[2] = ` data-summary="${[...logs].map(log => log.error.trim()).join("\n")}"`;
-  }
-  log(`🏠 <span${fin[0]}>Pages: ${visited.size}</span> | 📃 <span${fin[1]}>Assets: ${resourceMap.size}</span> | ❌ <span${fin[2]}>Errors: ${logs.length} (${percent}%)</span>`);
+  if (IS_ELECTRON) {
+    const fin = ["", "", ""];
+    if (finished) {
+        fin[0] = ` data-summary="${[...visited].join("\n")}"`;
+        fin[1] = ` data-summary="${[...resourceMap].map(r => r[0].trim()).join("\n")}"`;
+        fin[2] = ` data-summary="${[...logs].map(log => log.error.trim()).join("\n")}"`;
+    }
+    log(`🏠 <span${fin[0]}>Pages: ${visited.size}</span> | 📃 <span${fin[1]}>Assets: ${resourceMap.size}</span> | ❌ <span${fin[2]}>Errors: ${logs.length} (${percent}%)</span>`);
+  } else log(`🏠 Pages: ${visited.size} | 📃 Assets: ${resourceMap.size} | ❌ Errors: ${logs.length} (${percent}%)`);
 }
 
  /** Reports the total number of links and resources found */
 function reportTotal() {
-  log(`TLF${totalRequests}`);
+  if (IS_ELECTRON) log(`TLF${totalRequests}`);
 }
 
 /** Sort URLs by folder, folder depth and filenames */
@@ -250,9 +301,15 @@ function sortUrls(urls) {
 
 /** Finalizes the download process */
 async function finish(aborted) {
-  debug(`<font color="${aborted ? "red" : "green"}">Finished (aborted: ${Boolean(aborted)}).</font>`);
+  debug(`${aborted ? "-" : "+"}Finished (aborted: ${Boolean(aborted)})`);
   reportProgress(1);
-  if (!aborted) log(`*** FINISHED ***`);
+  if (!aborted) {
+    log(`*** FINISHED ***`);
+    if (ZIP_EXPORT) {
+      await createZip();
+      log(`📦 ZIP file '${OUTPUT_DIR}.zip' created.`);
+    }
+  }
   if (CREATE_SITEMAP) {
     let map = sortUrls(sitemap);
     map = [...map, ...sortUrls([...resourceMap].map(r => r[0]))];
@@ -269,7 +326,7 @@ async function finish(aborted) {
   const date = Date.now();
   const time = parseInt((date - START_TIME) / 1000, 10);
   log(`🏁 Overall Size: ${size}.🕧 Finished in ${time} seconds.`);
-  return "";
+  return;
 }
 
 /** Calculates the total size of the target folder (recursively). */
@@ -287,7 +344,7 @@ async function getFolderSize(dirPath) {
   total > 1024 && (total /= 1024, b = "kB");
   total > 1024 && (total /= 1024, b = "MB");
   total > 1024 && (total /= 1024, b = "GB");
-  debug(`Download size: ${total.toFixed(2)} ${b}`);
+  debug(`Folder size: ${total.toFixed(2)} ${b}`);
   return `${total.toFixed(2)} ${b}`;
 }
 
@@ -330,14 +387,31 @@ function pLimit(concurrency) {
   });
 }
 
-/** Converts a resource URL to a local file system path for saving. */
 function getLocalPath(resourceUrl, baseUrl) {
+  // resourceUrl may be absolute or relative — use baseUrl to resolve
   const u = new URL(resourceUrl, baseUrl);
-  let pathname = u.pathname.replace(/^\/+|\/+$/g, '');
+  // Normalize pathname (remove duplicate slashes)
+  let pathname = u.pathname.replace(/\/{2,}/g, '/');
+  // Determine if the original resourceURL or resolved pathname ends with a slash
+  // (treat as "folder")
+  const endsWithSlash = resourceUrl.endsWith('/') || u.pathname.endsWith('/');
+  // Trim leading and trailing slashes for segment handling
+  pathname = pathname.replace(/^\/+|\/+$/g, '');
+  // If empty -> root
   if (!pathname) pathname = 'index.html';
-  if (USE_INDEX && !path.extname(pathname)) pathname = path.join(pathname, 'index.html');
+  else {
+    // If the path ends with a slash -> folder -> index.html
+    if (endsWithSlash) pathname = path.posix.join(pathname, 'index.html');
+    else if (!path.extname(pathname)) {
+      // No file extension -> apply USE_INDEX policy
+      if (USE_INDEX) pathname = path.posix.join(pathname, 'index.html');
+      else pathname = pathname + '.html';
+    }
+  }
+  // Sanitize each path segment
   const safe = pathname.split('/').map(sanitize).join('/');
-  return path.join(OUTPUT_DIR, safe);
+  // Return POSIX-style path (forward slashes) — fs.* accepts forward slashes on Windows.
+  return path.posix.join(OUTPUT_DIR, safe);
 }
 
 /** Creates a ZIP archive of the contents of the OUTPUT_DIR directory (recursively). */
@@ -370,9 +444,9 @@ async function dynamicPageRequest(request, depth) {
     const href = parsedUrl.href;
     if (shouldIgnoreUrl(href)) return totalRequests++;
     let resourcePath = sanitize(parsedUrl.pathname);
-    if (USE_INDEX && !path.extname(resourcePath)) resourcePath += resourcePath.endsWith("/") ? "index.html" : "/index.html";
-    const localPath = path.join(OUTPUT_DIR, resourcePath);
-    if (href.endsWith(".html") || href.endsWith(".htm")) {
+    //if (USE_INDEX && !path.extname(resourcePath)) resourcePath += resourcePath.endsWith("/") ? "index.html" : "/index.html";
+    const localPath = path.posix.join(OUTPUT_DIR, resourcePath);
+    if (href.endsWith(".html") || href.endsWith(".htm") || !path.extname(resourcePath)) {
       sitemap.add(href);
       tasks.push(limit(() => crawl(href, depth + 1, 1)));
     } else if (href.endsWith(".css")) {
@@ -382,14 +456,15 @@ async function dynamicPageRequest(request, depth) {
         const cssContent = await fs.readFile(cssPath, 'utf8');
         const urls = await extractCssResources(cssContent, href);
         // Schedule downloads for all found URLs
-        for (let u of [...urls]) {
-          u = u.split("/").map(sanitize).join("/");
-          !shouldIgnoreUrl(u) && tasks.push(limit(async () => await downloadResource(u, href, "css")));
-        }
+        for (let u of [...urls]) tasks.push(limit(async () => await downloadResource(u, href, "css")));
       }));
     } else tasks.push(limit(async () => await downloadResource(href, localPath, "dyn")));
   } catch (err) {
-    logs.push({ url, error: `Error fetching dynamic resource ${url.split("/").pop()}: ${err.message || err.toString()}` });
+    const error = `Error fetching dynamic resource ${url.split("/").pop()}: ${err.message || err.toString()}`;
+    totalRequests++;
+    debug(`-Error: ${error}`);
+    failed.add(url);
+    logs.push({ url, error });
   }
 }
 
@@ -413,29 +488,34 @@ async function downloadResource(url, baseUrl, dyn = "") {
   const filename = url.split("/").pop();
   try {
     await new Promise((resolve, reject) => {
+      // Choose http or https module
       const req = (url.startsWith('https') ? https : http).get(url, r => {
         if (r.statusCode === 200) {
-          fs.mkdir(path.dirname(loc), { recursive: true }).then(() => {
+          // ensure directory (race-safe)
+          ensureDir(path.dirname(loc)).then(() => {
             const ws = createWriteStream(loc);
             r.pipe(ws);
             ws.on('finish', () => {
-              resourceMap.set(new URL(url, baseUrl).href, path.relative(OUTPUT_DIR, loc).replace(/\\/g,'/'));
+              // store normalized absolute href as key
+              try {
+                const mapKey = normalizeUrl(new URL(url, baseUrl).href, TARGET_URL);
+                resourceMap.set(mapKey, path.relative(OUTPUT_DIR, loc).replace(/\\/g,'/'));
+              } catch {
+                resourceMap.set(url, path.relative(OUTPUT_DIR, loc).replace(/\\/g,'/'));
+              }
               reportProgress();
               log(`🌐 ${type}: ${url}`);
               debug(`${url}`);
               resolve();
             });
             ws.on('error', msg => reject({ message: `Error on writing '${filename}': ${msg}` }));
-          });
-        } else {
-          failed.add(url);
-          reject({ message: `${type} '${filename}': ${r.statusCode} (${HTTP_STATUS_CODES[r.statusCode]})` });
-        }
+          }).catch(err => reject({ message: `Error creating dir: ${err.message || err.toString()}` }));
+        } else reject({ message: `${type} '${filename}': ${r.statusCode} (${HTTP_STATUS_CODES[r.statusCode]})` });
       });
       req.on('error', msg => reject({ message: `Error while retrieving '${filename}': ${msg}` }));
     });
   } catch (e) {
-    debug(`<font color="red">${url}... ${e.message || e.toString()}</font>`);
+    debug(`-${e.message || e.toString()}`);
     failed.add(url);
     logs.push({ url, error: e.message || e.toString() });
   }
@@ -454,8 +534,7 @@ function isSameDomain(urlA, urlB) {
 
 /**
  * Adjusts all relative and absolute links (href/src) in the provided HTML to point to their local equivalents.
- * Resolves URLs based on the given base URL, rewrites them to local paths if they exist in the resource map,
- * and optionally appends "index.html" for directory paths if USE_INDEX is enabled.
+ * Resolves URLs based on the given base URL, rewrites them to local paths if they exist in the resource map.
  */
 function adjustLinks(html, baseUrl) {
   const fromPath = getLocalPath(baseUrl, TARGET_URL);
@@ -480,7 +559,6 @@ function adjustLinks(html, baseUrl) {
       if (!isSameDomain(full, TARGET_URL)) return m;
       // Normalize
       let normalized = full;
-      if (USE_INDEX && !path.extname(pathname)) normalized += (pathname.endsWith("/") ? "index.html" : "/index.html");
       // Does resource exist locally?
       if (resourceMap.has(normalized)) return `${attr}="${makeRel(normalized)}"`;
       // Root-relative links → relativize
@@ -489,7 +567,7 @@ function adjustLinks(html, baseUrl) {
         return `${attr}=".${link}"`;
       }
     } catch (err) {
-      debug(`<font color="red">${err.message || err.toString()}</font>`);
+      debug(`-${err.message || err.toString()}`);
     }
     return m;
   });
@@ -503,8 +581,7 @@ function adjustLinks(html, baseUrl) {
         const full = stripSearch(new URL(urlPart, baseUrl).href);
         if (!isSameDomain(full, TARGET_URL)) return part.trim();
         if (resourceMap.has(full)) {
-          const rel = makeRel(full);
-          return `${rel}${size ? ' ' + size : ''}`;
+          return `${makeRel(full)}${size ? ' ' + size : ''}`;
         }
       } catch {}
       return part.trim();
@@ -518,7 +595,9 @@ function adjustLinks(html, baseUrl) {
     try {
       const full = stripSearch(new URL(link, baseUrl).href);
       if (!isSameDomain(full, TARGET_URL)) return m;
-      if (resourceMap.has(full)) return `url(${quote}${makeRel(full)}${quote})`;
+      if (resourceMap.has(full)) {
+        return `url(${quote}${makeRel(full)}${quote})`;
+      }
     } catch {}
     return m;
   });
@@ -530,8 +609,7 @@ function adjustLinks(html, baseUrl) {
       const full = stripSearch(new URL(url, baseUrl).href);
       if (!isSameDomain(full, TARGET_URL)) return m;
       if (resourceMap.has(full)) {
-        const rel = makeRel(full);
-        return m.replace(url, rel);
+        return m.replace(url, makeRel(full));
       }
     } catch {}
     return m;
@@ -545,7 +623,7 @@ function adjustLinks(html, baseUrl) {
  */
 async function extractCssResources(css, baseUrl) {
   let match;
-  const urls = new Set();
+  let urls = new Set();
   const urlRegex = /url\((['"]?)([^'")]+)\1\)/gi;
   const importRegex = /@import\s+(['"]?)([^'"]+)\1;?/gi;
   try {
@@ -554,8 +632,10 @@ async function extractCssResources(css, baseUrl) {
       // 2. @import – Finds CSS files loaded by a CSS file
       for (match of css.matchAll(importRegex)) urls.add(new URL(match[2].trim(), baseUrl).href);
   } catch {}
-  urls.size && debug(`${urls.size} resources found in ${baseUrl}.`);
-  return [...urls];
+  urls = [...urls].filter(u => !shouldIgnoreUrl(u)).map(u => stripSearch(u).split("/").map(sanitize).join("/"));
+  urls.length && debug(`Scheduling ${urls.length} resource${urls.length === 1 ? "" : "s"} from CSS for download:<br>${urls.join("<br>")}`);
+  return urls;
+
 }
 
 
@@ -569,7 +649,7 @@ async function handleManifest(manifestUrl, baseUrl) {
     const res = await fetch(manifestUrl);
     if (!res.ok) {
       const msg = `Manifest fetch failed: ${res.status} (${HTTP_STATUS_CODES[res.status]})`;
-      debug(`<font color="red">${msg}</font>`);
+      debug(`-${msg}`);
       logs.push({ url: manifestUrl, error: msg });
       return;
     }
@@ -609,7 +689,7 @@ async function handleManifest(manifestUrl, baseUrl) {
       }
     }
   } catch (e) {
-    debug(`<font color="red">${manifestUrl}: ${e.message || e.toString()}</font>`);
+    debug(`-${manifestUrl}: ${e.message || e.toString()}`);
     logs.push({ url: manifestUrl, error: `Manifest error: ${e.message || e.toString()}` });
   }
   debug(`${counter || "No"} resource${counter === 1 ? "" : "s"} found in ${manifestUrl}.`);
@@ -661,38 +741,26 @@ function pageEvaluate() {
  * @throws Will log and record errors encountered during crawling or resource downloading.
  */
 async function crawl(uri, depth, recursive = null) {
-
   totalRequests++;
-if (tasks.length) debug(`Tasks:<br>${tasks.map((t, i) => `  [${i}] ${t.toString().slice(0, 100)}...`).join("<br>")}`);
   // If this is not the entry HTML file, or if we overstep MAX_DEPTH → return
   if ((!RECURSIVE && recursive) || depth > MAX_DEPTH) return;
-
-  let url = stripSearch(uri);
+  let url = normalizeUrl(uri);
   const parsedUrl = new URL(uri);
-
-  if (
-    USE_INDEX &&
-    !path.extname(parsedUrl.pathname) &&
-    parsedUrl.pathname.includes(new URL(TARGET_URL).pathname)
-  ) url = url.endsWith("/") ? "index.html" : "/index.html";
-
   if (shouldIgnoreUrl(url)) return;
-
   // Remember the url of this HTML file
   visited.add(url);
   sitemap.add(url);
-
   // Print the progress
   reportProgress();
   debug(`Opening new browser page for ${url} at depth ${depth}.`);
   // Open a new page (puppeteer)
-  const page = await browser.newPage();
+  const page = await BROWSER.newPage();
   page.on('request', request => dynamicPageRequest(request, depth));
+  let pageTitle;
   try {
     // Open the website in puppeteer
     await page.goto(uri, { waitUntil: 'networkidle2' });
-
-    const pageTitle = await page.evaluate(() => document.title) || "";
+    pageTitle = await page.evaluate(() => document.title) || "";
     debug(`Crawling '${pageTitle}' (${url})...`);
     log(`📄 Site (Depth ${depth}): ${url}`);
     // Scroll down the page in order to catch requests which are initiated by an on-scroll trigger
@@ -710,7 +778,7 @@ if (tasks.length) debug(`Tasks:<br>${tasks.map((t, i) => `  [${i}] ${t.toString(
       catch { continue; }
       res = stripSearch(res);
       const extname = path.extname(new URL(raw, url).pathname);
-      if (USE_INDEX && !extname && new URL(res).hostname.includes(new URL(TARGET_URL).hostname)) res += (res.endsWith("/") ? "index.html" : "/index.html");
+      // Do NOT mutate the URL by appending '/index.html' here — mapping is handled by getLocalPath
       totalRequests += 1;
       if (shouldIgnoreUrl(res)) continue;
       if (res.endsWith('.html') || res.endsWith('.htm') || !extname) {
@@ -724,16 +792,13 @@ if (tasks.length) debug(`Tasks:<br>${tasks.map((t, i) => `  [${i}] ${t.toString(
               const cssContent = await fs.readFile(cssPath, 'utf8');
               const urls = await extractCssResources(cssContent, res);
               // Schedule downloads for all found URLs
-              for (let u of urls) {
-                u = u.split("/").map(sanitize).join("/");
-                !shouldIgnoreUrl(u) && tasks.push(limit(async () => await downloadResource(u, res, "css")));
-              }
+              for (let u of urls) tasks.push(limit(async () => await downloadResource(u, res, "css")));
             }));
           } else tasks.push(limit(async () => await downloadResource(res, url, "Asset")));
         } catch(e) {
           const error = e.message || e.toString();
           logs.push({ url: res, error });
-          debug(`<font color="red">${pageTitle}: ${error}</font>`);
+          debug(`-${pageTitle}: ${error}`);
         }
       }
     }
@@ -743,29 +808,33 @@ if (tasks.length) debug(`Tasks:<br>${tasks.map((t, i) => `  [${i}] ${t.toString(
 
     // Get the source code from the actual HTML file (not from the rendered DOM)
     let response = await fetch(url);
+    let ok = 1;
     if (!response.ok) {
       response = await fetch(uri);
       if (!response.ok) {
         const error = `Error while trying to open ${url}. Status ${response.status}: ${HTTP_STATUS_CODES[response.status]}`;
         logs.push({ url, error });
-        debug(`<font color="red">${error}</font>`);
+        debug(`-${error}`);
+        ok = 0;
       }
     }
-    const html = await response.text();
-    const adjustedContent = adjustLinks(html, url);
-    const localPath = getLocalPath(url, TARGET_URL);
-    await fs.mkdir(path.dirname(localPath), { recursive: true });
-    await fs.writeFile(localPath, adjustedContent, 'utf8');
+    if (ok) {
+        const html = await response.text();
+        const adjustedContent = adjustLinks(html, url);
+        const localPath = getLocalPath(url, TARGET_URL);
+        // await fs.mkdir(path.dirname(localPath), { recursive: true });
+        await ensureDir(path.dirname(localPath));
+        await fs.writeFile(localPath, adjustedContent, 'utf8');
+    }
     try {
       await page.close();
       debug(`Page '${pageTitle || url}' closed.`);
    } catch {}
   } catch (e) {
     logs.push({ url, error: e.message || e.toString() });
-    debug(`<font color="red">Page '${pageTitle}': ${e.message || e.toString()}</font>`);
+    debug(`-Page '${pageTitle}': ${e.message || e.toString()}`);
     try {
       await page.close();
-      debug(`<font color="red">Page '${pageTitle}' closed after error.</font>`);
     } catch {}
   }
 }
@@ -785,8 +854,9 @@ if (tasks.length) debug(`Tasks:<br>${tasks.map((t, i) => `  [${i}] ${t.toString(
     log('♻️ Clean: Folder deleted.');
   }
   const totalInterval = setInterval(reportTotal, 500);
-  await fs.mkdir(OUTPUT_DIR, { recursive: true });
-  browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  await ensureDir(OUTPUT_DIR);
+  // await fs.mkdir(OUTPUT_DIR, { recursive: true });
+  BROWSER = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   debug(`Target folder has been created and browser is launched.`);
   await crawl(TARGET_URL, 0);
 
@@ -796,10 +866,11 @@ if (tasks.length) debug(`Tasks:<br>${tasks.map((t, i) => `  [${i}] ${t.toString(
     visitedSize = visited.size;
     resourceMapSize = resourceMap.size;
     await Promise.allSettled(tasks);
+    await new Promise(r => setTimeout(r, DYNAMIC_WAIT_TIME));
   }
-  await browser.close();
+  await BROWSER.close();
   clearInterval(totalInterval);
   debug(`Browser closed.`);
-  if (ZIP_EXPORT) await createZip();
   await finish();
+  process.exit(0);
 })();
