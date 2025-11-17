@@ -164,28 +164,6 @@ Beim Herunterladen von Ressourcen schreibt download.js URLs in HTML/CSS um:
 
 ---
 
-## Häufige Aufgaben für KI-Agenten
-
-### Hinzufügen einer neuen Download-Option
-1. Füge Checkbox/Input zu `src/gui.html` hinzu
-2. Füge State-Variable + Preferences-Standard in `src/renderer.js` hinzu
-3. Füge CLI-Flag-Parsing in `src/download.js` hinzu (Args-Array-Handling)
-4. Gebe Flag an Kind-Prozess via `args.push()` in `src/main.js` weiter
-5. Implementiere Logik in download.js-Funktion, die das Flag nutzt
-
-### Debug von Download-Problemen
-1. Aktiviere `--debug` Flag in GUI um detaillierte Logs zu sehen
-2. Überprüfe `logs` Array in download.js auf erfasste Fehler
-3. Verifiziere, dass `resourceMap` erwartete URL-Zuordnungen enthält
-4. Nutze Debug-Modal (Ctrl+Shift+D), um Live-Prozessstatus zu inspizieren
-
-### Ändern der Asset-Erkennung
-- Bearbeite Asset-Extraktions-Logik in `src/download.js` (suche nach `extractResourcesFromHTML`, `extractFromCSS`)
-- Teste mit Seiten, die spezifische Asset-Typen nutzen (iframes, srcset, etc.)
-- Verifiziere, dass umgeschriebene URLs in Offline-Kopie noch funktionieren
-
----
-
 ## Build & Distribution
 
 - **Windows EXE**: `npm run build` erstellt ausführbare Datei in `dist/website-downloader-win32-x64/`
@@ -322,3 +300,4 @@ Standardempfehlung:
 - WebSocket-Verbindungen werden *nicht* beibehalten in Offline-Kopie
 - DWT sollte nur auf HTTP-basierte Assets warten (3000–4000ms)
 - Beachte: Download.js supportet WebSockets nicht automatisch
+
