@@ -164,28 +164,6 @@ When downloading resources, download.js rewrites URLs in HTML/CSS:
 
 ---
 
-## Common Tasks for AI Agents
-
-### Adding a New Download Option
-1. Add checkbox/input to `src/gui.html`
-2. Add state variable + preferences default in `src/renderer.js`
-3. Add CLI flag parsing in `src/download.js` (args array handling)
-4. Pass flag to child process via `args.push()` in `src/main.js`
-5. Implement logic in download.js function that uses the flag
-
-### Debugging Download Issues
-1. Enable `--debug` flag in GUI to see detailed logs
-2. Check `logs` array in download.js for collected errors
-3. Verify `resourceMap` contains expected URL mappings
-4. Use debug modal (Ctrl+Shift+D) to inspect live process state
-
-### Modifying Asset Detection
-- Edit asset extraction logic in `src/download.js` (search for `extractResourcesFromHTML`, `extractFromCSS`)
-- Test with pages that use specific asset types (iframes, srcset, etc.)
-- Verify rewritten URLs still work in offline copy
-
----
-
 ## Build & Distribution
 
 - **Windows EXE**: `npm run build` creates executable in `dist/website-downloader-win32-x64/`
@@ -329,3 +307,4 @@ Standard recommendation:
 - DWT should only wait for HTTP-based assets (3000–4000ms)
 
 - Note: Download.js does not automatically support WebSockets
+
