@@ -149,8 +149,8 @@ function log(msg) {
 }
 
 /** Asynchronously logs a message to the console. */
-async function logAsync(msg) {
-  await new Promise(r => r(console.log(msg)));
+function logAsync(msg) {
+  return new Promise(r => r(console.log(msg)));
 }
 
 /**
