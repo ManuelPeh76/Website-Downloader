@@ -11,7 +11,7 @@
 
 # Website Downloader
 
-| [Features](#features) | [Installation](#installation) | [Build Windows Installer](#installer) | [GUI](#gui) | [CLI](#cli) | [Enhancements](#enhancements) | [Technical Details](#details) | [Notes](#notes) |
+| [Features](#features) | [Installation](#installation) | [Build Windows Installer](#installer) | [Screenshots](#screenshots) | [GUI](#gui) | [CLI](#cli) | [Enhancements](#enhancements) | [Technical Details](#details) | [Notes](#notes) |
 
 Website Downloader is a powerful tool for downloading entire websites, including all resources, for offline use. It supports modern web technologies and has been continuously enhanced to ensure that all relevant assets for a page are stored locally.
 
@@ -60,7 +60,7 @@ npm run build
 This creates the app in `.\dist\website-downloader-win32-x64`, which can be started by running the `website-downloader.exe`.
 
 <a name="installer"></a>
-## ⚒️ Build a Windows Installer
+# ⚒️ Build a Windows Installer
 ```cmd
 npm run build
 
@@ -69,6 +69,7 @@ npm run setup
 This creates a windows installer package from the app. When you start the .exe file inside the `.\dist\installers` folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you'd already download anything ;) ).<br>
 The app will be installed to `C:\Users\<username>\AppData\Local\website_downloader`.
 
+<a name=""screenshots"></a>
 # 🖥️ Screenshots
 
 <table>
@@ -176,6 +177,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 ---
 **Source code available at** 
 [GitHub](https://github.com/ManuelPeh76/Website-Downloader)
+
 
 
 
