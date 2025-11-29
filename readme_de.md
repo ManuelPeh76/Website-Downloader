@@ -6,8 +6,9 @@
 ![Puppeteer](https://img.shields.io/badge/Puppeteer-grey.svg?flat&logo=Puppeteer&logoColor=white)
 [![Stars](https://img.shields.io/github/stars/ManuelPeh76/Website-Downloader?style=flat&logo=github)](https://github.com/ManuelPeh76/Website-Downloader/stargazers)
 [![License](https://img.shields.io/github/license/ManuelPeh76/Website-Downloader?style=flat)](https://github.com/ManuelPeh76/Website-Downloader/blob/master/LICENSE)
-# <img src="src/img/electron.svg" width="50" height="50"> Website Downloader
-| [Funktionen](#features) | [Installation](#installation) | [Windows-Installer](#installer) | [GUI](#gui) | [CLI](#cli) | [Verbesserungen](#enhancements) | [Technische Details](#details) | [Hinweise](#notes) |
+<center><img src="src/img/favicon_1024.ico" width="150" /</center>
+
+| [Funktionen](#features) | [Installation](#installation) | [Windows-Installer](#installer) | [Screenshots](#screenshots) | [GUI](#gui) | [CLI](#cli) | [Verbesserungen](#enhancements) | [Technische Details](#details) | [Hinweise](#notes) |
 
 Website Downloader ist ein leistungsstarkes Tool, um komplette Webseiten inklusive aller Ressourcen für die Offline-Nutzung herunterzuladen. Es unterstützt moderne Web-Technologien und wurde laufend erweitert, damit wirklich alle für eine Seite relevanten Assets lokal gespeichert werden.
 
@@ -64,6 +65,7 @@ npm run build
 Dadurch wird ein Windows-Installer-Paket aus der App erstellt. Starte die EXE-Datei im Ordner `.\dist\installers` und warte, bis das Setup vollständig abgeschlossen ist (das Symbol in der Bildschirmmitte verschwindet), auch wenn die App bereits während des Installationsvorgangs startet. Nach Abschluss der Installation wird die App nämlich neu gestartet (wäre blöd, wenn bereits Downloads laufen würden ;)).<br>
 Die App wird unter `C:\Benutzer\<Benutzername>\AppData\Local\website_downloader` installiert.
 
+<a name="screenshots"></a>
 # 🖥️ Screenshots
 
 <table>
@@ -170,4 +172,5 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Benutzer\
 <span style="margin-left:25px">MIT license © 2025 Manuel Pelzer</span>
 
 ---
+
 **Quellcode auf** [GitHub](https://github.com/ManuelPeh76/Website-Downloader) verfügbar.
