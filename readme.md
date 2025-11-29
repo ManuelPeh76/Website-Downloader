@@ -67,8 +67,6 @@ The app will be installed to `C:\Users\<username>\AppData\Local\website_download
 
 # 🖥️ Screenshots
 
-# 🖥️ Screenshots
-
 <table>
 <tr><td valign=top>Website Downloader<br><img src="src/img/app.png" width="400" title="App after launch"></td><td valign=top>Debug window open<br><img src="src/img/debugLog_open.png" width="400" title="App with debug window open"></td></tr>
 <tr><td valign=top>Debug window minimized<br><img src="src/img/debugLog_min.png" width="400" title="App with minimized debug window, visible at the bottom center"></td><td valign=top>Debug window maximized<br><img src="src/img/app.png" width="400" title="App with maximized Debug window"></td></tr>
@@ -174,4 +172,5 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 ---
 **Source code available at** 
 [GitHub](https://github.com/ManuelPeh76/Website-Downloader)
+
 
