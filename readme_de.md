@@ -64,6 +64,13 @@ npm run build
 Dadurch wird ein Windows-Installer-Paket aus der App erstellt. Starte die EXE-Datei im Ordner `.\dist\installers` und warte, bis das Setup vollständig abgeschlossen ist (das Symbol in der Bildschirmmitte verschwindet), auch wenn die App bereits während des Installationsvorgangs startet. Nach Abschluss der Installation wird die App nämlich neu gestartet (wäre blöd, wenn bereits Downloads laufen würden ;)).<br>
 Die App wird unter `C:\Benutzer\<Benutzername>\AppData\Local\website_downloader` installiert.
 
+# 🖥️ Screenshots
+
+<table>
+<tr><td valign=top>Website Downloader<br><img src="src/img/app.png" width="400" title="App nach dem Starten"></td><td valign=top>Debug-Fenster geöffnet<br><img src="src/img/debugLog_open.png" width="400" title="App mit offenem Debug-Fenster"></td></tr>
+<tr><td valign=top>Debug-Fenster minimiert<br><img src="src/img/debugLog_min.png" width="400" title="App mit minimiertem Debug-Fenster, zu sehen unten in der Mitte"></td><td valign=top>Debug-Fenster maximiert<br><img src="src/img/app.png" width="400" title="App mit maximiertem Debug-Fenster"></td></tr>
+</table>
+
 # 🪛 Verwendung
 
 ## GUI

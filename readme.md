@@ -65,6 +65,15 @@ npm run setup
 This creates a windows installer package from the app. When you start the .exe file inside the `.\dist\installers` folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you'd already download anything ;) ).<br>
 The app will be installed to `C:\Users\<username>\AppData\Local\website_downloader`.
 
+# 🖥️ Screenshots
+
+# 🖥️ Screenshots
+
+<table>
+<tr><td valign=top>Website Downloader<br><img src="src/img/app.png" width="400" title="App after launch"></td><td valign=top>Debug window open<br><img src="src/img/debugLog_open.png" width="400" title="App with debug window open"></td></tr>
+<tr><td valign=top>Debug window minimized<br><img src="src/img/debugLog_min.png" width="400" title="App with minimized debug window, visible at the bottom center"></td><td valign=top>Debug window maximized<br><img src="src/img/app.png" width="400" title="App with maximized Debug window"></td></tr>
+</table>
+
 # 🪛 Usage
 
 ## GUI
