@@ -205,7 +205,20 @@ function noValidUrl() {
 }
 
 function createQuery() {
-  return { url: url.value, depth: depth.value, zip: createZip.checked, clean: clean.checked, useIndex: useIndex.checked, recursive: recursive.checked, folder: folder.value.trim(), concurrency: parseInt(concurrency.value, 10), dwt: parseInt(dwt.value, 10), debug: debug.checked, sitemap: createSitemap.checked, log: createLog.checked };
+  return {
+    url: url.value,
+    depth: depth.value,
+    zip: createZip.checked,
+    clean: clean.checked,
+    useIndex: useIndex.checked,
+    recursive: recursive.checked,
+    folder: folder.value.trim(),
+    concurrency: parseInt(concurrency.value, 10),
+    dwt: parseInt(dwt.value, 10),
+    debug: debug.checked,
+    sitemap: createSitemap.checked,
+    log: createLog.checked
+  };
 }
 
 function logProgress(msg) {
@@ -503,3 +516,4 @@ async function validateUserInput() {
   }
   return true;
 }
+
