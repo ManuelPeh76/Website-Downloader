@@ -6,7 +6,9 @@
 ![Puppeteer](https://img.shields.io/badge/Puppeteer-grey.svg?flat&logo=Puppeteer&logoColor=white)
 [![Stars](https://img.shields.io/github/stars/ManuelPeh76/Website-Downloader?style=flat&logo=github)](https://github.com/ManuelPeh76/Website-Downloader/stargazers)
 [![License](https://img.shields.io/github/license/ManuelPeh76/Website-Downloader?style=flat)](https://github.com/ManuelPeh76/Website-Downloader/blob/master/LICENSE)
-# <img src="src/img/favicon_1024.ico" width="50" height="50"> Website Downloader
+<p align="center">
+  <img src="src/img/favicon_1024.ico" width="100%" />
+</p>
 | [Features](#features) | [Installation](#installation) | [Build Windows Installer](#installer) | [GUI](#gui) | [CLI](#cli) | [Enhancements](#enhancements) | [Technical Details](#details) | [Notes](#notes) |
 
 Website Downloader is a powerful tool for downloading entire websites, including all resources, for offline use. It supports modern web technologies and has been continuously enhanced to ensure that all relevant assets for a page are stored locally.
@@ -172,6 +174,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 ---
 **Source code available at** 
 [GitHub](https://github.com/ManuelPeh76/Website-Downloader)
+
 
 
 
