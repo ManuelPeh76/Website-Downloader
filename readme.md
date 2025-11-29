@@ -69,7 +69,7 @@ npm run setup
 This creates a windows installer package from the app. When you start the .exe file inside the `.\dist\installers` folder, please wait until the setup is finished completely (the icon in mid screen disappears), even if the app starts while the install process is still going. After installation is complete, the app will be restarted (would be unfortunally, if you'd already download anything ;) ).<br>
 The app will be installed to `C:\Users\<username>\AppData\Local\website_downloader`.
 
-<a name=""screenshots"></a>
+<a name="screenshots"></a>
 # 🖥️ Screenshots
 
 <table>
@@ -177,6 +177,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 ---
 **Source code available at** 
 [GitHub](https://github.com/ManuelPeh76/Website-Downloader)
+
 
 
 
