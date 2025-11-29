@@ -30,6 +30,13 @@ function loadAttributes(m) {
     m.modal.style.opacity = 1;
 }
 
+/**
+ * Toggle the "minimized" state of a modal element.
+ *
+ * @function minimize
+ * @this {Element}
+ * @returns {void}
+ */
 function minimize(m) {
     if (m.modal.dataset.status === "normal") {
         saveAttributes(m);
@@ -60,11 +67,8 @@ function minimize(m) {
  * Toggle the "maximized" state of a modal element.
  *
  * @function maximize
- * @this {Object}
+ * @this {Element}
  * @returns {void}
- * @example
- * // Invoke on an object that provides the required properties and helper functions:
- * // maximize.call(myModalController);
  */
 function maximize(m) {
     m.modal.style.opacity = 1;
@@ -242,6 +246,9 @@ export class Modal {
         return this;
     }
 
+    /**
+       * Remember the current modal style, then show the modal
+       */
     show() {
         this.temp.style = this.getStyle();
         const rect = this.modal.getBoundingClientRect();
@@ -253,12 +260,11 @@ export class Modal {
         this.modal.style.opacity = 1;
         return this;
     }
-
-    hide() {
+    
       /**
-       * Hide the modal and reset its style completely, so it is in
-       * the right shape, if opened again.
+       * Hide the modal and reset its style
        */
+    hide() {
         if (!this.isClosable()) return;
         this.modal.style.transition = "opacity 0.4s ease";
         this.modal.style.opacity = 0;
@@ -279,7 +285,7 @@ export class Modal {
     }
 
     clear() {
-        this.log/*[this*/./*logType === "div" ? "*/innerHTML/*" : "value"]*/ = "";
+        this.log.innerHTML = "";
         return this;
     }
 
@@ -403,7 +409,7 @@ export class Modal {
             </div>
         </div>
         <div class="dev-body">
-            %log% <!-- <textarea class="dev-content" readonly onfocus="this.blur()"></textarea> -->
+            %log%
         </div>
         <div class="dev-footer"></div>
     </div>`,
@@ -561,3 +567,4 @@ export class Modal {
         }`
     };
 }
+
