@@ -7,7 +7,7 @@
 [![Stars](https://img.shields.io/github/stars/ManuelPeh76/Website-Downloader?style=flat&logo=github)](https://github.com/ManuelPeh76/Website-Downloader/stargazers)
 [![License](https://img.shields.io/github/license/ManuelPeh76/Website-Downloader?style=flat)](https://github.com/ManuelPeh76/Website-Downloader/blob/master/LICENSE)
 
-<center><img src="src/img/favicon_1024.ico" width="100%" /></center>
+<center><img src="src/img/favicon_1024.ico" width="75vw" /></center>
 
 | [Features](#features) | [Installation](#installation) | [Build Windows Installer](#installer) | [GUI](#gui) | [CLI](#cli) | [Enhancements](#enhancements) | [Technical Details](#details) | [Notes](#notes) |
 
@@ -174,6 +174,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Users\<us
 ---
 **Source code available at** 
 [GitHub](https://github.com/ManuelPeh76/Website-Downloader)
+
 
 
 
