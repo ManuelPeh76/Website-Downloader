@@ -11,7 +11,7 @@
 
 # Website Downloader
 
-| [Features](#features) | [Installation](#installation) | [Build Windows Installer](#installer) | [Screenshots](#screenshots) | [GUI](#gui) | [CLI](#cli) | [Enhancements](#enhancements) | [Technical Details](#details) | [Notes](#notes) |
+| [Features](#features) | [Installation](#installation) | [Build the App](#app) | [Build Windows Installer](#installer) | [Screenshots](#screenshots) | [GUI](#gui) | [CLI](#cli) | [Enhancements](#enhancements) | [Technical Details](#details) | [Notes](#notes) |
 
 Website Downloader is a powerful tool for downloading entire websites, including all resources, for offline use. It supports modern web technologies and has been continuously enhanced to ensure that all relevant assets for a page are stored locally.
 
@@ -53,7 +53,9 @@ npm install
 Now you can run the app with `npm start`.
 With `npm run dev` the app works exactly the same as if you started it with `npm start`, but it restarts automatically each time one of its files change.
 
-To use this tool as a real standalone app, you have to create an app package. This works for windows users only:
+<a name="app"></a>
+# Build the App
+To build a windows app from the tool, you have to package it:
 ```cmd
 npm run build
 ```
