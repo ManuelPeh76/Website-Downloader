@@ -54,7 +54,7 @@ Now you can run the app with `npm start`.
 With `npm run dev` the app works exactly the same as if you started it with `npm start`, but it restarts automatically each time one of its files change.
 
 <a name="app"></a>
-# Build the App
+# ⚒️ Build the App
 To build a windows app from the tool, you have to package it:
 ```cmd
 npm run build
