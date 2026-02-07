@@ -70,7 +70,7 @@ Die App wird unter `C:\Benutzer\<Benutzername>\AppData\Local\website_downloader`
 
 <table>
 <tr><td valign=top>Website Downloader<br><img src="src/img/app.png" width="400" title="App nach dem Starten"></td><td valign=top>Debug-Fenster geöffnet<br><img src="src/img/debugLog_open.png" width="400" title="App mit offenem Debug-Fenster"></td></tr>
-<tr><td valign=top>Debug-Fenster minimiert<br><img src="src/img/debugLog_min.png" width="400" title="App mit minimiertem Debug-Fenster, zu sehen unten in der Mitte"></td><td valign=top>Debug-Fenster maximiert<br><img src="src/img/app.png" width="400" title="App mit maximiertem Debug-Fenster"></td></tr>
+<tr><td valign=top>Debug-Fenster minimiert<br><img src="src/img/debugLog_min.png" width="400" title="App mit minimiertem Debug-Fenster, zu sehen unten in der Mitte"></td><td valign=top>Debug-Fenster maximiert<br><img src="src/img/debugLog_max.png" width="400" title="App mit maximiertem Debug-Fenster"></td></tr>
 </table>
 
 # 🪛 Verwendung
@@ -174,3 +174,4 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 folder=C:\Benutzer\
 ---
 
 **Quellcode auf** [GitHub](https://github.com/ManuelPeh76/Website-Downloader) verfügbar.
+
