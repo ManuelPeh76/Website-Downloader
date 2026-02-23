@@ -156,7 +156,7 @@ node src/download https://example.org -r -c -u -d=4 -dwt=500 -f=C:\Users\<userna
 <a name="details"></a>
 # 🔎 Technical Details
 - Uses **Node.js** as backend and **Electron** as frontend
-- Uses **Puppeteer** for true browser rendering (which is also one way to recognize dynamic content)
+- Uses **Puppeteer** for true browser rendering
 - **JSZip** for ZIP export
 - **NTSuspend** provides an easy way to pause/resume the execution of node scripts on windows machines
 
