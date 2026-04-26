@@ -62,7 +62,7 @@ const logs = []; // List of all errors occured in the process
 let resourceMapSize = 0;
 let visitedSize = 0;
 let totalRequests = 0;
-
+let running = false;
 
 /* Debugging function */
 // A debug mode can be switched on in the GUI. It shows more
@@ -481,6 +481,7 @@ async function dynamicPageRequest(request, depth) {
  * @throws Will log and record errors encountered during request, download and local saving of the file.
  */
 async function downloadResource(url, baseUrl, dyn = "") {
+if (!running) return;
   totalRequests++;
   url = stripSearch(url);
   const loc = getLocalPath(url, baseUrl);
@@ -744,6 +745,7 @@ async function crawl(uri, depth, recursive = null) {
   totalRequests++;
   // If this is not the entry HTML file, or if we overstep MAX_DEPTH → return
   if ((!RECURSIVE && recursive) || depth > MAX_DEPTH) return;
+if (!running) return;
   let url = normalizeUrl(uri);
   const parsedUrl = new URL(uri);
   if (shouldIgnoreUrl(url)) return;
@@ -857,6 +859,7 @@ async function crawl(uri, depth, recursive = null) {
   await ensureDir(OUTPUT_DIR);
   // await fs.mkdir(OUTPUT_DIR, { recursive: true });
   BROWSER = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+running = true;
   debug(`Target folder has been created and browser is launched.`);
   await crawl(TARGET_URL, 0);
 
@@ -868,6 +871,7 @@ async function crawl(uri, depth, recursive = null) {
     await Promise.allSettled(tasks);
     await new Promise(r => setTimeout(r, DYNAMIC_WAIT_TIME));
   }
+  running = false;
   await BROWSER.close();
   clearInterval(totalInterval);
   debug(`Browser closed.`);
